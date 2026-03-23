@@ -1,0 +1,1574 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="YUME Interactive website built with plain HTML, CSS, and JavaScript." />
+  <title>YUME Interactive — Indie Game Studio</title>
+
+  <style>
+    :root {
+      --bg: #0d0d0f;
+      --bg-soft: #151519;
+      --bg-elev: #1b1b21;
+      --bg-header: rgba(13, 13, 15, .82);
+      --surface: rgba(255,255,255,.04);
+      --surface-2: rgba(255,255,255,.06);
+      --text: #f4f4f6;
+      --text-soft: #b4b4bc;
+      --border: rgba(255,255,255,.10);
+      --accent: #d13b2f;
+      --accent-2: #00d8ff;
+      --accent-3: #ff3ea8;
+      --radius: 18px;
+      --radius-sm: 12px;
+      --shadow-sm: 0 8px 20px rgba(0,0,0,.18);
+      --shadow-md: 0 14px 30px rgba(0,0,0,.22);
+      --shadow-lg: 0 20px 40px rgba(0,0,0,.24);
+      --max-width: 1240px;
+      --content-width: 1120px;
+      --section-pad: clamp(4.25rem, 7vw, 6.5rem);
+      --gutter: clamp(1rem, 2vw, 1.5rem);
+      --h1: clamp(2.8rem, 7vw, 5.9rem);
+      --h2: clamp(2.1rem, 5vw, 4.2rem);
+      --h3: clamp(1.2rem, 2.4vw, 1.6rem);
+      --lead: clamp(1.05rem, 1.6vw, 1.35rem);
+      --body: clamp(.98rem, 1.15vw, 1.05rem);
+      --small: .92rem;
+      --header-height: 80px;
+      --nav-gap: clamp(1rem, 2vw, 2rem);
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+
+    body {
+      margin: 0;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(circle at 12% 0%, rgba(0,216,255,.06), transparent 30%),
+        radial-gradient(circle at 88% 0%, rgba(255,62,168,.05), transparent 28%),
+        linear-gradient(180deg, #101014 0%, #0d0d0f 100%);
+      font-size: var(--body);
+      line-height: 1.65;
+      -webkit-font-smoothing: antialiased;
+      text-rendering: optimizeLegibility;
+    }
+
+    img { max-width: 100%; display: block; }
+    a { color: inherit; text-decoration: none; }
+    button, input, textarea { font: inherit; }
+    button { cursor: pointer; }
+
+    .container,
+    .content,
+    .wide {
+      width: min(100% - 2rem, var(--content-width));
+      margin-inline: auto;
+    }
+
+    .wide { width: min(100% - 2rem, var(--max-width)); }
+
+    .section {
+      padding-block: var(--section-pad);
+      position: relative;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: .6rem;
+      padding: .65rem 1rem;
+      border-radius: 999px;
+      background: rgba(209,59,47,.14);
+      border: 1px solid rgba(209,59,47,.24);
+      color: #ffd9d5;
+      font-size: .82rem;
+      font-weight: 700;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+    }
+
+    .section-title {
+      font-size: var(--h2);
+      line-height: .98;
+      letter-spacing: -.04em;
+      margin: 0 0 1rem;
+      font-weight: 800;
+    }
+
+    .section-copy,
+    .muted { color: var(--text-soft); }
+
+    .btn,
+    .chip {
+      border: 0;
+      border-radius: 999px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: .6rem;
+      min-height: 48px;
+      padding: .9rem 1.35rem;
+      font-weight: 700;
+      transition: transform .18s ease, background-color .18s ease, border-color .18s ease, color .18s ease, opacity .18s ease;
+    }
+
+    .btn:hover,
+    .chip:hover {
+      transform: translateY(-1px);
+    }
+
+    .btn-primary {
+      background: var(--accent);
+      color: white;
+      box-shadow: 0 8px 20px rgba(209,59,47,.18);
+    }
+
+    .btn-secondary,
+    .chip {
+      background: rgba(255,255,255,.04);
+      color: var(--text);
+      border: 1px solid rgba(255,255,255,.10);
+    }
+
+    .chip.is-active {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #fff;
+    }
+
+    .site-header {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      background: var(--bg-header);
+      border-bottom: 1px solid rgba(255,255,255,.06);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+    }
+
+    .site-header__inner {
+      min-height: var(--header-height);
+      display: grid;
+      grid-template-columns: max-content minmax(0, 1fr);
+      align-items: center;
+      gap: clamp(1rem, 2vw, 1.75rem);
+    }
+
+    .brand {
+      display: inline-flex;
+      align-items: center;
+      gap: .9rem;
+      min-width: 0;
+    }
+
+    .brand__logo {
+      width: 44px;
+      height: 44px;
+      object-fit: contain;
+      display: block;
+      border-radius: 12px;
+      flex: 0 0 auto;
+      background: rgba(255,255,255,.04);
+    }
+
+    .brand__text {
+      display: flex;
+      flex-direction: column;
+      line-height: 1.05;
+      min-width: 0;
+    }
+
+    .brand__name {
+      font-size: 1.08rem;
+      font-weight: 800;
+      letter-spacing: -.04em;
+      white-space: nowrap;
+    }
+
+    .brand__meta {
+      font-size: .82rem;
+      color: var(--text-soft);
+      white-space: nowrap;
+    }
+
+    .site-nav {
+      min-width: 0;
+      width: 100%;
+    }
+
+    .site-nav__bar {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      align-items: center;
+      justify-items: center;
+      gap: var(--nav-gap);
+      width: 100%;
+    }
+
+    .site-nav__bar a {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      min-height: 44px;
+      color: rgba(255,255,255,.9);
+      font-weight: 600;
+      white-space: nowrap;
+    }
+
+    .site-nav__bar a::after {
+      content: "";
+      position: absolute;
+      left: 0;
+      bottom: .25rem;
+      width: 100%;
+      height: 2px;
+      transform: scaleX(0);
+      transform-origin: left;
+      background: linear-gradient(90deg, var(--accent), var(--accent-2));
+      transition: transform .18s ease;
+    }
+
+    .site-nav__bar a:hover::after,
+    .site-nav__bar a:focus-visible::after {
+      transform: scaleX(1);
+    }
+
+    .menu-toggle {
+      display: none;
+      width: 48px;
+      height: 48px;
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,.04);
+      border-radius: 14px;
+      place-items: center;
+      padding: 0;
+      appearance: none;
+      -webkit-appearance: none;
+      color: var(--text);
+    }
+
+    .menu-toggle__icon {
+      position: relative;
+      display: block;
+      width: 18px;
+      height: 2px;
+      background: currentColor;
+      border-radius: 999px;
+      transition: background-color .18s ease, transform .18s ease;
+    }
+
+    .menu-toggle__icon::before,
+    .menu-toggle__icon::after {
+      content: "";
+      position: absolute;
+      left: 0;
+      width: 18px;
+      height: 2px;
+      background: currentColor;
+      border-radius: 999px;
+      transition: transform .18s ease, top .18s ease, opacity .18s ease;
+    }
+
+    .menu-toggle__icon::before { top: -6px; }
+    .menu-toggle__icon::after { top: 6px; }
+
+    body.nav-open .menu-toggle__icon {
+      background: transparent;
+    }
+
+    body.nav-open .menu-toggle__icon::before {
+      top: 0;
+      transform: rotate(45deg);
+    }
+
+    body.nav-open .menu-toggle__icon::after {
+      top: 0;
+      transform: rotate(-45deg);
+    }
+
+    .site-nav__panel {
+      display: none;
+    }
+
+    .hero {
+      height: calc(100svh - var(--header-height) + 4rem);
+      display: flex;
+      align-items: center;
+      position: relative;
+      overflow: clip;
+      isolation: isolate;
+    }
+
+    .hero::before,
+    .hero::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .hero::before {
+      background:
+        radial-gradient(circle at 15% 20%, rgba(209,59,47,.12), transparent 26%),
+        radial-gradient(circle at 82% 22%, rgba(0,216,255,.10), transparent 24%),
+        radial-gradient(circle at 58% 78%, rgba(255,62,168,.08), transparent 22%);
+      opacity: .95;
+    }
+
+    .hero::after {
+      background:
+        linear-gradient(180deg, rgba(255,255,255,.015), rgba(255,255,255,0)),
+        linear-gradient(135deg, rgba(209,59,47,.04), rgba(0,216,255,.03) 55%, rgba(255,62,168,.03));
+      opacity: 1;
+    }
+
+    .hero__content {
+      position: relative;
+      z-index: 1;
+      text-align: center;
+      padding-top: 0;
+	  padding-bottom: 0;
+	  transform: translateY(-4.5vh);
+	}
+	
+
+    .hero__intro {
+      max-width: 840px;
+      margin: 0 auto 0.5rem;
+      color: var(--text-soft);
+      font-size: var(--lead);
+    }
+
+    .hero h1 {
+      margin: 0 auto 2.5rem;
+      max-width: 1120px;
+      font-size: var(--h1);
+      line-height: .92;
+      letter-spacing: -.07em;
+      font-weight: 800;
+    }
+
+    .hero h1 .underline {
+      text-decoration: underline;
+      text-decoration-thickness: .1em;
+      text-decoration-color: rgba(209,59,47,.9);
+      text-underline-offset: .14em;
+    }
+
+    .hero__summary {
+      max-width: 760px;
+      margin: 0 auto 1.45rem;
+      color: var(--text-soft);
+    }
+
+    .hero__actions {
+      display: flex;
+      justify-content: center;
+      gap: .9rem;
+      flex-wrap: wrap;
+    }
+
+    .feature-strip {
+      background: rgba(255,255,255,.02);
+      border-top: 1px solid rgba(255,255,255,.05);
+      border-bottom: 1px solid rgba(255,255,255,.05);
+    }
+
+    .feature-head {
+      text-align: center;
+      max-width: 900px;
+      margin: 0 auto 2rem;
+    }
+
+    .filters {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: .75rem;
+      margin-bottom: 2rem;
+    }
+
+    .portfolio-grid {
+      display: grid;
+      grid-template-columns: repeat(12, 1fr);
+      gap: var(--gutter);
+      align-items: start;
+    }
+
+    .portfolio-card {
+      grid-column: span 4;
+      border-radius: var(--radius);
+      overflow: clip;
+      background: linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,.02));
+      border: 1px solid rgba(255,255,255,.08);
+      box-shadow: var(--shadow-sm);
+      transition: transform .18s ease, box-shadow .18s ease, opacity .18s ease;
+      cursor: pointer;
+    }
+
+    .portfolio-card:hover {
+      transform: translateY(-3px);
+      box-shadow: var(--shadow-md);
+    }
+
+    .portfolio-card.is-hidden {
+      display: none;
+    }
+
+    .portfolio-card__link {
+      display: block;
+      height: 100%;
+    }
+
+    .portfolio-card__media {
+      aspect-ratio: 16 / 10;
+      position: relative;
+      isolation: isolate;
+      overflow: hidden;
+      background:
+        linear-gradient(135deg, var(--thumb-a, #202028), var(--thumb-b, #d13b2f));
+    }
+
+    .portfolio-card__media::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background-image: var(--project-image);
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      opacity: var(--image-opacity, 1);
+      transform: scale(1.01);
+      transition: transform .28s ease, opacity .2s ease;
+      z-index: 0;
+    }
+
+    .portfolio-card:hover .portfolio-card__media::before {
+      transform: scale(1.04);
+    }
+
+    .portfolio-card__media::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background:
+        linear-gradient(to top, rgba(0,0,0,.46), rgba(0,0,0,.12) 42%, rgba(0,0,0,.06)),
+        linear-gradient(135deg, rgba(209,59,47,.10), rgba(0,216,255,.04) 55%, rgba(255,62,168,.05));
+      z-index: 1;
+      pointer-events: none;
+    }
+
+    .portfolio-card__label {
+      position: absolute;
+      left: 1rem;
+      bottom: 1rem;
+      z-index: 2;
+      display: inline-flex;
+      align-items: center;
+      min-height: 32px;
+      padding: .45rem .7rem;
+      border-radius: 999px;
+      background: rgba(13,13,15,.72);
+      border: 1px solid rgba(255,255,255,.08);
+      color: rgba(255,255,255,.92);
+      font-size: .78rem;
+      font-weight: 700;
+      letter-spacing: .07em;
+      text-transform: uppercase;
+    }
+
+    .portfolio-card__body {
+      padding: 1.1rem 1.1rem 1.2rem;
+    }
+
+    .portfolio-card h3 {
+      margin: 0 0 .45rem;
+      font-size: var(--h3);
+      line-height: 1.15;
+      letter-spacing: -.03em;
+    }
+
+    .portfolio-meta {
+      color: var(--text-soft);
+      font-size: .92rem;
+      margin-bottom: .55rem;
+    }
+
+    .portfolio-card p {
+      margin: 0;
+      color: var(--text-soft);
+      font-size: .97rem;
+    }
+
+    .center-actions {
+      margin-top: 2rem;
+      display: flex;
+      justify-content: center;
+    }
+
+    .capabilities-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 2rem;
+      margin-top: 2.5rem;
+    }
+
+    .capability {
+      padding-top: 1.25rem;
+      border-top: 1px solid rgba(255,255,255,.10);
+    }
+
+    .capability__no {
+      display: inline-block;
+      margin-bottom: .65rem;
+      font-size: .86rem;
+      font-weight: 700;
+      letter-spacing: .08em;
+      color: var(--text-soft);
+    }
+
+    .capability h3 {
+      margin: 0 0 .65rem;
+      font-size: 1.3rem;
+      line-height: 1.15;
+      letter-spacing: -.03em;
+    }
+
+    .case-study {
+      background:
+        radial-gradient(circle at 12% 18%, rgba(0,216,255,.06), transparent 22%),
+        radial-gradient(circle at 80% 20%, rgba(255,62,168,.06), transparent 22%),
+        linear-gradient(180deg, #111116 0%, #0b0b0e 100%);
+    }
+
+    .case-study .muted,
+    .case-study .section-copy,
+    .case-study .case-meta,
+    .case-study .case-body p {
+      color: rgba(255,255,255,.72);
+    }
+
+    .case-banner {
+      position: relative;
+      min-height: 460px;
+      border-radius: 24px;
+      overflow: clip;
+      background:
+        radial-gradient(circle at 20% 20%, rgba(255,255,255,.05), transparent 24%),
+        radial-gradient(circle at 72% 30%, rgba(0,216,255,.14), transparent 20%),
+        radial-gradient(circle at 50% 85%, rgba(255,62,168,.10), transparent 18%),
+        linear-gradient(135deg, #16161e 0%, #242430 45%, #0b0b0e 100%);
+      border: 1px solid rgba(255,255,255,.08);
+      box-shadow: var(--shadow-lg);
+      padding: clamp(1.8rem, 4vw, 3rem);
+      display: flex;
+      align-items: flex-end;
+      margin-top: 1.5rem;
+    }
+
+    .case-banner h3 {
+      margin: 0;
+      max-width: 680px;
+      font-size: clamp(2rem, 4.3vw, 4rem);
+      line-height: .95;
+      letter-spacing: -.05em;
+    }
+
+    .case-layout,
+    .contact-layout {
+      display: grid;
+      grid-template-columns: 260px minmax(0, 1fr);
+      gap: clamp(1.2rem, 3vw, 3rem);
+      margin-top: 2.3rem;
+    }
+
+    .case-meta h4,
+    .contact-label {
+      margin: 0;
+      font-size: 1rem;
+      letter-spacing: -.02em;
+    }
+
+    .case-kpis {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .case-kpi {
+      padding: 1rem 1.1rem;
+      border-radius: 14px;
+      background: rgba(255,255,255,.04);
+      border: 1px solid rgba(255,255,255,.07);
+    }
+
+    .case-kpi strong {
+      display: block;
+      margin-bottom: .2rem;
+      color: white;
+    }
+
+    .gallery-grid {
+      margin-top: 1.7rem;
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 1rem;
+    }
+
+    .gallery-grid .thumb {
+	  aspect-ratio: 4 / 3;
+	  border-radius: 14px;
+	  border: 1px solid rgba(255,255,255,.08);
+	  background-color: #151519;
+	  background-size: cover;
+	  background-position: center;
+	  background-repeat: no-repeat;
+	  overflow: hidden;
+	}
+
+    .contact-copy p {
+      margin: 0 0 1rem;
+      color: var(--text-soft);
+    }
+
+    .contact-card {
+      background: rgba(255,255,255,.03);
+      border: 1px solid rgba(255,255,255,.08);
+      border-radius: 20px;
+      padding: 1.2rem;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .form-grid {
+      display: grid;
+      gap: 1rem;
+    }
+
+    .field {
+      display: grid;
+      gap: .45rem;
+    }
+
+    .field label {
+      font-size: .92rem;
+      font-weight: 700;
+    }
+
+    .field input,
+    .field textarea {
+      width: 100%;
+      border: 1px solid transparent;
+      background: rgba(255,255,255,.04);
+      border-radius: 12px;
+      padding: .95rem 1rem;
+      color: var(--text);
+      outline: none;
+      transition: border-color .18s ease, box-shadow .18s ease, background-color .18s ease;
+    }
+
+    .field textarea {
+      min-height: 180px;
+      resize: vertical;
+    }
+
+    .field input:focus,
+    .field textarea:focus {
+      border-color: rgba(255,255,255,.15);
+      box-shadow: 0 0 0 3px rgba(209,59,47,.16);
+      background: rgba(255,255,255,.055);
+    }
+
+    .form-note,
+    .form-success,
+    .form-error {
+      font-size: .92rem;
+    }
+
+    .form-success {
+      color: #90f0ab;
+      display: none;
+    }
+
+    .form-error {
+      color: #ff9e9e;
+      display: none;
+    }
+
+    .site-footer {
+      background: #09090b;
+      color: white;
+      border-top: 1px solid rgba(255,255,255,.06);
+    }
+
+    .footer-top {
+      display: grid;
+      grid-template-columns: 1.1fr 1fr;
+      gap: 2rem;
+      padding-block: 3.5rem 1.6rem;
+    }
+
+    .footer-brand h3 {
+      margin: 0 0 .7rem;
+      font-size: clamp(2rem, 4vw, 3.2rem);
+      line-height: .92;
+      letter-spacing: -.06em;
+    }
+
+    .footer-brand p,
+    .footer-links a,
+    .footer-bottom {
+      color: rgba(255,255,255,.66);
+    }
+
+    .footer-columns {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 1rem;
+    }
+
+    .footer-links {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      display: grid;
+      gap: .6rem;
+    }
+
+    .footer-links strong {
+      color: #fff;
+      display: inline-block;
+      margin-bottom: .35rem;
+    }
+
+    .footer-bottom {
+      border-top: 1px solid rgba(255,255,255,.14);
+      padding: 1rem 0 2rem;
+      display: flex;
+      justify-content: space-between;
+      gap: 1rem;
+      flex-wrap: wrap;
+      font-size: .9rem;
+    }
+
+    .visually-hidden {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
+
+    @media (max-width: 1080px) {
+      .portfolio-card { grid-column: span 6; }
+      .capabilities-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .footer-top { grid-template-columns: 1fr; }
+    }
+
+    @media (max-width: 900px) {
+	   .hero { 
+	     height: calc(100svh - var(--header-height) - 5.5rem);
+	   }
+	   
+	   .hero__content {
+	    transform: translateY(-2vh)
+	   }
+	   
+      .site-header__inner {
+        grid-template-columns: 1fr auto;
+        gap: 1rem;
+	  }    
+
+      .site-nav__bar {
+        display: none;
+      }
+
+      .menu-toggle {
+        display: grid;
+      }
+
+      .site-nav__panel {
+        position: absolute;
+        top: calc(100% + .75rem);
+        right: 1rem;
+        left: 1rem;
+        display: none;
+        padding: 1rem;
+        border-radius: 18px;
+        background: rgba(17,17,22,.96);
+        border: 1px solid rgba(255,255,255,.08);
+        box-shadow: var(--shadow-md);
+      }
+
+      body.nav-open .site-nav__panel {
+        display: block;
+      }
+
+      .site-nav__links {
+        display: grid;
+        gap: .25rem;
+      }
+
+      .site-nav__links a {
+        display: flex;
+        align-items: center;
+        min-height: 48px;
+        padding: .9rem 1rem;
+        border-radius: 14px;
+        color: rgba(255,255,255,.92);
+      }
+
+      .site-nav__links a:hover {
+        background: rgba(255,255,255,.05);
+      }
+
+      .case-layout,
+      .contact-layout,
+      .footer-columns,
+      .gallery-grid,
+      .case-kpis {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 720px) {
+      .portfolio-grid { grid-template-columns: 1fr; }
+      .portfolio-card { grid-column: auto; }
+      .capabilities-grid,
+      .footer-columns { grid-template-columns: 1fr; }
+	  
+	  .hero { height: calc(100svh - var(--header-height) + 3rem);	}
+	   
+	  .hero__content { transform: translateY(0)}
+	  
+      .hero__actions { flex-direction: column; align-items: center; }
+      .hero__actions .btn { width: min(100%, 280px); }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+      *,
+      *::before,
+      *::after {
+        animation: none !important;
+        transition: none !important;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <div class="wide site-header__inner">
+      <a href="#top" class="brand" aria-label="Go to top">
+        <img class="brand__logo" src="assets/logo-web.webp" alt="YUME Interactive logo" />
+        <span class="brand__text">
+          <span class="brand__name" id="brandName">YUME Interactive</span>
+          <span class="brand__meta" id="brandMeta">Indie Game Studio</span>
+        </span>
+      </a>
+
+      <nav class="site-nav" aria-label="Primary navigation">
+        <div class="site-nav__bar" id="navBarLinks"></div>
+
+        <button class="menu-toggle" id="menuToggle" aria-expanded="false" aria-controls="mobileNav" aria-label="Toggle menu" type="button">
+          <span class="menu-toggle__icon" aria-hidden="true"></span>
+          <span class="visually-hidden">Toggle menu</span>
+        </button>
+
+        <div class="site-nav__panel" id="mobileNav">
+          <div class="site-nav__links" id="mobileNavLinks"></div>
+        </div>
+      </nav>
+    </div>
+  </header>
+
+  <main id="top">
+    <section class="section hero">
+      <div class="wide hero__content">
+        <p class="hero__intro" id="heroIntro"></p>
+        <h1 id="heroTitle"></h1>
+        <p class="hero__summary" id="heroSummary"></p>
+        <div class="hero__actions">
+          <a class="btn btn-secondary" href="#work" id="heroSecondary">Browse Work</a>
+          <a class="btn btn-primary" href="#contact" id="heroPrimary">Get In Touch</a>
+        </div>
+      </div>
+    </section>
+
+    <section class="section feature-strip" id="work">
+      <div class="wide">
+        <div class="feature-head">
+          <span class="eyebrow" id="workEyebrow">Featured Work</span>
+          <h2 class="section-title" id="workTitle"></h2>
+          <p class="section-copy" id="workCopy"></p>
+        </div>
+
+        <div class="filters" id="filters"></div>
+        <div class="portfolio-grid" id="portfolioGrid"></div>
+
+        <div class="center-actions">
+          <a href="#" target="_blank" rel="noreferrer" class="btn btn-secondary" id="viewPortfolioButton">View Full Portfolio</a>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="capabilities">
+      <div class="wide">
+        <h2 class="section-title" id="capabilitiesTitle">Capabilities.</h2>
+        <div class="capabilities-grid" id="capabilitiesGrid"></div>
+      </div>
+    </section>
+
+    <section class="section case-study" id="case-study">
+      <div class="wide">
+        <h2 class="section-title" id="caseTitle">Case Study.</h2>
+
+        <div class="case-banner">
+          <div>
+            <span class="eyebrow" id="caseEyebrow" style="background: rgba(255,255,255,.08); color: #fff; border-color: rgba(255,255,255,.08);">Featured Case</span>
+            <h3 id="caseBannerTitle"></h3>
+          </div>
+        </div>
+
+        <div class="case-layout">
+          <div class="case-meta">
+            <h4>Background</h4>
+          </div>
+          <div class="case-body">
+            <div class="case-kpis" id="caseKpis"></div>
+            <p id="caseParagraph1"></p>
+            <p id="caseParagraph2"></p>
+            <div class="gallery-grid" id="caseGallery"></div>
+          </div>
+        </div>
+
+        <div class="case-layout">
+          <div class="case-meta">
+            <h4>Outcome</h4>
+          </div>
+          <div class="case-body">
+            <p id="caseParagraph3"></p>
+            <p id="caseParagraph4"></p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="contact">
+      <div class="wide">
+        <div class="contact-layout">
+          <div>
+            <h2 class="section-title" id="contactTitle">Contact.</h2>
+          </div>
+
+          <div>
+            <div class="contact-copy">
+              <p id="contactCopy1"></p>
+              <p id="contactCopy2"></p>
+              <p id="contactEmailLine"></p>
+            </div>
+
+            <div class="contact-card">
+              <form id="contactForm" novalidate>
+                <div class="form-grid">
+                  <div class="field">
+                    <label for="name">Name</label>
+                    <input id="name" name="name" type="text" required />
+                  </div>
+
+                  <div class="field">
+                    <label for="email">Email</label>
+                    <input id="email" name="email" type="email" required />
+                  </div>
+
+                  <div class="field">
+                    <label for="message">Message</label>
+                    <textarea id="message" name="message" placeholder="Tell me a little about your project."></textarea>
+                  </div>
+
+                  <div class="form-error" id="formError">Please enter your name and a valid email address.</div>
+                  <div class="form-success" id="formSuccess">Thanks. Your message has been sent.</div>
+
+                  <button class="btn btn-primary" type="submit" style="width: 100%;">Send Message</button>
+
+                  <div class="form-note muted" id="formNote">
+                    This template uses front-end validation only. Add a Formspree endpoint for the lowest-maintenance setup.
+                  </div>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="wide footer-top">
+      <div class="footer-brand">
+        <h3 id="footerBrand"></h3>
+        <p id="footerCopy"></p>
+      </div>
+
+      <div class="footer-columns" id="footerColumns"></div>
+    </div>
+
+    <div class="wide footer-bottom">
+      <span id="footerLegal"></span>
+      <span id="footerTag"></span>
+    </div>
+  </footer>
+
+  <script>
+    const siteData = {
+      brand: {
+        name: "YUME Interactive",
+        meta: "Indie Game Studio"
+      },
+
+      navigation: [
+        { label: "Work", href: "#work" },
+        { label: "Capabilities", href: "#capabilities" },
+        { label: "Case Study", href: "#case-study" },
+        { label: "Contact", href: "#contact" }
+      ],
+
+      hero: {
+        intro: "We are a small indie game studio building polished interactive experiences, game systems, and product-ready visuals.",
+        title: "We design and build <span class='underline'>playful, polished digital experiences.</span>",
+        summary: "YUME Interactive blends game development, design thinking, and technical implementation into project pieces that feel crafted, readable, and production-ready.",
+        primary: "Get In Touch",
+        secondary: "Browse Work"
+      },
+
+      featured: {
+        eyebrow: "See What Our Dreamers Can Do",
+        title: "Featured projects across games, interfaces, technical builds, and visual design.",
+        copy: "Here are some of our more recent projects, handpicked to better showcase our creative and technical strengths.",
+        viewAllLabel: "View Full Portfolio",
+        viewAllHref: "https://your-link-here.com",
+
+        filters: [
+          "Featured",
+          "Game Development",
+          "Web Development",
+          "UI/UX",
+          "Game Design",
+          "Web Design",
+          "Graphics Design",
+          "Branding"
+        ],
+
+        items: [
+          {
+            title: "Go ON",
+            categories: ["Game Design", "Game Development", "UI/UX"],
+            meta: "Combat loop · active development · systems UX",
+            description: "A systems-forward prototype focused on readable feedback, progression clarity, strong interaction design, and mobile-friendly flow.",
+            label: "Playable Prototype",
+            href: "#case-study",
+            colors: ["#1a1d27", "#d13b2f"],
+            image: "assets/go-on-splash.webp",
+            featured: true
+          },
+          {
+            title: "Barangay Resident Information System",
+            categories: ["Web Design", "Web Development", "UI/UX"],
+            meta: "Civic platform · records management · admin dashboard",
+            description: "A records and operations platform built to support local administrative tasks through structured data views, and accessible interface design.",
+            label: "Civic System",
+            href: "https://your-link-here.com",
+            colors: ["#151519", "#00d8ff"],
+            image: "assets/brams-splash.webp",
+            featured: true
+          },
+          {
+            title: "Araling Panlipunan Game-based Interactive Learning",
+            categories: ["Game Design", "Game Development", "Branding"],
+            meta: "Worldbuilding · narrative framing",
+            description: "An interactive game-based learning tool built to make education more memorable, clear, and visually entertaining.",
+            label: "Interactive Learning",
+            href: "https://your-link-here.com",
+            colors: ["#24242d", "#ff3ea8"],
+            image: "assets/agila-splash.webp",
+            featured: true
+          },
+          {
+            title: "Digital Calling Cards Website",
+            categories: ["Web Development", "Web Design", "UI/UX"],
+            meta: "Active development · e-commerce",
+            description: "A fast, scalable website designed for active e-commerce.",
+            label: "Headless Build",
+            href: "https://your-link-here.com",
+            colors: ["#111114", "#00d8ff"],
+            image: "assets/fibei-splash.webp",
+            featured: false
+          },
+          {
+            title: "Foodpanda Capstone",
+            categories: ["UI/UX", "Graphics Design"],
+            meta: "Platform revamp · accessibility upgrade",
+            description: "Simplified navigation and UI flows for the payment system of an established food delivery app.",
+            label: "Learning UX",
+            href: "https://your-link-here.com",
+            colors: ["#191922", "#d13b2f"],
+            image: "assets/pandapay-splash.webp",
+            featured: false
+          },
+          {
+            title: "Immortal Renzown",
+            categories: ["Game Development", "Game Design"],
+            meta: "Nostalgia · Multiplayer · Local coop",
+            description: "A short fun game jam entry featuring couch coop mechanics and controls.",
+            label: "Game Jam",
+            href: "https://your-link-here.com",
+            colors: ["#111114", "#ff3ea8"],
+            image: "assets/ir-splash.webp",
+            featured: false
+          },
+          {
+            title: "Forsaken",
+            categories: ["Game Development", "Game Design"],
+            meta: "Multiplayer · Third-party",
+            description: "A third-person multiplayer game developed in the Core Engine platform.",
+            label: "Multiplayer",
+            href: "https://your-link-here.com",
+            colors: ["#111114", "#ff3ea8"],
+            image: "assets/forsaken-splash.webp",
+            featured: false
+          },
+          {
+            title: "Microbites",
+            categories: ["Graphics Design", "Branding"],
+            meta: "Brand identity · Logo design",
+            description: "A disinfection service for offices and establishments during the height of the COVID pandemic.",
+            label: "Brand Rollout",
+            href: "https://your-link-here.com",
+            colors: ["#111114", "#ff3ea8"],
+            image: "assets/microbites-splash.webp",
+            featured: false
+          }
+        ]
+      },
+
+      capabilities: [
+        {
+          title: "Game Systems & Interaction Design",
+          copy: "Design readable gameplay loops, player flows, and interfaces that make mechanics easier to understand and use for players."
+        },
+        {
+          title: "UI/UX for Games and Digital Products",
+          copy: "Build structured, user-centered interfaces for games, web platforms, and interactive systems with clarity and usability in mind."
+        },
+        {
+          title: "Front End Web Development",
+          copy: "Translate layouts into responsive, functional web experiences using clean front-end implementation and practical development workflows."
+        },
+        {
+          title: "Graphic Design & Visual Communication",
+          copy: "Create brand assets, promotional materials, and supporting visuals that strengthen presentation across digital and print touchpoints."
+        },
+        {
+          title: "Technical Design Thinking",
+          copy: "Bridge design intent and implementation by balancing aesthetics, usability, system logic, and production constraints."
+        },
+        {
+          title: "Adaptive Creative Production",
+          copy: "Work across game development, interface design, branding, and client-driven projects while adapting to different goals, styles, and requirements."
+        }
+      ],
+
+      caseStudy: {
+		  eyebrow: "Featured Case",
+		  bannerTitle: "Redesigning Pandapay to reduce payment friction and improve user support.",
+		  kpis: [
+		    { label: "Participants", value: "45 Survey · 5 Interviews" },
+		    { label: "Role", value: "UX Research · UI/UX Design" },
+		    { label: "Focus", value: "Payment Experience" }
+		  ],
+		  p1: "This case study focused on the payment experience within local food delivery apps, with attention placed on Pandapay as Foodpanda’s in-app wallet. Through surveys and 1:1 interviews, the study found that users were less concerned with food review features than with payment friction, including double-charging, failed transactions, cash-in limitations, withdrawal restrictions, and difficulty getting timely support.",
+		  p2: "The research showed that frequent food delivery users needed a faster, more reliable, and more flexible payment experience. Users valued convenience, security, and control over their remaining balance, but existing wallet limitations and verification steps created frustration across the transaction journey.",
+		  p3: "The proposed design solutions focused on two main opportunities: helping users maximize the use of Pandapay and helping users feel supported during payment-related issues. The concept introduced expanded wallet usability through QR-based transactions and fewer balance restrictions, alongside a persistent in-app support entry point for faster troubleshooting.",
+		  p4: "This project demonstrates a full UX process grounded in user research, problem validation, persona building, synthesis, and solution prototyping. Replace the gallery placeholders below with your final mockups, wireframes, or key screens from the Pandapay case study.",
+		  gallery: [
+			"assets/pandapay-case-01.webp",
+			"assets/pandapay-case-02.webp",
+			"assets/pandapay-case-03.webp"
+		  ]
+		},
+
+      contact: {
+        title: "Contact.",
+        copy1: "Need help with a game, interface, prototype, or a more polished portfolio presence?",
+        copy2: "For the lowest-maintenance setup, connect this form to Formspree and you are done.",
+        email: "hello@yumeinteractive.com",
+        formEndpoint: ""
+      },
+
+      footer: {
+        brand: "YUME Interactive",
+        copy: "A small indie studio aiming to revolutionize the local indie scene.",
+        columns: [
+          {
+            title: "Studio",
+            links: [
+              { label: "Work", href: "#work" },
+              { label: "Capabilities", href: "#capabilities" },
+              { label: "Case Study", href: "#case-study" },
+              { label: "Contact", href: "#contact" }
+            ]
+          },
+          {
+            title: "Elsewhere",
+            links: [
+              { label: "Itch.io", href: "https://yumeindie.itch.io" },
+              { label: "Steam", href: "https://your-link-here.com" },
+              { label: "GitHub", href: "https://https://github.com/judeTimothy" },
+              { label: "LinkedIn", href: "https://your-link-here.com" }
+            ]
+          },
+          {
+            title: "Legal",
+            links: [
+              { label: "Privacy", href: "#" },
+              { label: "Terms", href: "#" }
+            ]
+          }
+        ],
+        legal: `© ${new Date().getFullYear()} YUME Interactive. All rights reserved.`,
+        tag: "Built with plain HTML, CSS, and JavaScript."
+      }
+    };
+
+    const $ = (selector) => document.querySelector(selector);
+
+    const el = (tag, className, content) => {
+      const node = document.createElement(tag);
+      if (className) node.className = className;
+      if (content !== undefined) node.innerHTML = content;
+      return node;
+    };
+
+    function setText(id, value) {
+      const node = document.getElementById(id);
+      if (node) node.innerHTML = value;
+    }
+
+    function renderHeader() {
+      setText("brandName", siteData.brand.name);
+      setText("brandMeta", siteData.brand.meta);
+
+      const navBar = $("#navBarLinks");
+      const mobileNav = $("#mobileNavLinks");
+
+      siteData.navigation.forEach((item) => {
+        const desktopLink = el("a", "", item.label);
+        desktopLink.href = item.href;
+        navBar.appendChild(desktopLink);
+
+        const mobileLink = el("a", "", item.label);
+        mobileLink.href = item.href;
+        mobileNav.appendChild(mobileLink);
+      });
+    }
+
+    function renderHero() {
+      setText("heroIntro", siteData.hero.intro);
+      setText("heroTitle", siteData.hero.title);
+      setText("heroSummary", siteData.hero.summary);
+      setText("heroPrimary", siteData.hero.primary);
+      setText("heroSecondary", siteData.hero.secondary);
+    }
+
+    function createProjectCard(item) {
+      const categories = item.categories.map((c) => c.toLowerCase());
+      const card = el("article", "portfolio-card");
+      card.dataset.categories = categories.join("|");
+      card.dataset.featured = String(Boolean(item.featured));
+
+      const link = el("a", "portfolio-card__link");
+      link.href = item.href || "#";
+      if (/^https?:\/\//.test(link.href)) {
+        link.target = "_blank";
+        link.rel = "noreferrer";
+      }
+      link.setAttribute("aria-label", `Open project: ${item.title}`);
+
+      const media = el("div", "portfolio-card__media");
+      media.style.setProperty("--thumb-a", item.colors?.[0] || "#1a1a22");
+      media.style.setProperty("--thumb-b", item.colors?.[1] || "#d13b2f");
+
+      if (item.image && item.image.trim()) {
+        media.style.setProperty("--project-image", `url("${item.image}")`);
+        media.style.setProperty("--image-opacity", "1");
+      } else {
+        media.style.setProperty("--project-image", "none");
+        media.style.setProperty("--image-opacity", "0");
+      }
+
+      const label = el("span", "portfolio-card__label", item.label || "Project");
+
+      const body = el("div", "portfolio-card__body");
+      body.innerHTML = `
+        <h3>${item.title}</h3>
+        <div class="portfolio-meta">${item.meta || item.categories.join(" · ")}</div>
+        <p>${item.description}</p>
+      `;
+
+      media.appendChild(label);
+      link.append(media, body);
+      card.appendChild(link);
+
+      return card;
+    }
+
+    function applyFilter(filter) {
+      const grid = $("#portfolioGrid");
+      const cards = [...grid.querySelectorAll(".portfolio-card")];
+
+      cards.forEach((card) => {
+        const categories = card.dataset.categories;
+        const isFeatured = card.dataset.featured === "true";
+
+        let show = false;
+
+        if (filter === "featured") {
+          show = isFeatured;
+        } else {
+          show = categories.includes(filter);
+        }
+
+        card.classList.toggle("is-hidden", !show);
+      });
+    }
+
+    function renderFeatured() {
+      setText("workEyebrow", siteData.featured.eyebrow);
+      setText("workTitle", siteData.featured.title);
+      setText("workCopy", siteData.featured.copy);
+
+      const viewBtn = $("#viewPortfolioButton");
+      viewBtn.textContent = siteData.featured.viewAllLabel;
+      viewBtn.href = siteData.featured.viewAllHref || "#";
+
+      const filters = $("#filters");
+      const grid = $("#portfolioGrid");
+
+      siteData.featured.filters.forEach((filter) => {
+        const isFeaturedDefault = filter.toLowerCase() === "featured";
+        const button = el("button", `chip${isFeaturedDefault ? " is-active" : ""}`, filter);
+        button.type = "button";
+        button.dataset.filter = filter.toLowerCase();
+        filters.appendChild(button);
+      });
+
+      siteData.featured.items.forEach((item) => {
+        grid.appendChild(createProjectCard(item));
+      });
+
+      applyFilter("featured");
+
+      filters.addEventListener("click", (event) => {
+        const btn = event.target.closest("button[data-filter]");
+        if (!btn) return;
+
+        filters.querySelectorAll(".chip").forEach((chip) => chip.classList.remove("is-active"));
+        btn.classList.add("is-active");
+
+        applyFilter(btn.dataset.filter);
+      });
+    }
+
+    function renderCapabilities() {
+      setText("capabilitiesTitle", "Capabilities.");
+      const grid = $("#capabilitiesGrid");
+
+      siteData.capabilities.forEach((item, index) => {
+        const card = el("article", "capability");
+        card.innerHTML = `
+          <span class="capability__no">${String(index + 1).padStart(2, "0")}</span>
+          <h3>${item.title}</h3>
+          <p class="muted">${item.copy}</p>
+        `;
+        grid.appendChild(card);
+      });
+    }
+
+    function renderCaseStudy() {
+	  setText("caseTitle", "Pandapay UI/UX Case Study.");
+	  setText("caseEyebrow", siteData.caseStudy.eyebrow);
+	  setText("caseBannerTitle", siteData.caseStudy.bannerTitle);
+	  setText("caseParagraph1", siteData.caseStudy.p1);
+	  setText("caseParagraph2", siteData.caseStudy.p2);
+	  setText("caseParagraph3", siteData.caseStudy.p3);
+	  setText("caseParagraph4", siteData.caseStudy.p4);
+
+	  const kpis = $("#caseKpis");
+	  siteData.caseStudy.kpis.forEach((item) => {
+		const card = el("div", "case-kpi");
+		card.innerHTML = `<strong>${item.label}</strong><span>${item.value}</span>`;
+		kpis.appendChild(card);
+	  });
+
+	  const gallery = $("#caseGallery");
+	  siteData.caseStudy.gallery.forEach((image) => {
+		const thumb = el("div", "thumb");
+		thumb.style.backgroundImage = `url("${image}")`;
+		gallery.appendChild(thumb);
+	  });
+	}
+
+    function renderContact() {
+      setText("contactTitle", siteData.contact.title);
+      setText("contactCopy1", siteData.contact.copy1);
+      setText("contactCopy2", siteData.contact.copy2);
+      setText(
+        "contactEmailLine",
+        `Or email directly at <a href="mailto:${siteData.contact.email}">${siteData.contact.email}</a>.`
+      );
+
+      const form = $("#contactForm");
+      const note = $("#formNote");
+
+      if (siteData.contact.formEndpoint) {
+        form.action = siteData.contact.formEndpoint;
+        form.method = "POST";
+        note.textContent = "This form is connected to a lightweight form endpoint.";
+      }
+    }
+
+    function renderFooter() {
+      setText("footerBrand", siteData.footer.brand);
+      setText("footerCopy", siteData.footer.copy);
+      setText("footerLegal", siteData.footer.legal);
+      setText("footerTag", siteData.footer.tag);
+
+      const columns = $("#footerColumns");
+      siteData.footer.columns.forEach((group) => {
+        const wrap = el("div", "");
+        const list = el("ul", "footer-links");
+        list.innerHTML = `<li><strong>${group.title}</strong></li>`;
+
+        group.links.forEach((item) => {
+          const li = document.createElement("li");
+          const link = document.createElement("a");
+          link.textContent = item.label;
+          link.href = item.href;
+          if (/^https?:\/\//.test(item.href)) {
+            link.target = "_blank";
+            link.rel = "noreferrer";
+          }
+          li.appendChild(link);
+          list.appendChild(li);
+        });
+
+        wrap.appendChild(list);
+        columns.appendChild(wrap);
+      });
+    }
+
+    function initMobileNav() {
+      const toggle = $("#menuToggle");
+      const panel = $("#mobileNav");
+
+      if (!toggle || !panel) return;
+
+      const closeNav = () => {
+        document.body.classList.remove("nav-open");
+        toggle.setAttribute("aria-expanded", "false");
+      };
+
+      toggle.addEventListener("click", (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        const isOpen = document.body.classList.toggle("nav-open");
+        toggle.setAttribute("aria-expanded", String(isOpen));
+      });
+
+      panel.addEventListener("click", (event) => event.stopPropagation());
+
+      document.addEventListener("click", (event) => {
+        if (!document.body.classList.contains("nav-open")) return;
+        if (panel.contains(event.target) || toggle.contains(event.target)) return;
+        closeNav();
+      });
+
+      document.querySelectorAll('.site-nav a[href^="#"]').forEach((link) => {
+        link.addEventListener("click", () => closeNav());
+      });
+
+      document.addEventListener("keydown", (event) => {
+        if (event.key === "Escape") closeNav();
+      });
+    }
+
+    function initContactForm() {
+      const form = $("#contactForm");
+      const error = $("#formError");
+      const success = $("#formSuccess");
+
+      form.addEventListener("submit", async (event) => {
+        error.style.display = "none";
+        success.style.display = "none";
+
+        const name = form.name.value.trim();
+        const email = form.email.value.trim();
+        const validEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+
+        if (!name || !validEmail) {
+          event.preventDefault();
+          error.style.display = "block";
+          return;
+        }
+
+        if (!siteData.contact.formEndpoint) {
+          event.preventDefault();
+          success.textContent = "Thanks. Your message passed validation. Add a form endpoint to receive submissions.";
+          success.style.display = "block";
+          form.reset();
+          return;
+        }
+
+        event.preventDefault();
+
+        try {
+          const response = await fetch(siteData.contact.formEndpoint, {
+            method: "POST",
+            headers: { "Accept": "application/json" },
+            body: new FormData(form)
+          });
+
+          if (!response.ok) throw new Error("Form submission failed.");
+
+          success.textContent = "Thanks. Your message has been sent.";
+          success.style.display = "block";
+          form.reset();
+        } catch (err) {
+          error.textContent = "Something went wrong while sending the form. Please try again.";
+          error.style.display = "block";
+        }
+      });
+    }
+
+    renderHeader();
+    renderHero();
+    renderFeatured();
+    renderCapabilities();
+    renderCaseStudy();
+    renderContact();
+    renderFooter();
+    initMobileNav();
+    initContactForm();
+  </script>
+</body>
+</html>
