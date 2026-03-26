@@ -320,6 +320,48 @@ function getProficiencyBonusFromLevel(level) {
   return 2;
 }
 
+function getHitDieSizeFromClass(classKey) {
+  const hitDieText = CLASS_CONFIG[classKey]?.hitDie || "d8";
+  return Number(hitDieText.replace("d", "")) || 8;
+}
+
+function rollDie(sides) {
+  return Math.floor(Math.random() * sides) + 1;
+}
+
+function rollMaxHp() {
+  const classEl = document.getElementById("classSelect");
+  const levelEl = document.getElementById("level");
+  const maxHpEl = document.getElementById("charMaxHp");
+
+  if (!classEl || !levelEl || !maxHpEl) return;
+
+  const classKey = classEl.value;
+  const level = Math.max(1, Number(levelEl.value || 1));
+  const hitDie = getHitDieSizeFromClass(classKey);
+  const conMod = getAbilityMods().con;
+
+  let totalHp = hitDie;
+
+  for (let i = 1; i < level; i++) {
+    totalHp += rollDie(hitDie);
+  }
+
+  totalHp += conMod * level;
+
+  if (totalHp < 1) totalHp = 1;
+
+  maxHpEl.value = totalHp;
+  setStatus(`Rolled Max HP: ${totalHp}`, "ok");
+  queueFirestoreSave();
+}
+
+const rollHpBtn = document.getElementById("rollHpBtn");
+
+if (rollHpBtn) {
+  rollHpBtn.addEventListener("click", rollMaxHp);
+}
+
 function formatMod(value) {
   return value >= 0 ? `+${value}` : `${value}`;
 }
