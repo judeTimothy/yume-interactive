@@ -3,715 +3,365 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="description" content="YUME Interactive website built with plain HTML, CSS, and JavaScript." />
-  <title>YUME Interactive — Indie Game Studio</title>
-  <link rel="icon" href="favicon.ico">
+  <title>Quintessential Adventure Character Sheet</title>
   <link rel="stylesheet" href="styles.css" />
 </head>
-	
 <body>
-  <header class="site-header">
-    <div class="wide site-header__inner">
-      <a href="#top" class="brand" aria-label="Go to top">
-        <img class="brand__logo" src="assets/logo-web.webp" alt="YUME Interactive logo" />
-        <span class="brand__text">
-          <span class="brand__name" id="brandName">YUME Interactive</span>
-          <span class="brand__meta" id="brandMeta">Indie Game Studio</span>
-        </span>
-      </a>
-
-      <nav class="site-nav" aria-label="Primary navigation">
-        <div class="site-nav__bar" id="navBarLinks"></div>
-
-        <button class="menu-toggle" id="menuToggle" aria-expanded="false" aria-controls="mobileNav" aria-label="Toggle menu" type="button">
-          <span class="menu-toggle__icon" aria-hidden="true"></span>
-          <span class="visually-hidden">Toggle menu</span>
-        </button>
-
-        <div class="site-nav__panel" id="mobileNav">
-          <div class="site-nav__links" id="mobileNavLinks"></div>
-        </div>
-      </nav>
+  <script type="module" src="app.js"></script>
+  <section id="loginView" class="screen center">
+    <div class="card login-card">
+      <p class="eyebrow">TTRPG Portal</p>
+      <h1>Sign in</h1>
+      <p class="muted">Continue with Google to access your character sheet.</p>
+      <button id="loginBtn" class="btn btn-primary">Continue with Google</button>
+      <p id="loginError" class="status error"></p>
     </div>
-  </header>
+  </section>
 
-  <main id="top">
-    <section class="section hero">
-      <div class="wide hero__content">
-        <p class="hero__intro" id="heroIntro"></p>
-        <h1 id="heroTitle"></h1>
-        <p class="hero__summary" id="heroSummary"></p>
-        <div class="hero__actions">
-          <a class="btn btn-secondary" href="#work" id="heroSecondary">Browse Work</a>
-          <a class="btn btn-primary" href="#contact" id="heroPrimary">Get In Touch</a>
-        </div>
+  <section id="appView" class="hidden page-wrap">
+    <header class="topbar">
+      <div>
+        <h2>Quintessential Adventure Character Sheet</h2>
+        <p class="muted">A legally distinct and bizarre quintessential adventure.</p>
       </div>
-    </section>
 
-    <section class="section feature-strip" id="work">
-      <div class="wide">
-        <div class="feature-head">
-          <span class="eyebrow" id="workEyebrow">Featured Work</span>
-          <h2 class="section-title" id="workTitle"></h2>
-          <p class="section-copy" id="workCopy"></p>
-        </div>
-
-        <div class="filters" id="filters"></div>
-        <div class="portfolio-grid" id="portfolioGrid"></div>
-
-        <div class="center-actions">
-          <a href="#" target="_blank" rel="noreferrer" class="btn btn-secondary" id="viewPortfolioButton">View Full Portfolio</a>
-        </div>
-      </div>
-    </section>
-
-    <section class="section" id="capabilities">
-      <div class="wide">
-        <h2 class="section-title" id="capabilitiesTitle">Capabilities.</h2>
-        <div class="capabilities-grid" id="capabilitiesGrid"></div>
-      </div>
-    </section>
-
-    <section class="section case-study" id="case-study">
-      <div class="wide">
-        <h2 class="section-title" id="caseTitle">Case Study.</h2>
-
-        <div class="case-banner">
+      <div class="topbar-actions">
+        <div class="user-box">
+          <img id="userPhoto" alt="User photo" />
           <div>
-            <span class="eyebrow" id="caseEyebrow" style="background: rgba(255,255,255,.08); color: #fff; border-color: rgba(255,255,255,.08);">Featured Case</span>
-            <h3 id="caseBannerTitle"></h3>
+            <div id="userName" class="user-name"></div>
+            <div id="userEmail" class="muted small"></div>
           </div>
         </div>
 
-        <div class="case-layout">
-          <div class="case-meta">
-            <h4>Background</h4>
-          </div>
-          <div class="case-body">
-            <div class="case-kpis" id="caseKpis"></div>
-            <p id="caseParagraph1"></p>
-            <p id="caseParagraph2"></p>
-            <div class="gallery-grid" id="caseGallery"></div>
-          </div>
-        </div>
-
-        <div class="case-layout">
-          <div class="case-meta">
-            <h4>Outcome</h4>
-          </div>
-          <div class="case-body">
-            <p id="caseParagraph3"></p>
-            <p id="caseParagraph4"></p>
-          </div>
-        </div>
+        <button id="saveBtn" class="btn btn-secondary">Save</button>
+        <button id="resetBtn" class="btn btn-secondary">Reset</button>
+        <button id="logoutBtn" class="btn btn-danger">Log out</button>
       </div>
-    </section>
+    </header>
 
-    <section class="section" id="contact">
-      <div class="wide">
-        <div class="contact-layout">
-          <div>
-            <h2 class="section-title" id="contactTitle">Contact.</h2>
-          </div>
+    <p id="saveStatus" class="status"></p>
 
-          <div>
-            <div class="contact-copy">
-              <p id="contactCopy1"></p>
-              <p id="contactCopy2"></p>
-              <p id="contactEmailLine"></p>
-            </div>
+    <main class="layout">
+      <aside class="column">
+        <div class="card">
+		  <h3>Character Basics</h3>
 
-            <div class="contact-card">
-              <form id="contactForm" novalidate>
-                <div class="form-grid">
-                  <div class="field">
-                    <label for="name">Name</label>
-                    <input id="name" name="name" type="text" required />
-                  </div>
+		  <div class="field">
+			<label for="characterName">Character Name</label>
+			<input id="characterName" data-save />
+		  </div>
 
-                  <div class="field">
-                    <label for="email">Email</label>
-                    <input id="email" name="email" type="email" required />
-                  </div>
+		  <div class="grid-2">
+			<div class="field">
+			  <label for="classSelect">Class</label>
+			  <select id="classSelect" data-save>
+				<option value="fighter">Fighter</option>
+				<option value="wizard">Wizard</option>
+				<option value="rogue">Rogue</option>
+				<option value="cleric">Cleric</option>
+				<option value="ranger">Ranger</option>
+				<option value="wizard">Druid</option>
+				<option value="bard">Bard</option>
+				<option value="wizard">Warlock</option>
+				<option value="wizard">Sorcerer</option>
+				<option value="paladin">Paladin</option>
+				<option value="barbarian">Barbarian</option>
+			  </select>
+			</div>
 
-                  <div class="field">
-                    <label for="message">Message</label>
-                    <textarea id="message" name="message" placeholder="Tell me a little about your project."></textarea>
-                  </div>
+			<div class="field">
+			  <label for="level">Level</label>
+			  <input id="level" data-save type="number" min="1" value="1" />
+			</div>
+		  </div>
 
-                  <div class="form-error" id="formError">Please enter your name and a valid email address.</div>
-                  <div class="form-success" id="formSuccess">Thanks. Your message has been sent.</div>
+		  <div class="grid-2">
+			<div class="field">
+			  <label for="raceSelect">Race</label>
+			  <select id="raceSelect" data-save>
+				<option value="human">Human</option>
+				<option value="elf">Elf</option>
+				<option value="dwarf">Dwarf</option>
+				<option value="halfling">Halfling</option>
+				<option value="orc">Orc</option>
+				<option value="tiefling">Tiefling</option>
+				<option value="dragonborn">Dragonborn</option>
+				<option value="gnome">Gnome</option>
+			  </select>
+			</div>
 
-                  <button class="btn btn-primary" type="submit" style="width: 100%;">Send Message</button>
+			<div class="field">
+			  <label for="alignment">Alignment</label>
+			  <select id="alignment" data-save>
+				<option value="lawful-good">Lawful Good</option>
+				<option value="neutral-good">Neutral Good</option>
+				<option value="chaotic-good">Chaotic Good</option>
+				<option value="lawful-neutral">Lawful Neutral</option>
+				<option value="true-neutral">True Neutral</option>
+				<option value="chaotic-neutral">Chaotic Neutral</option>
+				<option value="lawful-evil">Lawful Evil</option>
+				<option value="neutral-evil">Neutral Evil</option>
+				<option value="chaotic-evil">Chaotic Evil</option>
+			  </select>
+			</div>
+		  </div>
 
-                  <div class="form-note muted" id="formNote">
-                    This template uses front-end validation only. Add a Formspree endpoint for the lowest-maintenance setup.
-                  </div>
-                </div>
-              </form>
-            </div>
-          </div>
+		  <div class="grid-2">
+			<div class="field">
+			  <label for="playerName">Player Name</label>
+			  <input id="playerName" data-save />
+			</div>
+
+			<div class="field">
+			  <label for="proficiencyBonus">Proficiency Bonus</label>
+			  <input id="proficiencyBonus" data-save type="number" value="2" readonly />
+			</div>
+		  </div>
+		</div>
+		<div class="card">
+		  <h3>Ability Modifiers</h3>
+
+		  <p class="muted small">
+			Points Remaining: <span id="pointPool">4</span>
+		  </p>
+
+		  <div class="ability-list">
+			<div class="ability">
+			  <div class="ability-head">
+				<span>Strength</span>
+				<strong id="mod-str">0</strong>
+			  </div>
+			  <div class="mod-controls">
+				<button type="button" class="mod-btn" data-mod-change="str:-1">-</button>
+				<button type="button" class="mod-btn" data-mod-change="str:1">+</button>
+			  </div>
+			</div>
+
+			<div class="ability">
+			  <div class="ability-head">
+				<span>Dexterity</span>
+				<strong id="mod-dex">0</strong>
+			  </div>
+			  <div class="mod-controls">
+				<button type="button" class="mod-btn" data-mod-change="dex:-1">-</button>
+				<button type="button" class="mod-btn" data-mod-change="dex:1">+</button>
+			  </div>
+			</div>
+
+			<div class="ability">
+			  <div class="ability-head">
+				<span>Constitution</span>
+				<strong id="mod-con">0</strong>
+			  </div>
+			  <div class="mod-controls">
+				<button type="button" class="mod-btn" data-mod-change="con:-1">-</button>
+				<button type="button" class="mod-btn" data-mod-change="con:1">+</button>
+			  </div>
+			</div>
+
+			<div class="ability">
+			  <div class="ability-head">
+				<span>Intelligence</span>
+				<strong id="mod-int">0</strong>
+			  </div>
+			  <div class="mod-controls">
+				<button type="button" class="mod-btn" data-mod-change="int:-1">-</button>
+				<button type="button" class="mod-btn" data-mod-change="int:1">+</button>
+			  </div>
+			</div>
+
+			<div class="ability">
+			  <div class="ability-head">
+				<span>Wisdom</span>
+				<strong id="mod-wis">0</strong>
+			  </div>
+			  <div class="mod-controls">
+				<button type="button" class="mod-btn" data-mod-change="wis:-1">-</button>
+				<button type="button" class="mod-btn" data-mod-change="wis:1">+</button>
+			  </div>
+			</div>
+
+			<div class="ability">
+			  <div class="ability-head">
+				<span>Charisma</span>
+				<strong id="mod-cha">0</strong>
+			  </div>
+			  <div class="mod-controls">
+				<button type="button" class="mod-btn" data-mod-change="cha:-1">-</button>
+				<button type="button" class="mod-btn" data-mod-change="cha:1">+</button>
+			  </div>
+			</div>
+		  </div>
+		</div>
+      </aside>
+
+      <section class="column">
+        <div class="card">
+		  <h3>Combat: Character</h3>
+
+		  <div class="grid-4">
+			<div class="field">
+			  <label for="charArmorClass">Armor Class</label>
+			  <input id="charArmorClass" data-save type="number" value="10" readonly />
+			</div>
+			<div class="field">
+			  <label for="charInitiative">Initiative</label>
+			  <input id="charInitiative" data-save type="number" value="0" readonly />
+			</div>
+			<div class="field">
+			  <label for="charSpeed">Speed</label>
+			  <input id="charSpeed" data-save placeholder="30 ft." />
+			</div>
+			<div class="field">
+			  <label for="charPassivePerception">Passive Perception</label>
+			  <input id="charPassivePerception" data-save type="number" value="10" readonly />
+			</div>
+		  </div>
+
+		  <div class="grid-3">
+			<div class="field">
+			  <label for="charCurrentHp">Current HP</label>
+			  <input id="charCurrentHp" data-save type="number" value="0" />
+			</div>
+			<div class="field">
+			  <label for="charMaxHp">Max HP</label>
+			  <input id="charMaxHp" data-save type="number" value="0" />
+			</div>
+			
+			<div class="field">
+			  <label for="charTempHp">Temp HP</label>
+			  <input id="charTempHp" data-save type="number" value="0" />
+			</div>
+		  </div>
+
+		  <div class="grid-3">
+			<div class="field">
+			  <label for="charHitDice">Hit Dice</label>
+			  <input id="charHitDice" data-save readonly />
+			</div>
+			<div class="field">
+			  <label for="charArmorType">Armor</label>
+			  <select id="charArmorType" data-save>
+				<option value="none">No Armor</option>
+				<option value="light">Light Armor</option>
+				<option value="medium">Medium Armor</option>
+				<option value="heavy">Heavy Armor</option>
+			  </select>
+			</div>
+			<div class="field">
+			  <label for="charWeaponSelect">Weapon</label>
+			  <select id="charWeaponSelect" data-save>
+				<option value="unarmed">Unarmed</option>
+				<option value="dagger">Dagger</option>
+				<option value="shortsword">Shortsword</option>
+				<option value="longsword">Longsword</option>
+				<option value="bow">Bow</option>
+				<option value="staff">Staff</option>
+				<option value="mace">Mace</option>
+				<option value="axe">Axe</option>
+			  </select>
+			</div>
+		  </div>
+		</div>
+		
+		<div class="card">
+			<h3>Traits & Features: Character</h3>
+			<div id="charFeatures" class="feature-list"></div>
+		</div>
+		
+		<div class="card">
+		  <h3>Combat: Quintessence</h3>
+
+		  <div class="field">
+			<label for="quintName">Quintessence Name</label>
+			<input id="quintName" data-save placeholder="Name of Quintessence" />
+		  </div>
+
+		  <div class="grid-4">
+			<div class="field">
+			  <label for="quintArmorClass">Armor Class</label>
+			  <input id="quintArmorClass" data-save type="number" value="10" readonly />
+			</div>
+			<div class="field">
+			  <label for="quintInitiative">Initiative</label>
+			  <input id="quintInitiative" data-save type="number" value="0" readonly />
+			</div>
+			<div class="field">
+			  <label for="quintSpeed">Speed</label>
+			  <input id="quintSpeed" data-save placeholder="30 ft." />
+			</div>
+			<div class="field">
+			  <label for="quintPassivePerception">Passive Perception</label>
+			  <input id="quintPassivePerception" data-save type="number" value="10" readonly />
+			</div>
+		  </div>
+		  
+		<div class="card">
+			<h3>Traits & Features: Quintessence</h3>
+			<div id="quintFeatures" class="feature-list"></div>
+		</div>
+
+		  <div class="grid-3">
+			<div class="field">
+			  <label for="quintMaxHp">Max HP</label>
+			  <input id="quintMaxHp" data-save type="number" value="0" />
+			</div>
+			<div class="field">
+			  <label for="quintCurrentHp">Current HP</label>
+			  <input id="quintCurrentHp" data-save type="number" value="0" />
+			</div>
+			<div class="field">
+			  <label for="quintTempHp">Temp HP</label>
+			  <input id="quintTempHp" data-save type="number" value="0" />
+			</div>
+		  </div>
+
+		  <div class="grid-3">
+			<div class="field">
+			  <label for="quintAttackBonus">Attack Bonus</label>
+			  <input id="quintAttackBonus" data-save type="number" value="0" readonly />
+			</div>
+			<div class="field">
+			  <label for="quintArmorType">Armor</label>
+			  <select id="quintArmorType" data-save>
+				<option value="none">No Armor</option>
+				<option value="light">Light Armor</option>
+				<option value="medium">Medium Armor</option>
+				<option value="heavy">Heavy Armor</option>
+			  </select>
+			</div>
+			<div class="field">
+			  <label for="quintWeaponSelect">Weapon</label>
+			  <select id="quintWeaponSelect" data-save>
+				<option value="fists">Fists</option>
+				<option value="blade-arms">Blade Arms</option>
+				<option value="chain">Chain</option>
+				<option value="projectile">Projectile</option>
+				<option value="hammer">Hammer</option>
+				<option value="rapier">Rapier</option>
+				<option value="cards">Cards</option>
+				<option value="custom">Custom</option>
+			  </select>
+			</div>
+		  </div>
+		</div>
+		
+      </section>
+
+      <aside class="column">
+        <div class="card">
+          <h3>Saving Throws</h3>
+          <div id="savingThrows" class="list"></div>
         </div>
-      </div>
-    </section>
-  </main>
 
-  <footer class="site-footer">
-    <div class="wide footer-top">
-      <div class="footer-brand">
-        <h3 id="footerBrand"></h3>
-        <p id="footerCopy"></p>
-      </div>
-
-      <div class="footer-columns" id="footerColumns"></div>
-    </div>
-
-    <div class="wide footer-bottom">
-      <span id="footerLegal"></span>
-      <span id="footerTag"></span>
-    </div>
-  </footer>
-
-  <script>
-    const siteData = {
-      brand: {
-        name: "YUME Interactive",
-        meta: "Indie Game Studio"
-      },
-
-      navigation: [
-        { label: "Work", href: "#work" },
-        { label: "Capabilities", href: "#capabilities" },
-        { label: "Case Study", href: "#case-study" },
-        { label: "Contact", href: "#contact" }
-      ],
-
-      hero: {
-        intro: "We are a small indie game studio building polished interactive experiences, game systems, and product-ready visuals.",
-        title: "We design and build <span class='underline'>playful, polished digital experiences.</span>",
-        summary: "YUME Interactive blends game development, design thinking, and technical implementation into project pieces that feel crafted, readable, and production-ready.",
-        primary: "Get In Touch",
-        secondary: "Browse Work"
-      },
-
-      featured: {
-        eyebrow: "See What Our Dreamers Can Do",
-        title: "Featured projects across games, interfaces, technical builds, and visual design.",
-        copy: "Here are some of our more recent projects, handpicked to better showcase our creative and technical strengths.",
-        viewAllLabel: "View Full Portfolio",
-        viewAllHref: "https://your-link-here.com",
-
-        filters: [
-          "Featured",
-          "Game Development",
-          "Web Development",
-          "UI/UX",
-          "Game Design",
-          "Web Design",
-          "Graphics Design",
-          "Branding"
-        ],
-
-        items: [
-          {
-            title: "Go ON",
-            categories: ["Game Design", "Game Development", "UI/UX"],
-            meta: "Combat loop · active development · systems UX",
-            description: "A systems-forward prototype focused on readable feedback, progression clarity, strong interaction design, and mobile-friendly flow.",
-            label: "Playable Prototype",
-            href: "#case-study",
-            colors: ["#1a1d27", "#d13b2f"],
-            image: "assets/go-on-splash.webp",
-            featured: true
-          },
-          {
-            title: "Barangay Resident Information System",
-            categories: ["Web Design", "Web Development", "UI/UX"],
-            meta: "Civic platform · records management · admin dashboard",
-            description: "A records and operations platform built to support local administrative tasks through structured data views, and accessible interface design.",
-            label: "Civic System",
-            href: "https://your-link-here.com",
-            colors: ["#151519", "#00d8ff"],
-            image: "assets/brams-splash.webp",
-            featured: true
-          },
-          {
-            title: "Araling Panlipunan Game-based Interactive Learning",
-            categories: ["Game Design", "Game Development", "Branding"],
-            meta: "Worldbuilding · narrative framing",
-            description: "An interactive game-based learning tool built to make education more memorable, clear, and visually entertaining.",
-            label: "Interactive Learning",
-            href: "https://your-link-here.com",
-            colors: ["#24242d", "#ff3ea8"],
-            image: "assets/agila-splash.webp",
-            featured: true
-          },
-          {
-            title: "Digital Calling Cards Website",
-            categories: ["Web Development", "Web Design", "UI/UX"],
-            meta: "Active development · e-commerce",
-            description: "A fast, scalable website designed for active e-commerce.",
-            label: "Headless Build",
-            href: "https://your-link-here.com",
-            colors: ["#111114", "#00d8ff"],
-            image: "assets/fibei-splash.webp",
-            featured: false
-          },
-          {
-            title: "Foodpanda Capstone",
-            categories: ["UI/UX", "Graphics Design"],
-            meta: "Platform revamp · accessibility upgrade",
-            description: "Simplified navigation and UI flows for the payment system of an established food delivery app.",
-            label: "Learning UX",
-            href: "https://your-link-here.com",
-            colors: ["#191922", "#d13b2f"],
-            image: "assets/pandapay-splash.webp",
-            featured: false
-          },
-          {
-            title: "Immortal Renzown",
-            categories: ["Game Development", "Game Design"],
-            meta: "Nostalgia · Multiplayer · Local coop",
-            description: "A short fun game jam entry featuring couch coop mechanics and controls.",
-            label: "Game Jam",
-            href: "https://your-link-here.com",
-            colors: ["#111114", "#ff3ea8"],
-            image: "assets/ir-splash.webp",
-            featured: false
-          },
-          {
-            title: "Forsaken",
-            categories: ["Game Development", "Game Design"],
-            meta: "Multiplayer · Third-party",
-            description: "A third-person multiplayer game developed in the Core Engine platform.",
-            label: "Multiplayer",
-            href: "https://your-link-here.com",
-            colors: ["#111114", "#ff3ea8"],
-            image: "assets/forsaken-splash.webp",
-            featured: false
-          },
-          {
-            title: "Microbites",
-            categories: ["Graphics Design", "Branding"],
-            meta: "Brand identity · Logo design",
-            description: "A disinfection service for offices and establishments during the height of the COVID pandemic.",
-            label: "Brand Rollout",
-            href: "https://your-link-here.com",
-            colors: ["#111114", "#ff3ea8"],
-            image: "assets/microbites-splash.webp",
-            featured: false
-          }
-        ]
-      },
-
-      capabilities: [
-        {
-          title: "Game Systems & Interaction Design",
-          copy: "Design readable gameplay loops, player flows, and interfaces that make mechanics easier to understand and use for players."
-        },
-        {
-          title: "UI/UX for Games and Digital Products",
-          copy: "Build structured, user-centered interfaces for games, web platforms, and interactive systems with clarity and usability in mind."
-        },
-        {
-          title: "Front End Web Development",
-          copy: "Translate layouts into responsive, functional web experiences using clean front-end implementation and practical development workflows."
-        },
-        {
-          title: "Graphic Design & Visual Communication",
-          copy: "Create brand assets, promotional materials, and supporting visuals that strengthen presentation across digital and print touchpoints."
-        },
-        {
-          title: "Technical Design Thinking",
-          copy: "Bridge design intent and implementation by balancing aesthetics, usability, system logic, and production constraints."
-        },
-        {
-          title: "Adaptive Creative Production",
-          copy: "Work across game development, interface design, branding, and client-driven projects while adapting to different goals, styles, and requirements."
-        }
-      ],
-
-      caseStudy: {
-		  eyebrow: "Featured Case",
-		  bannerTitle: "Redesigning Pandapay to reduce payment friction and improve user support.",
-		  kpis: [
-		    { label: "Participants", value: "45 Survey · 5 Interviews" },
-		    { label: "Role", value: "UX Research · UI/UX Design" },
-		    { label: "Focus", value: "Payment Experience" }
-		  ],
-		  p1: "This case study focused on the payment experience within local food delivery apps, with attention placed on Pandapay as Foodpanda’s in-app wallet. Through surveys and 1:1 interviews, the study found that users were less concerned with food review features than with payment friction, including double-charging, failed transactions, cash-in limitations, withdrawal restrictions, and difficulty getting timely support.",
-		  p2: "The research showed that frequent food delivery users needed a faster, more reliable, and more flexible payment experience. Users valued convenience, security, and control over their remaining balance, but existing wallet limitations and verification steps created frustration across the transaction journey.",
-		  p3: "The proposed design solutions focused on two main opportunities: helping users maximize the use of Pandapay and helping users feel supported during payment-related issues. The concept introduced expanded wallet usability through QR-based transactions and fewer balance restrictions, alongside a persistent in-app support entry point for faster troubleshooting.",
-		  p4: "This project demonstrates a full UX process grounded in user research, problem validation, persona building, synthesis, and solution prototyping. Replace the gallery placeholders below with your final mockups, wireframes, or key screens from the Pandapay case study.",
-		  gallery: [
-			"assets/pandapay-case-01.webp",
-			"assets/pandapay-case-02.webp",
-			"assets/pandapay-case-03.webp"
-		  ]
-		},
-
-      contact: {
-        title: "Contact.",
-        copy1: "Need help with a game, interface, prototype, or a more polished portfolio presence?",
-        copy2: "For the lowest-maintenance setup, connect this form to Formspree and you are done.",
-        email: "hello@yumeinteractive.com",
-        formEndpoint: ""
-      },
-
-      footer: {
-        brand: "YUME Interactive",
-        copy: "A small indie studio aiming to revolutionize the local indie scene.",
-        columns: [
-          {
-            title: "About the Studio",
-            links: [
-              { label: "Work", href: "#work" },
-              { label: "Capabilities", href: "#capabilities" },
-              { label: "Case Study", href: "#case-study" },
-              { label: "Contact", href: "#contact" }
-            ]
-          },
-          {
-            title: "Become a Dreamer",
-            links: [
-              { label: "Itch.io", href: "https://yumeindie.itch.io" },
-              { label: "Steam", href: "https://your-link-here.com" },
-              { label: "GitHub", href: "https://https://github.com/judeTimothy" },
-              { label: "LinkedIn", href: "https://your-link-here.com" }
-            ]
-          },
-          {
-            title: "Legal",
-            links: [
-              { label: "Privacy", href: "#" },
-              { label: "Terms", href: "#" }
-            ]
-          }
-        ],
-        legal: `© ${new Date().getFullYear()} YUME Interactive. All rights reserved.`,
-        tag: "Built with plain HTML, CSS, and JavaScript."
-      }
-    };
-
-    const $ = (selector) => document.querySelector(selector);
-
-    const el = (tag, className, content) => {
-      const node = document.createElement(tag);
-      if (className) node.className = className;
-      if (content !== undefined) node.innerHTML = content;
-      return node;
-    };
-
-    function setText(id, value) {
-      const node = document.getElementById(id);
-      if (node) node.innerHTML = value;
-    }
-
-    function renderHeader() {
-      setText("brandName", siteData.brand.name);
-      setText("brandMeta", siteData.brand.meta);
-
-      const navBar = $("#navBarLinks");
-      const mobileNav = $("#mobileNavLinks");
-
-      siteData.navigation.forEach((item) => {
-        const desktopLink = el("a", "", item.label);
-        desktopLink.href = item.href;
-        navBar.appendChild(desktopLink);
-
-        const mobileLink = el("a", "", item.label);
-        mobileLink.href = item.href;
-        mobileNav.appendChild(mobileLink);
-      });
-    }
-
-    function renderHero() {
-      setText("heroIntro", siteData.hero.intro);
-      setText("heroTitle", siteData.hero.title);
-      setText("heroSummary", siteData.hero.summary);
-      setText("heroPrimary", siteData.hero.primary);
-      setText("heroSecondary", siteData.hero.secondary);
-    }
-
-    function createProjectCard(item) {
-      const categories = item.categories.map((c) => c.toLowerCase());
-      const card = el("article", "portfolio-card");
-      card.dataset.categories = categories.join("|");
-      card.dataset.featured = String(Boolean(item.featured));
-
-      const link = el("a", "portfolio-card__link");
-      link.href = item.href || "#";
-      if (/^https?:\/\//.test(link.href)) {
-        link.target = "_blank";
-        link.rel = "noreferrer";
-      }
-      link.setAttribute("aria-label", `Open project: ${item.title}`);
-
-      const media = el("div", "portfolio-card__media");
-      media.style.setProperty("--thumb-a", item.colors?.[0] || "#1a1a22");
-      media.style.setProperty("--thumb-b", item.colors?.[1] || "#d13b2f");
-
-      if (item.image && item.image.trim()) {
-        media.style.setProperty("--project-image", `url("${item.image}")`);
-        media.style.setProperty("--image-opacity", "1");
-      } else {
-        media.style.setProperty("--project-image", "none");
-        media.style.setProperty("--image-opacity", "0");
-      }
-
-      const label = el("span", "portfolio-card__label", item.label || "Project");
-
-      const body = el("div", "portfolio-card__body");
-      body.innerHTML = `
-        <h3>${item.title}</h3>
-        <div class="portfolio-meta">${item.meta || item.categories.join(" · ")}</div>
-        <p>${item.description}</p>
-      `;
-
-      media.appendChild(label);
-      link.append(media, body);
-      card.appendChild(link);
-
-      return card;
-    }
-
-    function applyFilter(filter) {
-      const grid = $("#portfolioGrid");
-      const cards = [...grid.querySelectorAll(".portfolio-card")];
-
-      cards.forEach((card) => {
-        const categories = card.dataset.categories;
-        const isFeatured = card.dataset.featured === "true";
-
-        let show = false;
-
-        if (filter === "featured") {
-          show = isFeatured;
-        } else {
-          show = categories.includes(filter);
-        }
-
-        card.classList.toggle("is-hidden", !show);
-      });
-    }
-
-    function renderFeatured() {
-      setText("workEyebrow", siteData.featured.eyebrow);
-      setText("workTitle", siteData.featured.title);
-      setText("workCopy", siteData.featured.copy);
-
-      const viewBtn = $("#viewPortfolioButton");
-      viewBtn.textContent = siteData.featured.viewAllLabel;
-      viewBtn.href = siteData.featured.viewAllHref || "#";
-
-      const filters = $("#filters");
-      const grid = $("#portfolioGrid");
-
-      siteData.featured.filters.forEach((filter) => {
-        const isFeaturedDefault = filter.toLowerCase() === "featured";
-        const button = el("button", `chip${isFeaturedDefault ? " is-active" : ""}`, filter);
-        button.type = "button";
-        button.dataset.filter = filter.toLowerCase();
-        filters.appendChild(button);
-      });
-
-      siteData.featured.items.forEach((item) => {
-        grid.appendChild(createProjectCard(item));
-      });
-
-      applyFilter("featured");
-
-      filters.addEventListener("click", (event) => {
-        const btn = event.target.closest("button[data-filter]");
-        if (!btn) return;
-
-        filters.querySelectorAll(".chip").forEach((chip) => chip.classList.remove("is-active"));
-        btn.classList.add("is-active");
-
-        applyFilter(btn.dataset.filter);
-      });
-    }
-
-    function renderCapabilities() {
-      setText("capabilitiesTitle", "Capabilities.");
-      const grid = $("#capabilitiesGrid");
-
-      siteData.capabilities.forEach((item, index) => {
-        const card = el("article", "capability");
-        card.innerHTML = `
-          <span class="capability__no">${String(index + 1).padStart(2, "0")}</span>
-          <h3>${item.title}</h3>
-          <p class="muted">${item.copy}</p>
-        `;
-        grid.appendChild(card);
-      });
-    }
-
-    function renderCaseStudy() {
-	  setText("caseTitle", "Pandapay UI/UX Case Study.");
-	  setText("caseEyebrow", siteData.caseStudy.eyebrow);
-	  setText("caseBannerTitle", siteData.caseStudy.bannerTitle);
-	  setText("caseParagraph1", siteData.caseStudy.p1);
-	  setText("caseParagraph2", siteData.caseStudy.p2);
-	  setText("caseParagraph3", siteData.caseStudy.p3);
-	  setText("caseParagraph4", siteData.caseStudy.p4);
-
-	  const kpis = $("#caseKpis");
-	  siteData.caseStudy.kpis.forEach((item) => {
-		const card = el("div", "case-kpi");
-		card.innerHTML = `<strong>${item.label}</strong><span>${item.value}</span>`;
-		kpis.appendChild(card);
-	  });
-
-	  const gallery = $("#caseGallery");
-	  siteData.caseStudy.gallery.forEach((image) => {
-		const thumb = el("div", "thumb");
-		thumb.style.backgroundImage = `url("${image}")`;
-		gallery.appendChild(thumb);
-	  });
-	}
-
-    function renderContact() {
-      setText("contactTitle", siteData.contact.title);
-      setText("contactCopy1", siteData.contact.copy1);
-      setText("contactCopy2", siteData.contact.copy2);
-      setText(
-        "contactEmailLine",
-        `Or email directly at <a href="mailto:${siteData.contact.email}">${siteData.contact.email}</a>.`
-      );
-
-      const form = $("#contactForm");
-      const note = $("#formNote");
-
-      if (siteData.contact.formEndpoint) {
-        form.action = siteData.contact.formEndpoint;
-        form.method = "POST";
-        note.textContent = "This form is connected to a lightweight form endpoint.";
-      }
-    }
-
-    function renderFooter() {
-      setText("footerBrand", siteData.footer.brand);
-      setText("footerCopy", siteData.footer.copy);
-      setText("footerLegal", siteData.footer.legal);
-      setText("footerTag", siteData.footer.tag);
-
-      const columns = $("#footerColumns");
-      siteData.footer.columns.forEach((group) => {
-        const wrap = el("div", "");
-        const list = el("ul", "footer-links");
-        list.innerHTML = `<li><strong>${group.title}</strong></li>`;
-
-        group.links.forEach((item) => {
-          const li = document.createElement("li");
-          const link = document.createElement("a");
-          link.textContent = item.label;
-          link.href = item.href;
-          if (/^https?:\/\//.test(item.href)) {
-            link.target = "_blank";
-            link.rel = "noreferrer";
-          }
-          li.appendChild(link);
-          list.appendChild(li);
-        });
-
-        wrap.appendChild(list);
-        columns.appendChild(wrap);
-      });
-    }
-
-    function initMobileNav() {
-      const toggle = $("#menuToggle");
-      const panel = $("#mobileNav");
-
-      if (!toggle || !panel) return;
-
-      const closeNav = () => {
-        document.body.classList.remove("nav-open");
-        toggle.setAttribute("aria-expanded", "false");
-      };
-
-      toggle.addEventListener("click", (event) => {
-        event.preventDefault();
-        event.stopPropagation();
-        const isOpen = document.body.classList.toggle("nav-open");
-        toggle.setAttribute("aria-expanded", String(isOpen));
-      });
-
-      panel.addEventListener("click", (event) => event.stopPropagation());
-
-      document.addEventListener("click", (event) => {
-        if (!document.body.classList.contains("nav-open")) return;
-        if (panel.contains(event.target) || toggle.contains(event.target)) return;
-        closeNav();
-      });
-
-      document.querySelectorAll('.site-nav a[href^="#"]').forEach((link) => {
-        link.addEventListener("click", () => closeNav());
-      });
-
-      document.addEventListener("keydown", (event) => {
-        if (event.key === "Escape") closeNav();
-      });
-    }
-
-    function initContactForm() {
-      const form = $("#contactForm");
-      const error = $("#formError");
-      const success = $("#formSuccess");
-
-      form.addEventListener("submit", async (event) => {
-        error.style.display = "none";
-        success.style.display = "none";
-
-        const name = form.name.value.trim();
-        const email = form.email.value.trim();
-        const validEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-
-        if (!name || !validEmail) {
-          event.preventDefault();
-          error.style.display = "block";
-          return;
-        }
-
-        if (!siteData.contact.formEndpoint) {
-          event.preventDefault();
-          success.textContent = "Thanks. Your message passed validation. Add a form endpoint to receive submissions.";
-          success.style.display = "block";
-          form.reset();
-          return;
-        }
-
-        event.preventDefault();
-
-        try {
-          const response = await fetch(siteData.contact.formEndpoint, {
-            method: "POST",
-            headers: { "Accept": "application/json" },
-            body: new FormData(form)
-          });
-
-          if (!response.ok) throw new Error("Form submission failed.");
-
-          success.textContent = "Thanks. Your message has been sent.";
-          success.style.display = "block";
-          form.reset();
-        } catch (err) {
-          error.textContent = "Something went wrong while sending the form. Please try again.";
-          error.style.display = "block";
-        }
-      });
-    }
-
-    renderHeader();
-    renderHero();
-    renderFeatured();
-    renderCapabilities();
-    renderCaseStudy();
-    renderContact();
-    renderFooter();
-    initMobileNav();
-    initContactForm();
-  </script>
+        <div class="card">
+          <h3>Skills</h3>
+          <div id="skillsList" class="list"></div>
+        </div>
+
+      </aside>
+    </main>
+  </section>
 </body>
 </html>
