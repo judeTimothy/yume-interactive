@@ -54,6 +54,21 @@ const CLASS_CONFIG = {
     saves: ["wis", "cha"],
     skillChoices: 2
   },
+  druid: {
+    hitDie: "d8",
+    saves: ["int", "wis"],
+    skillChoices: 2
+  },
+  sorcerer: {
+    hitDie: "d6",
+    saves: ["con", "cha"],
+    skillChoices: 2
+  },
+  warlock: {
+    hitDie: "d8",
+    saves: ["wis", "cha"],
+    skillChoices: 2
+  },
   barbarian: {
     hitDie: "d12",
     saves: ["str", "con"],
@@ -109,6 +124,27 @@ const CLASS_FEATURES = {
     { level: 3, name: "Sacred Oath", desc: "Swear an oath that shapes your power." },
     { level: 5, name: "Extra Attack", desc: "Attack twice when you take the Attack action." }
   ],
+  druid: [
+    { level: 1, name: "Druidic", desc: "Know the secret language of druids." },
+    { level: 1, name: "Spellcasting", desc: "Cast nature-based spells using wisdom." },
+    { level: 2, name: "Wild Shape", desc: "Transform into natural beast forms." },
+    { level: 2, name: "Druid Circle", desc: "Choose a druidic circle that defines your path." },
+    { level: 5, name: "Empowered Forms", desc: "Your transformations and nature magic improve." }
+  ],
+  sorcerer: [
+    { level: 1, name: "Spellcasting", desc: "Cast innate spells using charisma." },
+    { level: 1, name: "Sorcerous Origin", desc: "Choose the source of your magical bloodline or power." },
+    { level: 2, name: "Font of Magic", desc: "Gain sorcery points to shape your spellcasting." },
+    { level: 3, name: "Metamagic", desc: "Alter your spells with special casting techniques." },
+    { level: 5, name: "Potent Casting", desc: "Your innate magic becomes more forceful." }
+  ],
+  warlock: [
+    { level: 1, name: "Otherworldly Patron", desc: "Choose the powerful entity behind your pact." },
+    { level: 1, name: "Pact Magic", desc: "Cast pact-based spells using charisma." },
+    { level: 2, name: "Eldritch Invocations", desc: "Gain supernatural enhancements and tricks." },
+    { level: 3, name: "Pact Boon", desc: "Receive a special gift tied to your patron." },
+    { level: 5, name: "Deepened Pact", desc: "Your patron's influence and gifts grow stronger." }
+  ],
   barbarian: [
     { level: 1, name: "Rage", desc: "Enter a furious state that boosts offense and resilience." },
     { level: 1, name: "Unarmored Defense", desc: "Rely on physical toughness rather than armor." },
@@ -116,6 +152,115 @@ const CLASS_FEATURES = {
     { level: 2, name: "Danger Sense", desc: "Gain heightened awareness against visible threats." },
     { level: 3, name: "Primal Path", desc: "Choose the source of your fury." },
     { level: 5, name: "Extra Attack", desc: "Attack twice when you take the Attack action." }
+  ]
+};
+
+const CLASS_FEATURE_SELECTORS = {
+  fighter: [
+    {
+      id: "fighterStyle",
+      label: "Fighting Style",
+      minLevel: 1,
+      options: ["Archery", "Defense", "Dueling", "Great Weapon Fighting", "Protection", "Two-Weapon Fighting"]
+    },
+    {
+      id: "fighterArchetype",
+      label: "Martial Archetype",
+      minLevel: 3,
+      options: ["Champion", "Battle Master", "Eldritch Knight"]
+    }
+  ],
+  rogue: [
+    {
+      id: "rogueArchetype",
+      label: "Roguish Archetype",
+      minLevel: 3,
+      options: ["Thief", "Assassin", "Arcane Trickster"]
+    }
+  ],
+  wizard: [
+    {
+      id: "wizardTradition",
+      label: "Arcane Tradition",
+      minLevel: 2,
+      options: ["Abjuration", "Conjuration", "Divination", "Enchantment", "Evocation", "Illusion", "Necromancy", "Transmutation"]
+    }
+  ],
+  cleric: [
+    {
+      id: "clericDomain",
+      label: "Divine Domain",
+      minLevel: 1,
+      options: ["Life", "Light", "Trickery", "War", "Knowledge", "Nature", "Tempest"]
+    }
+  ],
+  ranger: [
+    {
+      id: "rangerArchetype",
+      label: "Ranger Archetype",
+      minLevel: 3,
+      options: ["Hunter", "Beast Master", "Gloom Stalker"]
+    }
+  ],
+  bard: [
+    {
+      id: "bardCollege",
+      label: "Bard College",
+      minLevel: 3,
+      options: ["Lore", "Valor", "Glamour", "Swords", "Whispers"]
+    }
+  ],
+  paladin: [
+    {
+      id: "paladinOath",
+      label: "Sacred Oath",
+      minLevel: 3,
+      options: ["Devotion", "Ancients", "Vengeance", "Glory"]
+    }
+  ],
+  barbarian: [
+    {
+      id: "barbarianPath",
+      label: "Primal Path",
+      minLevel: 3,
+      options: ["Berserker", "Totem Warrior", "Zealot", "Wild Magic"]
+    }
+  ],
+  druid: [
+    {
+      id: "druidCircle",
+      label: "Druid Circle",
+      minLevel: 2,
+      options: ["Land", "Moon", "Stars", "Wildfire", "Spores"]
+    }
+  ],
+  sorcerer: [
+    {
+      id: "sorcererOrigin",
+      label: "Sorcerous Origin",
+      minLevel: 1,
+      options: ["Draconic", "Wild Magic", "Shadow", "Divine Soul", "Clockwork Soul"]
+    },
+    {
+      id: "sorcererMetamagic",
+      label: "Metamagic",
+      minLevel: 3,
+      options: ["Careful Spell", "Distant Spell", "Empowered Spell", "Extended Spell", "Quickened Spell", "Subtle Spell", "Twinned Spell"]
+    }
+  ],
+  warlock: [
+    {
+      id: "warlockPatron",
+      label: "Otherworldly Patron",
+      minLevel: 1,
+      options: ["Fiend", "Archfey", "Great Old One", "Celestial", "Hexblade"]
+    },
+    {
+      id: "warlockBoon",
+      label: "Pact Boon",
+      minLevel: 3,
+      options: ["Blade", "Chain", "Tome", "Talisman"]
+    }
   ]
 };
 
@@ -362,6 +507,34 @@ function renderFeatureList(containerId, features, level) {
     .join("");
 }
 
+function renderFeatureSelectors() {
+  const container = document.getElementById("charFeatureSelectors");
+  const classEl = document.getElementById("classSelect");
+  const levelEl = document.getElementById("level");
+
+  if (!container || !classEl || !levelEl) return;
+
+  const classKey = classEl.value;
+  const level = Number(levelEl.value || 1);
+  const selectors = CLASS_FEATURE_SELECTORS[classKey] || [];
+
+  const available = selectors.filter((item) => level >= item.minLevel);
+
+  if (available.length === 0) {
+    container.innerHTML = "";
+    return;
+  }
+
+  container.innerHTML = available.map((item) => `
+    <div class="field">
+      <label for="${item.id}">${item.label}</label>
+      <select id="${item.id}" data-save>
+        ${item.options.map((opt) => `<option value="${opt}">${opt}</option>`).join("")}
+      </select>
+    </div>
+  `).join("");
+}
+
 function updateFeatureSections() {
   const classEl = document.getElementById("classSelect");
   const levelEl = document.getElementById("level");
@@ -371,17 +544,9 @@ function updateFeatureSections() {
   const classKey = classEl.value;
   const level = Number(levelEl.value || 1);
 
-  renderFeatureList(
-    "charFeatures",
-    CLASS_FEATURES[classKey] || [],
-    level
-  );
-
-  renderFeatureList(
-    "quintFeatures",
-    QUINT_FEATURES,
-    level
-  );
+  renderFeatureList("charFeatures", CLASS_FEATURES[classKey] || [], level);
+  renderFeatureList("quintFeatures", QUINT_FEATURES, level);
+  renderFeatureSelectors();
 }
 
 function recalcSheet() {
