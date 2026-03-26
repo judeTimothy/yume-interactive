@@ -11,7 +11,6 @@ import {
   getFirestore,
   doc,
   getDoc,
-  getDocs,
   collection,
   runTransaction,
   deleteDoc,
@@ -29,65 +28,25 @@ const firebaseConfig = {
   appId: "1:874066974213:web:8c02d7ba12fca73c7d6e6c",
 };
 
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
 const db = getFirestore(app);
+const provider = new GoogleAuthProvider();
+
 const ABILITIES = ["str", "dex", "con", "int", "wis", "cha"];
 
 const CLASS_CONFIG = {
-  fighter: {
-    hitDie: "d10",
-    saves: ["str", "con"],
-    skillChoices: 2
-  },
-  rogue: {
-    hitDie: "d8",
-    saves: ["dex", "int"],
-    skillChoices: 4
-  },
-  wizard: {
-    hitDie: "d6",
-    saves: ["int", "wis"],
-    skillChoices: 2
-  },
-  cleric: {
-    hitDie: "d8",
-    saves: ["wis", "cha"],
-    skillChoices: 2
-  },
-  ranger: {
-    hitDie: "d10",
-    saves: ["str", "dex"],
-    skillChoices: 3
-  },
-  bard: {
-    hitDie: "d8",
-    saves: ["dex", "cha"],
-    skillChoices: 3
-  },
-  paladin: {
-    hitDie: "d10",
-    saves: ["wis", "cha"],
-    skillChoices: 2
-  },
-  druid: {
-    hitDie: "d8",
-    saves: ["int", "wis"],
-    skillChoices: 2
-  },
-  sorcerer: {
-    hitDie: "d6",
-    saves: ["con", "cha"],
-    skillChoices: 2
-  },
-  warlock: {
-    hitDie: "d8",
-    saves: ["wis", "cha"],
-    skillChoices: 2
-  },
-  barbarian: {
-    hitDie: "d12",
-    saves: ["str", "con"],
-    skillChoices: 2
-  }
+  fighter: { hitDie: "d10", saves: ["str", "con"], skillChoices: 2 },
+  rogue: { hitDie: "d8", saves: ["dex", "int"], skillChoices: 4 },
+  wizard: { hitDie: "d6", saves: ["int", "wis"], skillChoices: 2 },
+  cleric: { hitDie: "d8", saves: ["wis", "cha"], skillChoices: 2 },
+  ranger: { hitDie: "d10", saves: ["str", "dex"], skillChoices: 3 },
+  bard: { hitDie: "d8", saves: ["dex", "cha"], skillChoices: 3 },
+  paladin: { hitDie: "d10", saves: ["wis", "cha"], skillChoices: 2 },
+  druid: { hitDie: "d8", saves: ["int", "wis"], skillChoices: 2 },
+  sorcerer: { hitDie: "d6", saves: ["con", "cha"], skillChoices: 2 },
+  warlock: { hitDie: "d8", saves: ["wis", "cha"], skillChoices: 2 },
+  barbarian: { hitDie: "d12", saves: ["str", "con"], skillChoices: 2 }
 };
 
 const CLASS_FEATURES = {
@@ -329,10 +288,6 @@ const SKILLS = [
   { key: "survival", label: "Survival", ability: "wis" }
 ];
 
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const provider = new GoogleAuthProvider();
-
 const loginView = document.getElementById("loginView");
 const appView = document.getElementById("appView");
 const loginBtn = document.getElementById("loginBtn");
@@ -347,6 +302,9 @@ const userName = document.getElementById("userName");
 const userEmail = document.getElementById("userEmail");
 
 let currentUser = null;
+let stopQuintListener = null;
+let previousQuintKey = "";
+let saveTimer = null;
 
 function getSelectedText(selectId) {
   const el = document.getElementById(selectId);
@@ -362,10 +320,6 @@ function getProficiencyBonusFromLevel(level) {
   return 2;
 }
 
-function modFromScore(score) {
-  return Math.floor((Number(score) - 10) / 2);
-}
-
 function formatMod(value) {
   return value >= 0 ? `+${value}` : `${value}`;
 }
@@ -377,6 +331,7 @@ function setStatus(message = "", type = "") {
 
 function buildSavingThrows() {
   const wrap = document.getElementById("savingThrows");
+  if (!wrap) return;
   wrap.innerHTML = "";
 
   SAVING_THROWS.forEach((item) => {
@@ -393,6 +348,7 @@ function buildSavingThrows() {
 
 function buildSkills() {
   const wrap = document.getElementById("skillsList");
+  if (!wrap) return;
   wrap.innerHTML = "";
 
   SKILLS.forEach((item) => {
@@ -442,8 +398,9 @@ function changeModifier(ability, delta) {
   const remaining = getPointPoolRemaining();
   if (delta > 0 && remaining <= 0) return;
 
-  el.textContent = next;
+  el.textContent = String(next);
   recalcSheet();
+  queueFirestoreSave();
 }
 
 function updateClassRules() {
@@ -457,7 +414,6 @@ function updateClassRules() {
   const classKey = classEl.value;
   const level = Number(levelEl.value || 1);
   const config = CLASS_CONFIG[classKey];
-
   if (!config) return;
 
   charHitDiceEl.value = `${level}${config.hitDie}`;
@@ -466,7 +422,6 @@ function updateClassRules() {
   SAVING_THROWS.forEach((item) => {
     const box = document.getElementById(`saveProf-${item.key}`);
     if (!box) return;
-
     const isProficient = config.saves.includes(item.key);
     box.checked = isProficient;
     box.disabled = true;
@@ -485,7 +440,6 @@ function enforceSkillLimit() {
   if (!config) return;
 
   const maxSkills = config.skillChoices;
-
   const boxes = SKILLS
     .map((item) => document.getElementById(`skillProf-${item.key}`))
     .filter(Boolean);
@@ -497,7 +451,6 @@ function enforceSkillLimit() {
   }
 
   const newChecked = boxes.filter((box) => box.checked);
-
   boxes.forEach((box) => {
     box.disabled = !box.checked && newChecked.length >= maxSkills;
   });
@@ -515,19 +468,17 @@ function renderFeatureList(containerId, features, level) {
   }
 
   container.innerHTML = unlocked
-    .map(
-      (feature) => `
-        <div class="feature-item">
-          <div class="feature-item-title">${feature.name}</div>
-          <div class="feature-item-level">Level ${feature.level}</div>
-          <div class="feature-item-desc">${feature.desc}</div>
-        </div>
-      `
-    )
+    .map((feature) => `
+      <div class="feature-item">
+        <div class="feature-item-title">${feature.name}</div>
+        <div class="feature-item-level">Level ${feature.level}</div>
+        <div class="feature-item-desc">${feature.desc}</div>
+      </div>
+    `)
     .join("");
 }
 
-function renderFeatureSelectors() {
+function renderFeatureSelectors(savedFeatureValues = {}) {
   const container = document.getElementById("charFeatureSelectors");
   const classEl = document.getElementById("classSelect");
   const levelEl = document.getElementById("level");
@@ -539,9 +490,9 @@ function renderFeatureSelectors() {
   const selectors = CLASS_FEATURE_SELECTORS[classKey] || [];
   const available = selectors.filter((item) => level >= item.minLevel);
 
-  const previousValues = {};
+  const currentValues = {};
   container.querySelectorAll("select").forEach((select) => {
-    previousValues[select.id] = select.value;
+    currentValues[select.id] = select.value;
   });
 
   if (available.length === 0) {
@@ -550,8 +501,7 @@ function renderFeatureSelectors() {
   }
 
   container.innerHTML = available.map((item) => {
-    const savedValue = previousValues[item.id] || "";
-
+    const savedValue = currentValues[item.id] || savedFeatureValues[item.id] || "";
     return `
       <div class="field">
         <label for="${item.id}">${item.label}</label>
@@ -566,7 +516,7 @@ function renderFeatureSelectors() {
   }).join("");
 }
 
-function updateFeatureSections() {
+function updateFeatureSections(savedFeatureValues = {}) {
   const classEl = document.getElementById("classSelect");
   const levelEl = document.getElementById("level");
 
@@ -577,7 +527,7 @@ function updateFeatureSections() {
 
   renderFeatureList("charFeatures", CLASS_FEATURES[classKey] || [], level);
   renderFeatureList("quintFeatures", QUINT_FEATURES, level);
-  renderFeatureSelectors();
+  renderFeatureSelectors(savedFeatureValues);
 }
 
 function recalcSheet() {
@@ -591,7 +541,6 @@ function recalcSheet() {
     const profBox = document.getElementById(`saveProf-${item.key}`);
     const valEl = document.getElementById(`saveVal-${item.key}`);
     if (!profBox || !valEl) return;
-
     const total = mods[item.key] + (profBox.checked ? prof : 0);
     valEl.textContent = formatMod(total);
   });
@@ -600,7 +549,6 @@ function recalcSheet() {
     const profBox = document.getElementById(`skillProf-${item.key}`);
     const valEl = document.getElementById(`skillVal-${item.key}`);
     if (!profBox || !valEl) return;
-
     const total = mods[item.ability] + (profBox.checked ? prof : 0);
     valEl.textContent = formatMod(total);
   });
@@ -613,8 +561,8 @@ function recalcSheet() {
   if (charArmorTypeEl && charArmorClassEl) {
     const armorType = charArmorTypeEl.value;
     const armorBase = ARMOR_CONFIG[armorType] ?? 10;
-
     let armorClass = armorBase;
+
     if (armorType === "light") armorClass += mods.dex;
     else if (armorType === "medium") armorClass += Math.min(mods.dex, 2);
     else if (armorType === "none") armorClass += mods.dex;
@@ -634,8 +582,8 @@ function recalcSheet() {
   if (quintArmorTypeEl && quintArmorClassEl) {
     const armorType = quintArmorTypeEl.value;
     const armorBase = ARMOR_CONFIG[armorType] ?? 10;
-
     let armorClass = armorBase;
+
     if (armorType === "light") armorClass += mods.dex;
     else if (armorType === "medium") armorClass += Math.min(mods.dex, 2);
     else if (armorType === "none") armorClass += mods.dex;
@@ -648,59 +596,96 @@ function recalcSheet() {
   if (quintAttackBonusEl) quintAttackBonusEl.value = prof + mods.dex;
 }
 
-function storageKey() {
-  return currentUser ? `dnd-sheet-${currentUser.uid}` : null;
-}
-
 function collectData() {
   const data = {};
-
   document.querySelectorAll("[data-save], [data-feature-save]").forEach((el) => {
     data[el.id] = el.type === "checkbox" ? el.checked : el.value;
   });
-
   return data;
 }
 
 function applyData(data) {
-  document.querySelectorAll("[data-save], [data-feature-save]").forEach((el) => {
+  document.querySelectorAll("[data-save]").forEach((el) => {
     if (!(el.id in data)) return;
+    if (el.type === "checkbox") el.checked = Boolean(data[el.id]);
+    else el.value = data[el.id];
+  });
 
-    if (el.type === "checkbox") {
-      el.checked = Boolean(data[el.id]);
-    } else {
-      el.value = data[el.id];
+  updateClassRules();
+  updateFeatureSections(data);
+
+  document.querySelectorAll("[data-feature-save]").forEach((el) => {
+    if (!(el.id in data)) return;
+    el.value = data[el.id];
+  });
+
+  ABILITIES.forEach((ability) => {
+    const key = `mod-${ability}`;
+    if (key in data) {
+      const el = document.getElementById(key);
+      if (el) el.textContent = String(data[key]);
     }
   });
 
+  previousQuintKey = data.quintName || "";
   recalcSheet();
 }
 
-function saveLocal() {
-  const key = storageKey();
-  if (!key) return;
-
-  localStorage.setItem(key, JSON.stringify(collectData()));
-  setStatus("Saved locally.", "ok");
+function getSheetRef() {
+  if (!currentUser) return null;
+  return doc(db, "sheets", currentUser.uid);
 }
 
-function loadLocal() {
-  const key = storageKey();
-  if (!key) return;
+async function saveSheetToFirestore() {
+  const ref = getSheetRef();
+  if (!ref || !currentUser) return;
 
-  const raw = localStorage.getItem(key);
-  if (!raw) {
+  const data = collectData();
+
+  await setDoc(
+    ref,
+    {
+      uid: currentUser.uid,
+      playerName: currentUser.displayName || currentUser.email || "",
+      updatedAt: serverTimestamp(),
+      sheet: data
+    },
+    { merge: true }
+  );
+
+  setStatus("Sheet saved.", "ok");
+}
+
+async function loadSheetFromFirestore() {
+  const ref = getSheetRef();
+  if (!ref) return;
+
+  const snap = await getDoc(ref);
+
+  if (!snap.exists()) {
+    updateClassRules();
+    updateFeatureSections();
     recalcSheet();
     return;
   }
 
-  try {
-    applyData(JSON.parse(raw));
-    setStatus("Loaded saved sheet.", "ok");
-  } catch (error) {
-    console.error(error);
-    setStatus("Could not load saved sheet.", "error");
-  }
+  const data = snap.data()?.sheet || {};
+  applyData(data);
+  setStatus("Sheet loaded.", "ok");
+}
+
+function queueFirestoreSave() {
+  if (!currentUser) return;
+
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(async () => {
+    try {
+      await saveSheetToFirestore();
+    } catch (error) {
+      console.error(error);
+      setStatus("Autosave failed.", "error");
+    }
+  }, 500);
 }
 
 function resetForm() {
@@ -719,6 +704,7 @@ function resetForm() {
       else if (el.id === "quintInitiative") el.value = 0;
       else if (el.id === "quintPassivePerception") el.value = 10;
       else if (el.id === "quintAttackBonus") el.value = 0;
+      else if (el.id === "proficiencyBonus") el.value = 2;
       else el.value = 0;
       return;
     }
@@ -731,14 +717,21 @@ function resetForm() {
     el.value = "";
   });
 
+  document.querySelectorAll("[data-feature-save]").forEach((el) => {
+    el.selectedIndex = 0;
+  });
+
   ABILITIES.forEach((ability) => {
     const el = document.getElementById(`mod-${ability}`);
     if (el) el.textContent = "0";
   });
 
+  previousQuintKey = "";
   updateClassRules();
+  updateFeatureSections();
   recalcSheet();
-  setStatus("Reset complete. Press Save to keep it.", "");
+  queueFirestoreSave();
+  setStatus("Reset complete.", "");
 }
 
 async function claimQuintessence(quintKey) {
@@ -779,8 +772,6 @@ async function releaseQuintessence(quintKey) {
   }
 }
 
-let stopQuintListener = null;
-
 function watchQuintessenceAvailability() {
   const select = document.getElementById("quintName");
   if (!select) return;
@@ -797,45 +788,20 @@ function watchQuintessenceAvailability() {
     Array.from(select.options).forEach((opt) => {
       if (!opt.value) return;
 
+      const cleanText = opt.text.replace(" (Taken)", "");
       const claim = taken.get(opt.value);
       const ownedByMe = claim && claim.claimedByUid === currentUser?.uid;
 
       if (claim && !ownedByMe) {
         opt.disabled = true;
-        opt.text = `${opt.text.replace(" (Taken)", "")} (Taken)`;
+        opt.text = `${cleanText} (Taken)`;
       } else {
         opt.disabled = false;
-        opt.text = opt.text.replace(" (Taken)", "");
+        opt.text = cleanText;
       }
     });
   });
 }
-
-let previousQuintKey = "";
-
-document.addEventListener("change", async (event) => {
-  if (event.target.id !== "quintName") return;
-
-  const newKey = event.target.value;
-
-  try {
-    if (previousQuintKey && previousQuintKey !== newKey) {
-      await releaseQuintessence(previousQuintKey);
-    }
-
-    if (newKey) {
-      await claimQuintessence(newKey);
-      previousQuintKey = newKey;
-      setStatus(`Quintessence locked: ${getSelectedText("quintName")}`, "ok");
-    } else {
-      previousQuintKey = "";
-    }
-  } catch (error) {
-    console.error(error);
-    setStatus(error.message || "Could not claim Quintessence.", "error");
-    event.target.value = previousQuintKey || "";
-  }
-});
 
 loginBtn.addEventListener("click", async () => {
   loginError.textContent = "";
@@ -858,27 +824,64 @@ logoutBtn.addEventListener("click", async () => {
     console.error(error);
     setStatus("Logout failed.", "error");
   }
+
   if (stopQuintListener) {
-  stopQuintListener();
-  stopQuintListener = null;
-}
+    stopQuintListener();
+    stopQuintListener = null;
+  }
 });
 
-saveBtn.addEventListener("click", saveLocal);
+saveBtn.addEventListener("click", async () => {
+  try {
+    await saveSheetToFirestore();
+  } catch (error) {
+    console.error(error);
+    setStatus("Could not save sheet.", "error");
+  }
+});
+
 resetBtn.addEventListener("click", resetForm);
 
 document.addEventListener("input", (event) => {
   if (event.target.matches("[data-feature-save]")) {
+    queueFirestoreSave();
     return;
   }
 
   if (event.target.matches("[data-save]")) {
     recalcSheet();
+    queueFirestoreSave();
   }
 });
 
-document.addEventListener("change", (event) => {
+document.addEventListener("change", async (event) => {
+  if (event.target.id === "quintName") {
+    const newKey = event.target.value;
+
+    try {
+      if (previousQuintKey && previousQuintKey !== newKey) {
+        await releaseQuintessence(previousQuintKey);
+      }
+
+      if (newKey) {
+        await claimQuintessence(newKey);
+        previousQuintKey = newKey;
+        setStatus(`Quintessence locked: ${getSelectedText("quintName")}`, "ok");
+      } else {
+        previousQuintKey = "";
+      }
+
+      queueFirestoreSave();
+    } catch (error) {
+      console.error(error);
+      setStatus(error.message || "Could not claim Quintessence.", "error");
+      event.target.value = previousQuintKey || "";
+    }
+    return;
+  }
+
   if (event.target.matches("[data-feature-save]")) {
+    queueFirestoreSave();
     return;
   }
 
@@ -886,17 +889,20 @@ document.addEventListener("change", (event) => {
     updateClassRules();
     updateFeatureSections();
     recalcSheet();
+    queueFirestoreSave();
     return;
   }
 
   if (event.target.id.startsWith("skillProf-")) {
     enforceSkillLimit();
     recalcSheet();
+    queueFirestoreSave();
     return;
   }
 
   if (event.target.matches("[data-save]")) {
     recalcSheet();
+    queueFirestoreSave();
   }
 });
 
@@ -914,7 +920,7 @@ updateClassRules();
 updateFeatureSections();
 recalcSheet();
 
-onAuthStateChanged(auth, (user) => {
+onAuthStateChanged(auth, async (user) => {
   currentUser = user;
 
   if (user) {
@@ -925,11 +931,16 @@ onAuthStateChanged(auth, (user) => {
     userName.textContent = user.displayName || "User";
     userEmail.textContent = user.email || "";
 
-    loadLocal();
+    await loadSheetFromFirestore();
+    watchQuintessenceAvailability();
   } else {
     appView.classList.add("hidden");
     loginView.classList.remove("hidden");
     setStatus("");
+
+    if (stopQuintListener) {
+      stopQuintListener();
+      stopQuintListener = null;
+    }
   }
-  watchQuintessenceAvailability();
 });
