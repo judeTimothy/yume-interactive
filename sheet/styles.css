@@ -89,18 +89,17 @@ body {
 
 .user-name { font-weight: 700; font-size: 13px; }
 
-.input-with-button {
+.input-with-buttons {
   position: relative;
 }
 
-.input-with-button input {
-  padding-right: 42px;
+.input-with-buttons input {
+  padding-right: 76px;
 }
 
 .inline-roll-btn {
   position: absolute;
   top: 50%;
-  right: 8px;
   transform: translateY(-50%);
   width: 28px;
   height: 28px;
@@ -109,9 +108,17 @@ body {
   color: var(--text);
   border-radius: 8px;
   padding: 0;
-  font-size: 14px;
+  font-size: 13px;
   line-height: 1;
   cursor: pointer;
+}
+
+#avgHpBtn {
+  right: 40px;
+}
+
+#rollHpBtn {
+  right: 8px;
 }
 
 .inline-roll-btn:hover {
