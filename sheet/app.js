@@ -666,17 +666,38 @@ function recalcSheet() {
 
 function collectData() {
   const data = {};
+
   document.querySelectorAll("[data-save], [data-feature-save]").forEach((el) => {
     data[el.id] = el.type === "checkbox" ? el.checked : el.value;
   });
+
+  ABILITIES.forEach((ability) => {
+    const el = document.getElementById(`mod-${ability}`);
+    if (el) {
+      data[`mod-${ability}`] = el.textContent || "0";
+    }
+  });
+
   return data;
 }
 
 function applyData(data) {
   document.querySelectorAll("[data-save]").forEach((el) => {
     if (!(el.id in data)) return;
-    if (el.type === "checkbox") el.checked = Boolean(data[el.id]);
-    else el.value = data[el.id];
+
+    if (el.type === "checkbox") {
+      el.checked = Boolean(data[el.id]);
+    } else {
+      el.value = data[el.id];
+    }
+  });
+
+  ABILITIES.forEach((ability) => {
+    const key = `mod-${ability}`;
+    const el = document.getElementById(key);
+    if (el && key in data) {
+      el.textContent = String(data[key]);
+    }
   });
 
   updateClassRules();
@@ -685,14 +706,6 @@ function applyData(data) {
   document.querySelectorAll("[data-feature-save]").forEach((el) => {
     if (!(el.id in data)) return;
     el.value = data[el.id];
-  });
-
-  ABILITIES.forEach((ability) => {
-    const key = `mod-${ability}`;
-    if (key in data) {
-      const el = document.getElementById(key);
-      if (el) el.textContent = String(data[key]);
-    }
   });
 
   previousQuintKey = data.quintName || "";
