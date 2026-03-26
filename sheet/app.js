@@ -356,11 +356,37 @@ function rollMaxHp() {
   queueFirestoreSave();
 }
 
-const rollHpBtn = document.getElementById("rollHpBtn");
-
-if (rollHpBtn) {
-  rollHpBtn.addEventListener("click", rollMaxHp);
+function averagePerLevel(hitDie) {
+  return Math.floor(hitDie / 2) + 1;
 }
+
+function setAverageHp() {
+  const classEl = document.getElementById("classSelect");
+  const levelEl = document.getElementById("level");
+  const maxHpEl = document.getElementById("charMaxHp");
+
+  if (!classEl || !levelEl || !maxHpEl) return;
+
+  const classKey = classEl.value;
+  const level = Math.max(1, Number(levelEl.value || 1));
+  const hitDie = getHitDieSizeFromClass(classKey);
+  const conMod = getAbilityMods().con;
+
+  let totalHp = hitDie;
+
+  for (let i = 1; i < level; i++) {
+    totalHp += averagePerLevel(hitDie);
+  }
+
+  totalHp += conMod * level;
+
+  if (totalHp < 1) totalHp = 1;
+
+  maxHpEl.value = totalHp;
+  setStatus(`Average Max HP: ${totalHp}`, "ok");
+  queueFirestoreSave();
+}
+
 
 function formatMod(value) {
   return value >= 0 ? `+${value}` : `${value}`;
@@ -949,11 +975,23 @@ document.addEventListener("change", async (event) => {
 });
 
 document.addEventListener("click", (event) => {
-  const button = event.target.closest("[data-mod-change]");
-  if (!button) return;
+  const modButton = event.target.closest("[data-mod-change]");
+  if (modButton) {
+    const [ability, deltaText] = modButton.dataset.modChange.split(":");
+    changeModifier(ability, Number(deltaText));
+    return;
+  }
 
-  const [ability, deltaText] = button.dataset.modChange.split(":");
-  changeModifier(ability, Number(deltaText));
+  const rollHpButton = event.target.closest("#rollHpBtn");
+  if (rollHpButton) {
+    rollMaxHp();
+    return;
+  }
+
+  const avgHpButton = event.target.closest("#avgHpBtn");
+  if (avgHpButton) {
+    setAverageHp();
+  }
 });
 
 buildSavingThrows();
