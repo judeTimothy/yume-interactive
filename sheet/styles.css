@@ -89,11 +89,11 @@ body {
 
 .user-name { font-weight: 700; font-size: 13px; }
 
-.input-with-buttons {
+.input-with-button {
   position: relative;
 }
 
-.input-with-buttons input {
+.input-with-button input {
   padding-right: 76px;
 }
 
