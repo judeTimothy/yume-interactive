@@ -517,22 +517,33 @@ function renderFeatureSelectors() {
   const classKey = classEl.value;
   const level = Number(levelEl.value || 1);
   const selectors = CLASS_FEATURE_SELECTORS[classKey] || [];
-
   const available = selectors.filter((item) => level >= item.minLevel);
+
+  const previousValues = {};
+  container.querySelectorAll("select").forEach((select) => {
+    previousValues[select.id] = select.value;
+  });
 
   if (available.length === 0) {
     container.innerHTML = "";
     return;
   }
 
-  container.innerHTML = available.map((item) => `
-    <div class="field">
-      <label for="${item.id}">${item.label}</label>
-      <select id="${item.id}" data-save>
-        ${item.options.map((opt) => `<option value="${opt}">${opt}</option>`).join("")}
-      </select>
-    </div>
-  `).join("");
+  container.innerHTML = available.map((item) => {
+    const savedValue = previousValues[item.id] || "";
+
+    return `
+      <div class="field">
+        <label for="${item.id}">${item.label}</label>
+        <select id="${item.id}" data-save>
+          ${item.options.map((opt) => {
+            const selected = opt === savedValue ? "selected" : "";
+            return `<option value="${opt}" ${selected}>${opt}</option>`;
+          }).join("")}
+        </select>
+      </div>
+    `;
+  }).join("");
 }
 
 function updateFeatureSections() {
@@ -615,8 +626,6 @@ function recalcSheet() {
   if (quintInitiativeEl) quintInitiativeEl.value = mods.dex;
   if (quintPassiveEl) quintPassiveEl.value = 10 + mods.wis;
   if (quintAttackBonusEl) quintAttackBonusEl.value = prof + mods.dex;
-
-  updateClassRules();
 }
 
 function storageKey() {
@@ -745,6 +754,19 @@ document.addEventListener("input", (event) => {
 });
 
 document.addEventListener("change", (event) => {
+  if (event.target.id === "classSelect" || event.target.id === "level") {
+    updateClassRules();
+    updateFeatureSections();
+    recalcSheet();
+    return;
+  }
+
+  if (event.target.id.startsWith("skillProf-")) {
+    enforceSkillLimit();
+    recalcSheet();
+    return;
+  }
+
   if (event.target.matches("[data-save]")) {
     recalcSheet();
   }
