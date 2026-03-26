@@ -535,7 +535,7 @@ function renderFeatureSelectors() {
     return `
       <div class="field">
         <label for="${item.id}">${item.label}</label>
-        <select id="${item.id}" data-save>
+        <select id="${item.id}" data-feature-save>
           ${item.options.map((opt) => {
             const selected = opt === savedValue ? "selected" : "";
             return `<option value="${opt}" ${selected}>${opt}</option>`;
@@ -635,7 +635,7 @@ function storageKey() {
 function collectData() {
   const data = {};
 
-  document.querySelectorAll("[data-save]").forEach((el) => {
+  document.querySelectorAll("[data-save], [data-feature-save]").forEach((el) => {
     data[el.id] = el.type === "checkbox" ? el.checked : el.value;
   });
 
@@ -643,7 +643,7 @@ function collectData() {
 }
 
 function applyData(data) {
-  document.querySelectorAll("[data-save]").forEach((el) => {
+  document.querySelectorAll("[data-save], [data-feature-save]").forEach((el) => {
     if (!(el.id in data)) return;
 
     if (el.type === "checkbox") {
@@ -748,12 +748,20 @@ saveBtn.addEventListener("click", saveLocal);
 resetBtn.addEventListener("click", resetForm);
 
 document.addEventListener("input", (event) => {
+  if (event.target.matches("[data-feature-save]")) {
+    return;
+  }
+
   if (event.target.matches("[data-save]")) {
     recalcSheet();
   }
 });
 
 document.addEventListener("change", (event) => {
+  if (event.target.matches("[data-feature-save]")) {
+    return;
+  }
+
   if (event.target.id === "classSelect" || event.target.id === "level") {
     updateClassRules();
     updateFeatureSections();
