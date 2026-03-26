@@ -7,6 +7,19 @@ import {
   onAuthStateChanged
 } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-auth.js";
 
+import {
+  getFirestore,
+  doc,
+  getDoc,
+  getDocs,
+  collection,
+  runTransaction,
+  deleteDoc,
+  serverTimestamp,
+  setDoc,
+  onSnapshot
+} from "https://www.gstatic.com/firebasejs/12.11.0/firebase-firestore.js";
+
 const firebaseConfig = {
   apiKey: "AIzaSyCCBAuZgYfHqAYZa2tRQeiqR2kLh8rjLVY",
   authDomain: "charisma20-a7ea6.firebaseapp.com",
@@ -16,6 +29,7 @@ const firebaseConfig = {
   appId: "1:874066974213:web:8c02d7ba12fca73c7d6e6c",
 };
 
+const db = getFirestore(app);
 const ABILITIES = ["str", "dex", "con", "int", "wis", "cha"];
 
 const CLASS_CONFIG = {
@@ -333,6 +347,12 @@ const userName = document.getElementById("userName");
 const userEmail = document.getElementById("userEmail");
 
 let currentUser = null;
+
+function getSelectedText(selectId) {
+  const el = document.getElementById(selectId);
+  if (!el) return "";
+  return el.options[el.selectedIndex]?.text || "";
+}
 
 function getProficiencyBonusFromLevel(level) {
   if (level >= 17) return 6;
@@ -721,6 +741,102 @@ function resetForm() {
   setStatus("Reset complete. Press Save to keep it.", "");
 }
 
+async function claimQuintessence(quintKey) {
+  if (!currentUser || !quintKey) return;
+
+  const claimRef = doc(db, "quintessenceClaims", quintKey);
+
+  await runTransaction(db, async (transaction) => {
+    const snap = await transaction.get(claimRef);
+
+    if (snap.exists()) {
+      const data = snap.data();
+      if (data.claimedByUid !== currentUser.uid) {
+        throw new Error("That Quintessence is already taken.");
+      }
+      return;
+    }
+
+    transaction.set(claimRef, {
+      claimedByUid: currentUser.uid,
+      claimedByName: currentUser.displayName || currentUser.email || "Unknown",
+      claimedAt: serverTimestamp()
+    });
+  });
+}
+
+async function releaseQuintessence(quintKey) {
+  if (!currentUser || !quintKey) return;
+
+  const claimRef = doc(db, "quintessenceClaims", quintKey);
+  const snap = await getDoc(claimRef);
+
+  if (!snap.exists()) return;
+
+  const data = snap.data();
+  if (data.claimedByUid === currentUser.uid) {
+    await deleteDoc(claimRef);
+  }
+}
+
+let stopQuintListener = null;
+
+function watchQuintessenceAvailability() {
+  const select = document.getElementById("quintName");
+  if (!select) return;
+
+  if (stopQuintListener) stopQuintListener();
+
+  stopQuintListener = onSnapshot(collection(db, "quintessenceClaims"), (snapshot) => {
+    const taken = new Map();
+
+    snapshot.forEach((docSnap) => {
+      taken.set(docSnap.id, docSnap.data());
+    });
+
+    Array.from(select.options).forEach((opt) => {
+      if (!opt.value) return;
+
+      const claim = taken.get(opt.value);
+      const ownedByMe = claim && claim.claimedByUid === currentUser?.uid;
+
+      if (claim && !ownedByMe) {
+        opt.disabled = true;
+        opt.text = `${opt.text.replace(" (Taken)", "")} (Taken)`;
+      } else {
+        opt.disabled = false;
+        opt.text = opt.text.replace(" (Taken)", "");
+      }
+    });
+  });
+}
+
+let previousQuintKey = "";
+
+document.addEventListener("change", async (event) => {
+  if (event.target.id !== "quintName") return;
+
+  const newKey = event.target.value;
+
+  try {
+    if (previousQuintKey && previousQuintKey !== newKey) {
+      await releaseQuintessence(previousQuintKey);
+    }
+
+    if (newKey) {
+      await claimQuintessence(newKey);
+      previousQuintKey = newKey;
+      setStatus(`Quintessence locked: ${getSelectedText("quintName")}`, "ok");
+    } else {
+      previousQuintKey = "";
+    }
+  } catch (error) {
+    console.error(error);
+    setStatus(error.message || "Could not claim Quintessence.", "error");
+    event.target.value = previousQuintKey || "";
+  }
+});
+
 loginBtn.addEventListener("click", async () => {
   loginError.textContent = "";
   loginBtn.disabled = true;
@@ -742,6 +858,10 @@ logoutBtn.addEventListener("click", async () => {
     console.error(error);
     setStatus("Logout failed.", "error");
   }
+  if (stopQuintListener) {
+  stopQuintListener();
+  stopQuintListener = null;
+}
 });
 
 saveBtn.addEventListener("click", saveLocal);
@@ -811,4 +931,5 @@ onAuthStateChanged(auth, (user) => {
     loginView.classList.remove("hidden");
     setStatus("");
   }
+  watchQuintessenceAvailability();
 });
