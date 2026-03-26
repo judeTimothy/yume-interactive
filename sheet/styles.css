@@ -89,6 +89,35 @@ body {
 
 .user-name { font-weight: 700; font-size: 13px; }
 
+.input-with-button {
+  position: relative;
+}
+
+.input-with-button input {
+  padding-right: 42px;
+}
+
+.inline-roll-btn {
+  position: absolute;
+  top: 50%;
+  right: 8px;
+  transform: translateY(-50%);
+  width: 28px;
+  height: 28px;
+  border: 1px solid var(--line);
+  background: var(--panel-2);
+  color: var(--text);
+  border-radius: 8px;
+  padding: 0;
+  font-size: 14px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.inline-roll-btn:hover {
+  filter: brightness(1.08);
+}
+
 .btn {
   border: 0;
   border-radius: 12px;
