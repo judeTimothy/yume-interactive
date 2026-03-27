@@ -242,7 +242,7 @@ const QUINT_CONFIG = {
     armorClass: 18,
     armor: "Natural Guard",
     weapon: "Precision Barrage",
-    range: "Melee / Close",
+    range: "Melee / Combat",
     attackModStat: "dex",
     distance: "15 ft.",
     features: [
@@ -255,7 +255,7 @@ const QUINT_CONFIG = {
     armorClass: 14,
     armor: "Tendril Body",
     weapon: "Emerald Volley",
-    range: "Ranged / Long",
+    range: "Ranged / Combat",
     attackModStat: "wis",
     distance: "120 ft.",
     features: [
@@ -268,7 +268,7 @@ const QUINT_CONFIG = {
     armorClass: 15,
     armor: "Flame Mantle",
     weapon: "Fire Assault",
-    range: "Mid / Area",
+    range: "Mid / Combat",
     attackModStat: "int",
     distance: "15 ft.",
     features: [
@@ -281,7 +281,7 @@ const QUINT_CONFIG = {
     armorClass: 17,
     armor: "Dueling Shell",
     weapon: "Rapier",
-    range: "Melee / Reach",
+    range: "Melee / Combat",
     attackModStat: "dex",
     distance: "15 ft.",
     features: [
@@ -307,7 +307,7 @@ const QUINT_CONFIG = {
     armorClass: 16,
     armor: "Sand Body",
     weapon: "Shifting Mass",
-    range: "Variable / Close",
+    range: "Variable / Combat",
     attackModStat: "dex",
     distance: "15 ft.",
     features: [
@@ -320,7 +320,7 @@ const QUINT_CONFIG = {
     armorClass: 17,
     armor: "Restorative Guard",
     weapon: "Heavy Barrage",
-    range: "Melee / Close",
+    range: "Melee / Combat",
     attackModStat: "dex",
     distance: "10 ft.",
     features: [
@@ -333,7 +333,7 @@ const QUINT_CONFIG = {
     armorClass: 16,
     armor: "Brutal Guard",
     weapon: "Erasure Swipe",
-    range: "Melee / Special",
+    range: "Melee / Combat",
     attackModStat: "str",
     distance: "10 ft.",
     features: [
@@ -346,7 +346,7 @@ const QUINT_CONFIG = {
     armorClass: 14,
     armor: "Sound Form",
     weapon: "Sound Effect",
-    range: "Variable / Utility",
+    range: "Melee / Combat",
     attackModStat: "cha",
     distance: "15 ft.",
     features: [
@@ -359,7 +359,7 @@ const QUINT_CONFIG = {
     armorClass: 13,
     armor: "Manifest Script",
     weapon: "Command Imprint",
-    range: "Short / Control",
+    range: "Melee / Combat",
     attackModStat: "wis",
     distance: "5 ft.",
     features: [
