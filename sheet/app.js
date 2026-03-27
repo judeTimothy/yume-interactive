@@ -783,6 +783,7 @@ function recalcSheet() {
   const quintAttackBonusEl = document.getElementById("quintAttackBonus");
   const quintWeaponEl = document.getElementById("quintWeaponSelect");
   const quintArmorEl = document.getElementById("quintArmorType");
+  const quintDistanceEl = document.getElementById("quintDistance");
   const quintRangeEl = document.getElementById("quintRangeType");
 
   if (quintArmorClassEl) quintArmorClassEl.value = quint.armorClass;
