@@ -360,6 +360,17 @@ const QUINT_CONFIG = {
   }
 };
 
+function getQuintConfig(quintKey){
+  return QUINT_CONFIG[quintKey] || {
+    armorClass: 10,
+    armor: "Manifest Form",
+    weapon: "Unarmed",
+    range: "Close",
+    attackModStat: "dex",
+    features: []
+  };
+}
+
 const ARMOR_CONFIG = {
   none: 10,
   light: 11,
@@ -696,14 +707,17 @@ function renderFeatureSelectors(savedFeatureValues = {}) {
 function updateFeatureSections(savedFeatureValues = {}) {
   const classEl = document.getElementById("classSelect");
   const levelEl = document.getElementById("level");
+  const quintEl = document.getElementById("quintName");
 
   if (!classEl || !levelEl) return;
 
   const classKey = classEl.value;
   const level = Number(levelEl.value || 1);
+  const quintKey = quintEl?.value || "";
+  const quint = getQuintConfig(quintKey);
 
   renderFeatureList("charFeatures", CLASS_FEATURES[classKey] || [], level);
-  renderFeatureList("quintFeatures", QUINT_FEATURES, level);
+  renderFeatureList("quintFeatures", quint.features || [], level);
   renderFeatureSelectors(savedFeatureValues);
 }
 
@@ -750,27 +764,24 @@ function recalcSheet() {
   if (charInitiativeEl) charInitiativeEl.value = mods.dex;
   if (charPassiveEl) charPassiveEl.value = 10 + mods.wis;
 
-  const quintArmorTypeEl = document.getElementById("quintArmorType");
+  const quintKey = document.getElementById("quintName")?.value || "";
+  const quint = getQuintConfig(quintKey);
+
   const quintArmorClassEl = document.getElementById("quintArmorClass");
   const quintInitiativeEl = document.getElementById("quintInitiative");
   const quintPassiveEl = document.getElementById("quintPassivePerception");
   const quintAttackBonusEl = document.getElementById("quintAttackBonus");
+  const quintWeaponEl = document.getElementById("quintWeaponSelect");
+  const quintArmorEl = document.getElementById("quintArmorType");
+  const quintRangeEl = document.getElementById("quintRangeType");
 
-  if (quintArmorTypeEl && quintArmorClassEl) {
-    const armorType = quintArmorTypeEl.value;
-    const armorBase = ARMOR_CONFIG[armorType] ?? 10;
-    let armorClass = armorBase;
-
-    if (armorType === "light") armorClass += mods.dex;
-    else if (armorType === "medium") armorClass += Math.min(mods.dex, 2);
-    else if (armorType === "none") armorClass += mods.dex;
-
-    quintArmorClassEl.value = armorClass;
-  }
-
+  if (quintArmorClassEl) quintArmorClassEl.value = quint.armorClass;
   if (quintInitiativeEl) quintInitiativeEl.value = mods.dex;
   if (quintPassiveEl) quintPassiveEl.value = 10 + mods.wis;
-  if (quintAttackBonusEl) quintAttackBonusEl.value = prof + mods.dex;
+  if (quintAttackBonusEl) quintAttackBonusEl.value = prof + (mods[quint.attackModStat] || 0);
+  if (quintWeaponEl) quintWeaponEl.value = quint.weapon;
+  if (quintArmorEl) quintArmorEl.value = quint.armor;
+  if (quintRangeEl) quintRangeEl.value = quint.range;
 }
 
 function collectData() {
@@ -1060,7 +1071,8 @@ document.addEventListener("change", async (event) => {
       } else {
         previousQuintKey = "";
       }
-
+      updateFeatureSections();
+      recalcSheet();
       queueFirestoreSave();
     } catch (error) {
       console.error(error);
