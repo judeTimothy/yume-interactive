@@ -244,10 +244,11 @@ const QUINT_CONFIG = {
     weapon: "Precision Barrage",
     range: "Melee / Close",
     attackModStat: "dex",
+    distance: "15 ft.",
     features: [
-      { level: 1, name: "Barrage", desc: "Rapid close-range strikes with exceptional force and precision." },
-      { level: 3, name: "Pinpoint Control", desc: "Can perform extremely precise actions at close range." },
-      { level: 5, name: "Overwhelming Rush", desc: "Attack sequences become faster and more relentless." }
+      { level: 1, name: "Barrage", desc: "Rapid close-range strikes with exceptional force and precision. Astral can attack twice instead of once." },
+      { level: 3, name: "Pinpoint Control", desc: "Can perform extremely precise actions at close range. Astral gains +2 to attack and Dexterity Rolls" },
+      { level: 5, name: "Overwhelming Rush", desc: "Astral can attack three times instead of two." }
     ]
   },
   "hierophant-verdant": {
@@ -256,10 +257,11 @@ const QUINT_CONFIG = {
     weapon: "Emerald Volley",
     range: "Ranged / Long",
     attackModStat: "wis",
+    distance: "120 ft.",
     features: [
-      { level: 1, name: "Tendril Reach", desc: "Extends through threads and tendrils to strike or scout." },
+      { level: 1, name: "Tendril Reach", desc: "Extends through threads and tendrils to strike or scout. Verdant can squeeze in tight spaces as small as an inch." },
       { level: 3, name: "Emerald Volley", desc: "Fires concentrated projectile attacks." },
-      { level: 5, name: "Remote Control", desc: "Operates effectively at longer distances." }
+      { level: 5, name: "Remote Control", desc: "Verdant can operate outside his normal range." }
     ]
   },
   "magus-crimson": {
@@ -267,11 +269,12 @@ const QUINT_CONFIG = {
     armor: "Flame Mantle",
     weapon: "Fire Assault",
     range: "Mid / Area",
-    attackModStat: "wis",
+    attackModStat: "int",
+    distance: "15 ft.",
     features: [
-      { level: 1, name: "Flame Control", desc: "Shapes and projects intense fire offensively." },
-      { level: 3, name: "Heat Wave", desc: "Can pressure multiple targets with spreading flame." },
-      { level: 5, name: "Blazing Surge", desc: "Fire attacks become more forceful and persistent." }
+      { level: 1, name: "Flame Control", desc: "Shapes and projects intense fire offensively. Magus can use the Firebolt cantrip." },
+      { level: 3, name: "Heat Wave", desc: "Can pressure multiple targets with spreading flame. Magus can cast Burning Hands once per combat" },
+      { level: 5, name: "Blazing Surge", desc: "Fire attacks become more forceful and persistent. Magus can cast Fireball once per short rest." }
     ]
   },
   "silver-cavalier": {
@@ -280,10 +283,11 @@ const QUINT_CONFIG = {
     weapon: "Rapier",
     range: "Melee / Reach",
     attackModStat: "dex",
+    distance: "15 ft.",
     features: [
-      { level: 1, name: "Fencing Mastery", desc: "Fast and accurate thrusting attacks." },
-      { level: 3, name: "Armor Shed", desc: "Drops protection for greater speed." },
-      { level: 5, name: "Flash Assault", desc: "Executes very rapid melee strings." }
+      { level: 1, name: "Fencing Mastery", desc: "Fast and accurate thrusting attacks. Silver can attack twice instead of once." },
+      { level: 3, name: "Armor Shed", desc: "Drops protection for greater speed. You receive and deal additional damage based on your DEX mod." },
+      { level: 5, name: "Flash Assault", desc: "Executes very rapid melee strings. Silver can attack thrice." }
     ]
   },
   "hermit-violet": {
@@ -292,10 +296,11 @@ const QUINT_CONFIG = {
     weapon: "Binding Vines",
     range: "Mid / Utility",
     attackModStat: "wis",
+    distance: "0 ft.",
     features: [
-      { level: 1, name: "Binding", desc: "Restrains or lashes with thorned vines." },
-      { level: 3, name: "Divination", desc: "Produces insight through symbolic or medium-based readings." },
-      { level: 5, name: "Extended Grip", desc: "Improves reach and entangling control." }
+      { level: 1, name: "Binding", desc: "Restrains or lashes with thorned vines. You gain the thornwhip cantrip." },
+      { level: 3, name: "Divination", desc: "Produces insight through symbolic or medium-based readings. You gain the Guidance cantrip." },
+      { level: 5, name: "Extended Grip", desc: "Your Violet cantrips gain additional 10 ft. range." }
     ]
   },
   "the-wanderer": {
@@ -304,10 +309,11 @@ const QUINT_CONFIG = {
     weapon: "Shifting Mass",
     range: "Variable / Close",
     attackModStat: "dex",
+    distance: "15 ft.",
     features: [
-      { level: 1, name: "Sand Form", desc: "Body shifts shape to defend and attack." },
+      { level: 1, name: "Sand Form", desc: "Body shifts shape to defend and attack. As a reaction, the Wanderer can increase its AC by 2 until his next turn." },
       { level: 3, name: "Mobility", desc: "Moves flexibly across unstable terrain." },
-      { level: 5, name: "Morph Strike", desc: "Alters attack shape and angle fluidly." }
+      { level: 5, name: "Morph Strike", desc: "Alters attack shape and angle fluidly. The wanderer gains a +2 to attack rolls." }
     ]
   },
   "wild-diamond": {
@@ -316,10 +322,11 @@ const QUINT_CONFIG = {
     weapon: "Heavy Barrage",
     range: "Melee / Close",
     attackModStat: "dex",
+    distance: "10 ft.",
     features: [
-      { level: 1, name: "Restoration", desc: "Repairs damaged matter or restores broken forms." },
-      { level: 3, name: "Impact Rush", desc: "Delivers powerful short-range punch combinations." },
-      { level: 5, name: "Reconstruction Control", desc: "Uses restoration creatively in combat and utility." }
+      { level: 1, name: "Restoration", desc: "You gain the Mending cantrip. Diamond's attacks can heal allies for 1d4 hit points." },
+      { level: 3, name: "Impact Rush", desc: "Delivers powerful short-range punch combinations. Diamond can attack twice instead of once." },
+      { level: 5, name: "Reconstruction Control", desc: "Diamond's attacks now heal for 2d4+2." }
     ]
   },
   "the-palm": {
@@ -328,10 +335,11 @@ const QUINT_CONFIG = {
     weapon: "Erasure Swipe",
     range: "Melee / Special",
     attackModStat: "str",
+    distance: "10 ft.",
     features: [
-      { level: 1, name: "Erasure", desc: "Removes space or matter with a devastating swipe." },
-      { level: 3, name: "Gap Pull", desc: "Closes distance unnaturally by erasing space between points." },
-      { level: 5, name: "Void Pressure", desc: "Threatens a wide area with erasure-based melee." }
+      { level: 1, name: "Erasure", desc: "Black Hole's attacks removes space and matter. Targets must succeed against a Dexterity Saving Throw (DC 10) or suffer from the Quintessence effects." },
+      { level: 3, name: "Gap Close", desc: "As an action, Black Hole can choose to remove space to close the gap to a target. Alternatively, Black Hole can also pull a target closer." },
+      { level: 5, name: "Void Pressure", desc: "Saving Throw against Erasure now adds your Strength Modifier to the DC." }
     ]
   },
   "reverberation": {
@@ -340,10 +348,11 @@ const QUINT_CONFIG = {
     weapon: "Sound Effect",
     range: "Variable / Utility",
     attackModStat: "cha",
+    distance: "15 ft.",
     features: [
-      { level: 1, name: "Sound Marks", desc: "Places effect-driven sounds onto targets or areas." },
-      { level: 3, name: "Act Shift", desc: "Develops into stronger forms with broader effects." },
-      { level: 5, name: "Pressure Word", desc: "Applies powerful sound-based control." }
+      { level: 1, name: "Sound Marks", desc: "Reverberation's attacks place a Glyph of Warding spell on the target. Effects only last until the next turn and one effect can only be active at a time." },
+      { level: 3, name: "Act Shift", desc: "Reverberation gains an additional +2 to attack rolls." },
+      { level: 5, name: "Pressure Word", desc: "Once per combat, you can cast Magnify Gravity spell without expending a spell slot." }
     ]
   },
   "celestial-gate": {
@@ -352,10 +361,11 @@ const QUINT_CONFIG = {
     weapon: "Command Imprint",
     range: "Short / Control",
     attackModStat: "wis",
+    distance: "5 ft.",
     features: [
-      { level: 1, name: "Read Target", desc: "Extracts information directly from a target." },
-      { level: 3, name: "Write Command", desc: "Imposes written directives onto affected targets." },
-      { level: 5, name: "Narrative Control", desc: "Control effects become broader and more precise." }
+      { level: 1, name: "Read Target", desc: "Celestial's attacks place a mark on a target which you can use to extract information from the target." },
+      { level: 3, name: "Write Command", desc: "Marked targets can be told as if under the Command spell which lasts until your next turn or when the mark expires." },
+      { level: 5, name: "Narrative Control", desc: "Mark persists for 1 minute or until Celestial's user is Incapacitated." }
     ]
   }
 };
@@ -781,6 +791,7 @@ function recalcSheet() {
   if (quintAttackBonusEl) quintAttackBonusEl.value = prof + (mods[quint.attackModStat] || 0);
   if (quintWeaponEl) quintWeaponEl.value = quint.weapon;
   if (quintArmorEl) quintArmorEl.value = quint.armor;
+  if (quintDistanceEl) quintDistanceEl.value = quint.distance;
   if (quintRangeEl) quintRangeEl.value = quint.range;
 }
 
