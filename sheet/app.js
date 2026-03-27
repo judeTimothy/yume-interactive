@@ -247,7 +247,7 @@ const QUINT_CONFIG = {
     distance: "15 ft.",
     features: [
       { level: 1, name: "Barrage", desc: "Rapid close-range strikes with exceptional force and precision. Astral can attack twice instead of once." },
-      { level: 3, name: "Pinpoint Control", desc: "Can perform extremely precise actions at close range. Astral gains +2 to attack and Dexterity Rolls" },
+      { level: 3, name: "Pinpoint Control", desc: "Can perform extremely precise actions at close range. Astral gains +2 to attack and Dexterity Rolls." },
       { level: 5, name: "Overwhelming Rush", desc: "Astral can attack three times instead of two." }
     ]
   },
@@ -273,7 +273,7 @@ const QUINT_CONFIG = {
     distance: "15 ft.",
     features: [
       { level: 1, name: "Flame Control", desc: "Shapes and projects intense fire offensively. Magus can use the Firebolt cantrip." },
-      { level: 3, name: "Heat Wave", desc: "Can pressure multiple targets with spreading flame. Magus can cast Burning Hands once per combat" },
+      { level: 3, name: "Heat Wave", desc: "Can pressure multiple targets with spreading flame. Magus can cast Burning Hands once per combat." },
       { level: 5, name: "Blazing Surge", desc: "Fire attacks become more forceful and persistent. Magus can cast Fireball once per short rest." }
     ]
   },
