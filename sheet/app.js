@@ -237,19 +237,128 @@ const CLASS_FEATURE_SELECTORS = {
   ]
 };
 
-const QUINT_FEATURES = [
-  { level: 1, name: "Manifestation", desc: "Your Quintessence appears and can act as an extension of your will." },
-  { level: 1, name: "Linked Senses", desc: "You can perceive through your Quintessence while it is active." },
-  { level: 2, name: "Combat Echo", desc: "Your Quintessence gains improved timing and response in combat." },
-  { level: 3, name: "Signature Expression", desc: "Develop a unique technique or defining manifestation trait." },
-  { level: 5, name: "Accelerated Assault", desc: "Your Quintessence gains stronger offensive sequencing." },
-  { level: 7, name: "Extended Presence", desc: "Its effective operational range or duration improves." },
-  { level: 9, name: "Refined Precision", desc: "Your Quintessence becomes more accurate and controlled." },
-  { level: 11, name: "Overdrive", desc: "Unlock a high-output state for decisive moments." },
-  { level: 13, name: "Awakened Form", desc: "Its presence evolves into a stronger expression." },
-  { level: 15, name: "Dominion", desc: "Your Quintessence exerts stronger control over its field." },
-  { level: 17, name: "Transcendent Manifestation", desc: "Your Quintessence reaches an exceptional state of power." }
-];
+const QUINT_CONFIG = {
+  "astral-platinum": {
+    armorClass: 18,
+    armor: "Natural Guard",
+    weapon: "Precision Barrage",
+    range: "Melee / Close",
+    attackModStat: "dex",
+    features: [
+      { level: 1, name: "Barrage", desc: "Rapid close-range strikes with exceptional force and precision." },
+      { level: 3, name: "Pinpoint Control", desc: "Can perform extremely precise actions at close range." },
+      { level: 5, name: "Overwhelming Rush", desc: "Attack sequences become faster and more relentless." }
+    ]
+  },
+  "hierophant-verdant": {
+    armorClass: 14,
+    armor: "Tendril Body",
+    weapon: "Emerald Volley",
+    range: "Ranged / Long",
+    attackModStat: "wis",
+    features: [
+      { level: 1, name: "Tendril Reach", desc: "Extends through threads and tendrils to strike or scout." },
+      { level: 3, name: "Emerald Volley", desc: "Fires concentrated projectile attacks." },
+      { level: 5, name: "Remote Control", desc: "Operates effectively at longer distances." }
+    ]
+  },
+  "magus-crimson": {
+    armorClass: 15,
+    armor: "Flame Mantle",
+    weapon: "Fire Assault",
+    range: "Mid / Area",
+    attackModStat: "wis",
+    features: [
+      { level: 1, name: "Flame Control", desc: "Shapes and projects intense fire offensively." },
+      { level: 3, name: "Heat Wave", desc: "Can pressure multiple targets with spreading flame." },
+      { level: 5, name: "Blazing Surge", desc: "Fire attacks become more forceful and persistent." }
+    ]
+  },
+  "silver-cavalier": {
+    armorClass: 17,
+    armor: "Dueling Shell",
+    weapon: "Rapier",
+    range: "Melee / Reach",
+    attackModStat: "dex",
+    features: [
+      { level: 1, name: "Fencing Mastery", desc: "Fast and accurate thrusting attacks." },
+      { level: 3, name: "Armor Shed", desc: "Drops protection for greater speed." },
+      { level: 5, name: "Flash Assault", desc: "Executes very rapid melee strings." }
+    ]
+  },
+  "hermit-violet": {
+    armorClass: 13,
+    armor: "Vine Form",
+    weapon: "Binding Vines",
+    range: "Mid / Utility",
+    attackModStat: "wis",
+    features: [
+      { level: 1, name: "Binding", desc: "Restrains or lashes with thorned vines." },
+      { level: 3, name: "Divination", desc: "Produces insight through symbolic or medium-based readings." },
+      { level: 5, name: "Extended Grip", desc: "Improves reach and entangling control." }
+    ]
+  },
+  "the-wanderer": {
+    armorClass: 16,
+    armor: "Sand Body",
+    weapon: "Shifting Mass",
+    range: "Variable / Close",
+    attackModStat: "dex",
+    features: [
+      { level: 1, name: "Sand Form", desc: "Body shifts shape to defend and attack." },
+      { level: 3, name: "Mobility", desc: "Moves flexibly across unstable terrain." },
+      { level: 5, name: "Morph Strike", desc: "Alters attack shape and angle fluidly." }
+    ]
+  },
+  "wild-diamond": {
+    armorClass: 17,
+    armor: "Restorative Guard",
+    weapon: "Heavy Barrage",
+    range: "Melee / Close",
+    attackModStat: "dex",
+    features: [
+      { level: 1, name: "Restoration", desc: "Repairs damaged matter or restores broken forms." },
+      { level: 3, name: "Impact Rush", desc: "Delivers powerful short-range punch combinations." },
+      { level: 5, name: "Reconstruction Control", desc: "Uses restoration creatively in combat and utility." }
+    ]
+  },
+  "the-palm": {
+    armorClass: 16,
+    armor: "Brutal Guard",
+    weapon: "Erasure Swipe",
+    range: "Melee / Special",
+    attackModStat: "str",
+    features: [
+      { level: 1, name: "Erasure", desc: "Removes space or matter with a devastating swipe." },
+      { level: 3, name: "Gap Pull", desc: "Closes distance unnaturally by erasing space between points." },
+      { level: 5, name: "Void Pressure", desc: "Threatens a wide area with erasure-based melee." }
+    ]
+  },
+  "reverberation": {
+    armorClass: 14,
+    armor: "Sound Form",
+    weapon: "Sound Effect",
+    range: "Variable / Utility",
+    attackModStat: "cha",
+    features: [
+      { level: 1, name: "Sound Marks", desc: "Places effect-driven sounds onto targets or areas." },
+      { level: 3, name: "Act Shift", desc: "Develops into stronger forms with broader effects." },
+      { level: 5, name: "Pressure Word", desc: "Applies powerful sound-based control." }
+    ]
+  },
+  "celestial-gate": {
+    armorClass: 13,
+    armor: "Manifest Script",
+    weapon: "Command Imprint",
+    range: "Short / Control",
+    attackModStat: "wis",
+    features: [
+      { level: 1, name: "Read Target", desc: "Extracts information directly from a target." },
+      { level: 3, name: "Write Command", desc: "Imposes written directives onto affected targets." },
+      { level: 5, name: "Narrative Control", desc: "Control effects become broader and more precise." }
+    ]
+  }
+};
 
 const ARMOR_CONFIG = {
   none: 10,
