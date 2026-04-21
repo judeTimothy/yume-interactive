@@ -5,6 +5,13 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>Faerûn Interactive Hex Faction Map</title>
 
+<!--
+Base map source requested by user:
+Official Wizards of the Coast Sword Coast / NW Faerûn high-res map
+https://media.wizards.com/2015/images/dnd/resources/Sword-Coast-Map_HighRes.jpg
+Referenced via user prompt / publicly available map. :contentReference[oaicite:0]{index=0}
+-->
+
 <style>
   :root{
     --bg:#10151c;
@@ -140,6 +147,43 @@
     min-width:180px;
     font-size:14px;
   }
+  
+  #toggleSidebar{
+  width:100%;
+  margin-bottom:12px;
+  background:#274157;
+  }
+
+  #app.collapsed{
+    grid-template-columns: 0px 1fr;
+  }
+
+  #app.collapsed #sidebar{
+    overflow:hidden;
+    padding:0;
+    border-right:none;
+  }
+
+  #app.collapsed #sidebar *:not(#toggleSidebar){
+    display:none;
+  }
+
+  #app.collapsed #toggleSidebar{
+    position:absolute;
+    left:8px;
+    top:8px;
+    width:auto;
+    z-index:999;
+    display:block;
+  }
+  
+  #app{
+    transition:grid-template-columns .25s ease;
+  }
+
+  #sidebar{
+    transition:padding .25s ease;
+  }
 
   .legendItem{
     display:flex;
@@ -162,6 +206,7 @@
 <div id="app">
 
   <aside id="sidebar">
+  <button id="toggleSidebar">☰ Hide Panel</button>
     <h1>Resistance War Map</h1>
     <div class="small">
       Interactive faction territory overlay on the official Sword Coast / NW Faerûn map.
@@ -2310,6 +2355,20 @@ function bindUI(){
       alert("Invalid JSON");
     }
   };
+  
+  document.getElementById("toggleSidebar").onclick=()=>{
+	  const app = document.getElementById("app");
+	  const btn = document.getElementById("toggleSidebar");
+
+	  app.classList.toggle("collapsed");
+
+	  btn.textContent =
+		app.classList.contains("collapsed")
+		? "☰ Show Panel"
+		: "☰ Hide Panel";
+
+	  setTimeout(()=>applyTransform(), 50);
+	};
 }
 
 function refreshFactionUI(){
