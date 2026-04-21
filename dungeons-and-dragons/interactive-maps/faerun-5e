@@ -1,0 +1,2361 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Faerûn Interactive Hex Faction Map</title>
+
+<!--
+Base map source requested by user:
+Official Wizards of the Coast Sword Coast / NW Faerûn high-res map
+https://media.wizards.com/2015/images/dnd/resources/Sword-Coast-Map_HighRes.jpg
+Referenced via user prompt / publicly available map. :contentReference[oaicite:0]{index=0}
+-->
+
+<style>
+  :root{
+    --bg:#10151c;
+    --panel:#18212b;
+    --line:#d7e3f4;
+    --muted:#9fb3c8;
+    --accent:#63b3ff;
+  }
+
+  *{box-sizing:border-box}
+  html,body{
+    margin:0;
+    height:100%;
+    font-family:Inter,Segoe UI,Arial,sans-serif;
+    background:var(--bg);
+    color:#fff;
+    overflow:hidden;
+  }
+
+  #app{
+    display:grid;
+    grid-template-columns: 320px 1fr;
+    height:100vh;
+  }
+
+  #sidebar{
+    background:var(--panel);
+    border-right:1px solid #2c3a4a;
+    padding:16px;
+    overflow:auto;
+  }
+
+  #sidebar h1{
+    margin:0 0 10px;
+    font-size:22px;
+  }
+
+  .small{
+    color:var(--muted);
+    font-size:13px;
+    line-height:1.4;
+    margin-bottom:14px;
+  }
+
+  .section{
+    margin:16px 0;
+    padding:12px;
+    border:1px solid #2b3948;
+    border-radius:12px;
+    background:#131c25;
+  }
+
+  .section h2{
+    font-size:15px;
+    margin:0 0 8px;
+  }
+
+  label{
+    display:block;
+    font-size:13px;
+    margin:8px 0 4px;
+    color:#d4e3f5;
+  }
+
+  input, select, button, textarea{
+    width:100%;
+    border-radius:8px;
+    border:1px solid #36475a;
+    background:#0f1720;
+    color:#fff;
+    padding:8px 10px;
+    font-size:14px;
+  }
+
+  button{
+    cursor:pointer;
+    background:#1d2b39;
+    transition:0.2s;
+    margin-top:8px;
+  }
+
+  button:hover{
+    background:#274157;
+  }
+
+  .row{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:8px;
+  }
+
+  #mapWrap{
+    position:relative;
+    overflow:hidden;
+    background:#0a0e14;
+  }
+
+  #viewport{
+    position:absolute;
+    inset:0;
+    cursor:grab;
+  }
+
+  #viewport.dragging{ cursor:grabbing; }
+
+  #world{
+    position:absolute;
+    left:0;
+    top:0;
+    transform-origin:0 0;
+  }
+
+  #baseMap{
+    display:block;
+    user-select:none;
+    pointer-events:none;
+  }
+
+  #hexCanvas{
+    position:absolute;
+    left:0;
+    top:0;
+  }
+
+  #hoverInfo{
+    position:absolute;
+    right:16px;
+    bottom:16px;
+    padding:10px 12px;
+    background:rgba(10,16,24,.88);
+    border:1px solid #314050;
+    border-radius:10px;
+    min-width:180px;
+    font-size:14px;
+  }
+
+  .legendItem{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    margin:6px 0;
+    font-size:13px;
+  }
+
+  .sw{
+    width:14px;height:14px;border-radius:3px;
+  }
+
+  code{
+    color:#8cd6ff;
+  }
+</style>
+</head>
+<body>
+<div id="app">
+
+  <aside id="sidebar">
+    <h1>Resistance War Map</h1>
+    <div class="small">
+      Interactive faction territory overlay on the official Sword Coast / NW Faerûn map.
+    </div>
+
+    <div class="section" style="display: none;">
+      <h2>Grid Settings</h2>
+
+      <label>Hex Size</label>
+      <input type="range" min="18" max="80" value="34" id="hexSize">
+
+      <label>Opacity</label>
+      <input type="range" min="0" max="100" value="42" id="opacity">
+
+      <button id="regen">Rebuild Grid</button>
+      <button id="toggleGrid">Toggle Grid</button>
+    </div>
+
+    <div class="section">
+      <h2>Legend: Faction Name</h2>
+	  
+      <label style="display: none;">Faction Name</label>
+	  
+      <input id="fName" value="Lords' Alliance" style="display: none;">
+
+      <label style="display: none;">Faction Color</label>
+      <input type="color" id="fColor" value="#4ea7ff" style="display: none;">
+
+      <button id="saveFaction" style="display: none;">Save / Update Faction</button>
+
+      <label style="display: none;">Choose Active Faction</label>
+      <select id="factions" style="display: none;"></select>
+
+      <div class="row">
+        <button id="paintMode"style="display: none;">Paint</button>
+        <button id="eraseMode"style="display: none;">Erase</button>
+      </div>
+	  
+      <div id="legend"></div>
+    </div>
+
+    <div class="section" style="display: none;">
+      <h2>Data</h2>
+      <button id="exportBtn">Export JSON</button>
+      <button id="importBtn">Import JSON</button>
+      <textarea id="dataBox" rows="8" placeholder="Paste JSON here"></textarea>
+    </div>
+
+    <div class="section">
+      <h2>Controls</h2>
+      <div class="small">
+        Mouse wheel = zoom<br>
+        Drag background = pan
+      </div>
+    </div>
+  </aside>
+
+  <main id="mapWrap">
+    <div id="viewport">
+      <div id="world">
+        <img
+		  id="baseMap"
+		  src="Sword-Coast-Map_HighRes.jpg"
+		>
+        <canvas id="hexCanvas"></canvas>
+      </div>
+    </div>
+
+    <div id="hoverInfo">
+      Hover: <span id="hoverText">—</span>
+    </div>
+  </main>
+
+</div>
+
+<script>
+/* =========================
+   Editable Data Structures
+========================= */
+
+const factions = {
+  "Lords' Alliance": "#4ea7ff",
+  "Harpers": "#58d68d",
+  "Zhentarim": "#6c5ce7",
+  "Church of Voice": "#d400ff",
+  "None": "#000000"
+};
+
+let activeFaction = "Lords' Alliance";
+let mode = "paint"; // paint / erase
+
+// hex ownership: key "q,r" => factionName
+let ownership = {
+	"126,60": "Church of Voice",
+    "125,61": "Church of Voice",
+    "126,61": "Church of Voice",
+    "125,62": "Church of Voice",
+    "126,62": "Church of Voice",
+    "128,62": "Church of Voice",
+    "128,61": "Church of Voice",
+    "127,61": "Church of Voice",
+    "129,61": "Church of Voice",
+    "130,61": "Church of Voice",
+    "130,62": "Church of Voice",
+    "131,61": "Church of Voice",
+    "131,62": "Church of Voice",
+    "129,63": "Church of Voice",
+    "128,63": "Church of Voice",
+    "129,64": "Church of Voice",
+    "128,65": "Church of Voice",
+    "127,66": "Church of Voice",
+    "127,65": "Church of Voice",
+    "130,64": "Church of Voice",
+    "126,66": "Church of Voice",
+    "125,67": "Church of Voice",
+    "125,68": "Church of Voice",
+    "127,67": "Church of Voice",
+    "130,65": "Church of Voice",
+    "131,65": "Church of Voice",
+    "129,66": "Church of Voice",
+    "126,68": "Church of Voice",
+    "131,64": "Church of Voice",
+    "132,64": "Church of Voice",
+    "129,65": "Church of Voice",
+    "128,66": "Church of Voice",
+    "132,63": "Church of Voice",
+    "133,63": "Church of Voice",
+    "134,63": "Church of Voice",
+    "134,62": "Church of Voice",
+    "135,62": "Church of Voice",
+    "136,62": "Church of Voice",
+    "136,63": "Church of Voice",
+    "137,63": "Church of Voice",
+    "137,64": "Church of Voice",
+    "137,65": "Church of Voice",
+    "136,66": "Church of Voice",
+    "135,67": "Church of Voice",
+    "134,68": "Church of Voice",
+    "134,69": "Church of Voice",
+    "133,70": "Church of Voice",
+    "132,71": "Church of Voice",
+    "132,72": "Church of Voice",
+    "131,72": "Church of Voice",
+    "131,71": "Church of Voice",
+    "130,72": "Church of Voice",
+    "129,72": "Church of Voice",
+    "128,73": "Church of Voice",
+    "127,73": "Church of Voice",
+    "127,74": "Church of Voice",
+    "128,74": "Church of Voice",
+    "128,75": "Church of Voice",
+    "129,75": "Church of Voice",
+    "130,74": "Church of Voice",
+    "131,73": "Church of Voice",
+    "130,73": "Church of Voice",
+    "129,74": "Church of Voice",
+    "130,75": "Church of Voice",
+    "131,74": "Church of Voice",
+    "132,73": "Church of Voice",
+    "129,73": "Church of Voice",
+    "132,70": "Church of Voice",
+    "133,69": "Church of Voice",
+    "134,67": "Church of Voice",
+    "135,66": "Church of Voice",
+    "135,65": "Church of Voice",
+    "135,64": "Church of Voice",
+    "134,64": "Church of Voice",
+    "133,64": "Church of Voice",
+    "128,64": "Church of Voice",
+    "127,62": "Church of Voice",
+    "124,61": "Church of Voice",
+    "123,62": "Church of Voice",
+    "122,62": "Church of Voice",
+    "122,63": "Church of Voice",
+    "121,63": "Church of Voice",
+    "120,64": "Church of Voice",
+    "119,65": "Church of Voice",
+    "118,65": "Church of Voice",
+    "117,66": "Church of Voice",
+    "121,64": "Church of Voice",
+    "124,63": "Church of Voice",
+    "125,63": "Church of Voice",
+    "124,62": "Church of Voice",
+    "123,63": "Church of Voice",
+    "122,64": "Church of Voice",
+    "123,64": "Church of Voice",
+    "126,63": "Church of Voice",
+    "127,63": "Church of Voice",
+    "126,64": "Church of Voice",
+    "125,64": "Church of Voice",
+    "127,64": "Church of Voice",
+    "126,65": "Church of Voice",
+    "125,65": "Church of Voice",
+    "124,64": "Church of Voice",
+    "123,65": "Church of Voice",
+    "124,65": "Church of Voice",
+    "124,66": "Church of Voice",
+    "125,66": "Church of Voice",
+    "124,67": "Church of Voice",
+    "123,67": "Church of Voice",
+    "122,67": "Church of Voice",
+    "122,66": "Church of Voice",
+    "121,67": "Church of Voice",
+    "121,66": "Church of Voice",
+    "120,66": "Church of Voice",
+    "120,65": "Church of Voice",
+    "121,65": "Church of Voice",
+    "122,65": "Church of Voice",
+    "123,66": "Church of Voice",
+    "120,67": "Church of Voice",
+    "119,67": "Church of Voice",
+    "118,67": "Church of Voice",
+    "117,67": "Church of Voice",
+    "116,68": "Church of Voice",
+    "115,68": "Church of Voice",
+    "115,69": "Church of Voice",
+    "116,69": "Church of Voice",
+    "118,68": "Church of Voice",
+    "117,69": "Church of Voice",
+    "117,68": "Church of Voice",
+    "118,66": "Church of Voice",
+    "119,66": "Church of Voice",
+    "129,62": "Church of Voice",
+    "130,63": "Church of Voice",
+    "131,63": "Church of Voice",
+    "132,62": "Church of Voice",
+    "132,61": "Church of Voice",
+    "133,62": "Church of Voice",
+    "135,63": "Church of Voice",
+    "136,64": "Church of Voice",
+    "136,65": "Church of Voice",
+    "134,65": "Church of Voice",
+    "133,65": "Church of Voice",
+    "132,65": "Church of Voice",
+    "131,66": "Church of Voice",
+    "132,66": "Church of Voice",
+    "133,66": "Church of Voice",
+    "133,67": "Church of Voice",
+    "133,68": "Church of Voice",
+    "132,68": "Church of Voice",
+    "132,67": "Church of Voice",
+    "134,66": "Church of Voice",
+    "130,66": "Church of Voice",
+    "130,67": "Church of Voice",
+    "131,67": "Church of Voice",
+    "131,68": "Church of Voice",
+    "131,69": "Church of Voice",
+    "130,68": "Church of Voice",
+    "129,67": "Church of Voice",
+    "128,68": "Church of Voice",
+    "129,68": "Church of Voice",
+    "130,69": "Church of Voice",
+    "130,70": "Church of Voice",
+    "129,70": "Church of Voice",
+    "128,70": "Church of Voice",
+    "128,69": "Church of Voice",
+    "128,67": "Church of Voice",
+    "127,68": "Church of Voice",
+    "126,69": "Church of Voice",
+    "126,67": "Church of Voice",
+    "125,69": "Church of Voice",
+    "124,69": "Church of Voice",
+    "124,70": "Church of Voice",
+    "124,71": "Church of Voice",
+    "124,72": "Church of Voice",
+    "125,71": "Church of Voice",
+    "125,70": "Church of Voice",
+    "126,70": "Church of Voice",
+    "125,72": "Church of Voice",
+    "125,73": "Church of Voice",
+    "124,73": "Church of Voice",
+    "126,73": "Church of Voice",
+    "126,72": "Church of Voice",
+    "126,71": "Church of Voice",
+    "127,69": "Church of Voice",
+    "127,70": "Church of Voice",
+    "127,71": "Church of Voice",
+    "129,69": "Church of Voice",
+    "127,72": "Church of Voice",
+    "128,72": "Church of Voice",
+    "129,71": "Church of Voice",
+    "128,71": "Church of Voice",
+    "130,71": "Church of Voice",
+    "131,70": "Church of Voice",
+    "132,69": "Church of Voice",
+    "134,70": "Church of Voice",
+    "133,71": "Church of Voice",
+    "133,72": "Church of Voice",
+    "134,71": "Church of Voice",
+    "135,69": "Church of Voice",
+    "135,68": "Church of Voice",
+    "136,67": "Church of Voice",
+    "133,61": "Church of Voice",
+    "132,60": "Church of Voice",
+    "131,60": "Church of Voice",
+    "131,59": "Church of Voice",
+    "130,60": "Church of Voice",
+    "130,59": "Church of Voice",
+    "130,58": "Church of Voice",
+    "129,58": "Church of Voice",
+    "128,58": "Church of Voice",
+    "127,58": "Church of Voice",
+    "126,58": "Church of Voice",
+    "125,58": "Church of Voice",
+    "124,59": "Church of Voice",
+    "123,59": "Church of Voice",
+    "122,60": "Church of Voice",
+    "121,60": "Church of Voice",
+    "121,61": "Church of Voice",
+    "122,61": "Church of Voice",
+    "123,60": "Church of Voice",
+    "123,61": "Church of Voice",
+    "124,60": "Church of Voice",
+    "125,59": "Church of Voice",
+    "125,60": "Church of Voice",
+    "127,59": "Church of Voice",
+    "126,59": "Church of Voice",
+    "128,59": "Church of Voice",
+    "128,60": "Church of Voice",
+    "127,60": "Church of Voice",
+    "129,59": "Church of Voice",
+    "129,60": "Church of Voice",
+    "119,64": "Church of Voice",
+    "116,66": "Church of Voice",
+    "115,67": "Church of Voice",
+    "114,67": "Church of Voice",
+    "114,68": "Church of Voice",
+    "113,68": "Church of Voice",
+    "113,69": "Church of Voice",
+    "112,69": "Church of Voice",
+    "114,69": "Church of Voice",
+    "115,70": "Church of Voice",
+    "116,70": "Church of Voice",
+    "118,69": "Church of Voice",
+    "119,68": "Church of Voice",
+    "120,68": "Church of Voice",
+    "121,68": "Church of Voice",
+    "122,68": "Church of Voice",
+    "123,68": "Church of Voice",
+    "124,68": "Church of Voice",
+    "121,69": "Church of Voice",
+    "120,69": "Church of Voice",
+    "119,69": "Church of Voice",
+    "118,70": "Church of Voice",
+    "117,70": "Church of Voice",
+    "116,71": "Church of Voice",
+    "117,71": "Church of Voice",
+    "118,71": "Church of Voice",
+    "119,70": "Church of Voice",
+    "120,70": "Church of Voice",
+    "121,70": "Church of Voice",
+    "122,70": "Church of Voice",
+    "121,71": "Church of Voice",
+    "122,71": "Church of Voice",
+    "123,69": "Church of Voice",
+    "122,69": "Church of Voice",
+    "123,70": "Church of Voice",
+    "123,71": "Church of Voice",
+    "122,72": "Church of Voice",
+    "123,72": "Church of Voice",
+    "123,73": "Church of Voice",
+    "122,73": "Church of Voice",
+    "121,73": "Church of Voice",
+    "121,72": "Church of Voice",
+    "120,72": "Church of Voice",
+    "120,71": "Church of Voice",
+    "119,72": "Church of Voice",
+    "119,71": "Church of Voice",
+    "121,74": "Church of Voice",
+    "120,74": "Church of Voice",
+    "119,75": "Church of Voice",
+    "120,75": "Church of Voice",
+    "121,75": "Church of Voice",
+    "122,74": "Church of Voice",
+    "122,75": "Church of Voice",
+    "123,74": "Church of Voice",
+    "124,74": "Church of Voice",
+    "125,74": "Church of Voice",
+    "125,75": "Church of Voice",
+    "126,75": "Church of Voice",
+    "127,75": "Church of Voice",
+    "127,76": "Church of Voice",
+    "128,76": "Church of Voice",
+    "129,76": "Church of Voice",
+    "128,77": "Church of Voice",
+    "127,77": "Church of Voice",
+    "126,77": "Church of Voice",
+    "125,77": "Church of Voice",
+    "125,76": "Church of Voice",
+    "124,76": "Church of Voice",
+    "123,76": "Church of Voice",
+    "122,76": "Church of Voice",
+    "123,75": "Church of Voice",
+    "124,75": "Church of Voice",
+    "126,74": "Church of Voice",
+    "126,76": "Church of Voice",
+    "128,78": "Church of Voice",
+    "127,78": "Church of Voice",
+    "126,79": "Church of Voice",
+    "126,78": "Church of Voice",
+    "125,78": "Church of Voice",
+    "124,78": "Church of Voice",
+    "124,77": "Church of Voice",
+    "123,77": "Church of Voice",
+    "122,77": "Church of Voice",
+    "122,78": "Church of Voice",
+    "122,79": "Church of Voice",
+    "122,80": "Church of Voice",
+    "123,78": "Church of Voice",
+    "123,80": "Church of Voice",
+    "124,79": "Church of Voice",
+    "125,79": "Church of Voice",
+    "127,79": "Church of Voice",
+    "127,80": "Church of Voice",
+    "127,81": "Church of Voice",
+    "127,82": "Church of Voice",
+    "126,81": "Church of Voice",
+    "126,80": "Church of Voice",
+    "125,80": "Church of Voice",
+    "124,80": "Church of Voice",
+    "124,81": "Church of Voice",
+    "123,81": "Church of Voice",
+    "123,79": "Church of Voice",
+    "121,81": "Church of Voice",
+    "122,81": "Church of Voice",
+    "122,82": "Church of Voice",
+    "122,83": "Church of Voice",
+    "122,84": "Church of Voice",
+    "122,85": "Church of Voice",
+    "122,86": "Church of Voice",
+    "123,86": "Church of Voice",
+    "122,87": "Church of Voice",
+    "122,88": "Church of Voice",
+    "121,88": "Church of Voice",
+    "120,88": "Church of Voice",
+    "120,87": "Church of Voice",
+    "119,87": "Church of Voice",
+    "121,87": "Church of Voice",
+    "121,86": "Church of Voice",
+    "120,86": "Church of Voice",
+    "121,85": "Church of Voice",
+    "123,85": "Church of Voice",
+    "123,84": "Church of Voice",
+    "123,83": "Church of Voice",
+    "123,82": "Church of Voice",
+    "121,84": "Church of Voice",
+    "123,87": "Church of Voice",
+    "120,85": "Church of Voice",
+    "120,84": "Church of Voice",
+    "121,83": "Church of Voice",
+    "121,82": "Church of Voice",
+    "120,82": "Church of Voice",
+    "120,81": "Church of Voice",
+    "119,83": "Church of Voice",
+    "118,84": "Church of Voice",
+    "117,85": "Church of Voice",
+    "116,86": "Church of Voice",
+    "117,86": "Church of Voice",
+    "118,85": "Church of Voice",
+    "119,84": "Church of Voice",
+    "120,83": "Church of Voice",
+    "119,85": "Church of Voice",
+    "118,86": "Church of Voice",
+    "119,86": "Church of Voice",
+    "121,80": "Church of Voice",
+    "121,79": "Church of Voice",
+    "121,78": "Church of Voice",
+    "121,77": "Church of Voice",
+    "121,76": "Church of Voice",
+    "120,76": "Church of Voice",
+    "119,76": "Church of Voice",
+    "119,77": "Church of Voice",
+    "118,78": "Church of Voice",
+    "117,78": "Church of Voice",
+    "116,79": "Church of Voice",
+    "116,78": "Church of Voice",
+    "117,79": "Church of Voice",
+    "120,77": "Church of Voice",
+    "120,78": "Church of Voice",
+    "119,79": "Church of Voice",
+    "118,79": "Church of Voice",
+    "118,80": "Church of Voice",
+    "119,78": "Church of Voice",
+    "117,80": "Church of Voice",
+    "116,80": "Church of Voice",
+    "117,81": "Church of Voice",
+    "116,81": "Church of Voice",
+    "115,82": "Church of Voice",
+    "116,82": "Church of Voice",
+    "115,83": "Church of Voice",
+    "116,83": "Church of Voice",
+    "116,84": "Church of Voice",
+    "116,85": "Church of Voice",
+    "115,86": "Church of Voice",
+    "117,83": "Church of Voice",
+    "117,82": "Church of Voice",
+    "118,81": "Church of Voice",
+    "119,80": "Church of Voice",
+    "120,79": "Church of Voice",
+    "120,80": "Church of Voice",
+    "119,81": "Church of Voice",
+    "118,82": "Church of Voice",
+    "118,83": "Church of Voice",
+    "117,84": "Church of Voice",
+    "119,82": "Church of Voice",
+    "118,77": "Church of Voice",
+    "119,74": "Church of Voice",
+    "120,73": "Church of Voice",
+    "118,72": "Church of Voice",
+    "117,72": "Church of Voice",
+    "116,72": "Church of Voice",
+    "115,71": "Church of Voice",
+    "114,71": "Church of Voice",
+    "113,71": "Church of Voice",
+    "112,72": "Church of Voice",
+    "111,72": "Church of Voice",
+    "110,72": "Church of Voice",
+    "109,73": "Church of Voice",
+    "110,73": "Church of Voice",
+    "111,73": "Church of Voice",
+    "112,73": "Church of Voice",
+    "111,74": "Church of Voice",
+    "112,74": "Church of Voice",
+    "113,73": "Church of Voice",
+    "114,72": "Church of Voice",
+    "115,72": "Church of Voice",
+    "113,72": "Church of Voice",
+    "114,70": "Church of Voice",
+    "111,69": "Church of Voice",
+    "112,68": "Church of Voice",
+    "111,68": "Church of Voice",
+    "110,68": "Church of Voice",
+    "110,69": "Church of Voice",
+    "109,70": "Church of Voice",
+    "108,71": "Church of Voice",
+    "108,72": "Church of Voice",
+    "107,73": "Church of Voice",
+    "108,73": "Church of Voice",
+    "109,72": "Church of Voice",
+    "107,74": "Church of Voice",
+    "106,74": "Church of Voice",
+    "105,75": "Church of Voice",
+    "104,76": "Church of Voice",
+    "103,76": "Church of Voice",
+    "102,77": "Church of Voice",
+    "101,77": "Church of Voice",
+    "100,77": "Church of Voice",
+    "99,78": "Church of Voice",
+    "98,79": "Church of Voice",
+    "97,80": "Church of Voice",
+    "98,80": "Church of Voice",
+    "99,80": "Church of Voice",
+    "100,80": "Church of Voice",
+    "101,80": "Church of Voice",
+    "99,79": "Church of Voice",
+    "100,78": "Church of Voice",
+    "101,78": "Church of Voice",
+    "102,78": "Church of Voice",
+    "103,77": "Church of Voice",
+    "105,76": "Church of Voice",
+    "106,75": "Church of Voice",
+    "103,78": "Church of Voice",
+    "102,79": "Church of Voice",
+    "102,80": "Church of Voice",
+    "103,80": "Church of Voice",
+    "104,80": "Church of Voice",
+    "105,80": "Church of Voice",
+    "104,81": "Church of Voice",
+    "104,82": "Church of Voice",
+    "103,82": "Church of Voice",
+    "102,83": "Church of Voice",
+    "101,83": "Church of Voice",
+    "100,83": "Church of Voice",
+    "99,84": "Church of Voice",
+    "100,84": "Church of Voice",
+    "103,83": "Church of Voice",
+    "104,83": "Church of Voice",
+    "115,87": "Church of Voice",
+    "114,87": "Church of Voice",
+    "113,87": "Church of Voice",
+    "113,86": "Church of Voice",
+    "112,87": "Church of Voice",
+    "111,87": "Church of Voice",
+    "110,87": "Church of Voice",
+    "111,88": "Church of Voice",
+    "111,89": "Church of Voice",
+    "112,89": "Church of Voice",
+    "112,90": "Church of Voice",
+    "111,90": "Church of Voice",
+    "110,91": "Church of Voice",
+    "110,92": "Church of Voice",
+    "111,91": "Church of Voice",
+    "111,92": "Church of Voice",
+    "112,91": "Church of Voice",
+    "113,91": "Church of Voice",
+    "114,90": "Church of Voice",
+    "114,89": "Church of Voice",
+    "113,90": "Church of Voice",
+    "115,89": "Church of Voice",
+    "115,88": "Church of Voice",
+    "114,88": "Church of Voice",
+    "113,89": "Church of Voice",
+    "112,88": "Church of Voice",
+    "113,88": "Church of Voice",
+    "115,85": "Church of Voice",
+    "115,84": "Church of Voice",
+    "114,84": "Church of Voice",
+    "114,83": "Church of Voice",
+    "98,84": "Church of Voice",
+    "97,84": "Church of Voice",
+    "97,85": "Church of Voice",
+    "96,86": "Church of Voice",
+    "95,86": "Church of Voice",
+    "94,86": "Church of Voice",
+    "94,85": "Church of Voice",
+    "93,85": "Church of Voice",
+    "92,85": "Church of Voice",
+    "91,86": "Church of Voice",
+    "90,86": "Church of Voice",
+    "89,87": "Church of Voice",
+    "91,85": "Church of Voice",
+    "93,84": "Church of Voice",
+    "94,84": "Church of Voice",
+    "95,83": "Church of Voice",
+    "96,82": "Church of Voice",
+    "96,81": "Church of Voice",
+    "95,81": "Church of Voice",
+    "94,81": "Church of Voice",
+    "94,80": "Church of Voice",
+    "93,81": "Church of Voice",
+    "93,80": "Church of Voice",
+    "92,80": "Church of Voice",
+    "92,79": "Church of Voice",
+    "91,79": "Church of Voice",
+    "90,79": "Church of Voice",
+    "89,79": "Church of Voice",
+    "91,80": "Church of Voice",
+    "95,80": "Church of Voice",
+    "96,80": "Church of Voice",
+    "97,79": "Church of Voice",
+    "98,78": "Church of Voice",
+    "96,79": "Church of Voice",
+    "100,79": "Church of Voice",
+    "101,79": "Church of Voice",
+    "99,85": "Church of Voice",
+    "98,85": "Church of Voice",
+    "97,86": "Church of Voice",
+    "98,86": "Church of Voice",
+    "100,85": "Church of Voice",
+    "101,84": "Church of Voice",
+    "102,84": "Church of Voice",
+    "103,84": "Church of Voice",
+    "79,80": "Church of Voice",
+    "80,80": "Church of Voice",
+    "81,80": "Church of Voice",
+    "82,80": "Church of Voice",
+    "83,79": "Church of Voice",
+    "84,79": "Church of Voice",
+    "85,79": "Church of Voice",
+    "86,79": "Church of Voice",
+    "87,79": "Church of Voice",
+    "88,79": "Church of Voice",
+    "89,78": "Church of Voice",
+    "88,78": "Church of Voice",
+    "87,80": "Church of Voice",
+    "86,80": "Church of Voice",
+    "85,80": "Church of Voice",
+    "84,81": "Church of Voice",
+    "83,81": "Church of Voice",
+    "83,80": "Church of Voice",
+    "82,81": "Church of Voice",
+    "81,81": "Church of Voice",
+    "81,82": "Church of Voice",
+    "81,83": "Church of Voice",
+    "81,84": "Church of Voice",
+    "81,85": "Church of Voice",
+    "82,84": "Church of Voice",
+    "83,84": "Church of Voice",
+    "84,83": "Church of Voice",
+    "84,84": "Church of Voice",
+    "85,83": "Church of Voice",
+    "82,85": "Church of Voice",
+    "82,86": "Church of Voice",
+    "81,87": "Church of Voice",
+    "82,87": "Church of Voice",
+    "82,88": "Church of Voice",
+    "82,89": "Church of Voice",
+    "82,90": "Church of Voice",
+    "83,88": "Church of Voice",
+    "83,87": "Church of Voice",
+    "83,86": "Church of Voice",
+    "83,85": "Church of Voice",
+    "84,85": "Church of Voice",
+    "72,92": "Church of Voice",
+    "73,92": "Church of Voice",
+    "73,93": "Church of Voice",
+    "74,92": "Church of Voice",
+    "74,93": "Church of Voice",
+    "75,93": "Church of Voice",
+    "76,92": "Church of Voice",
+    "77,92": "Church of Voice",
+    "78,92": "Church of Voice",
+    "79,92": "Church of Voice",
+    "80,91": "Church of Voice",
+    "81,91": "Church of Voice",
+    "81,90": "Church of Voice",
+    "79,91": "Church of Voice",
+    "76,93": "Church of Voice",
+    "76,94": "Church of Voice",
+    "77,94": "Church of Voice",
+    "77,95": "Church of Voice",
+    "78,95": "Church of Voice",
+    "79,95": "Church of Voice",
+    "80,95": "Church of Voice",
+    "81,95": "Church of Voice",
+    "82,95": "Church of Voice",
+    "83,95": "Church of Voice",
+    "84,95": "Church of Voice",
+    "85,94": "Church of Voice",
+    "84,94": "Church of Voice",
+    "83,94": "Church of Voice",
+    "76,95": "Church of Voice",
+    "75,95": "Church of Voice",
+    "75,94": "Church of Voice",
+    "81,96": "Church of Voice",
+    "82,96": "Church of Voice",
+    "83,96": "Church of Voice",
+    "84,96": "Church of Voice",
+    "83,93": "Church of Voice",
+    "83,92": "Church of Voice",
+    "82,92": "Church of Voice",
+    "82,91": "Church of Voice",
+    "83,90": "Church of Voice",
+    "83,91": "Church of Voice",
+    "84,90": "Church of Voice",
+    "84,91": "Church of Voice",
+    "85,91": "Church of Voice",
+    "84,92": "Church of Voice",
+    "84,93": "Church of Voice",
+    "85,92": "Church of Voice",
+    "85,90": "Church of Voice",
+    "86,92": "Church of Voice",
+    "85,93": "Church of Voice",
+    "86,94": "Church of Voice",
+    "86,95": "Church of Voice",
+    "85,96": "Church of Voice",
+    "85,95": "Church of Voice",
+    "86,93": "Church of Voice",
+    "87,94": "Church of Voice",
+    "88,94": "Church of Voice",
+    "87,95": "Church of Voice",
+    "87,96": "Church of Voice",
+    "88,96": "Church of Voice",
+    "86,96": "Church of Voice",
+    "88,97": "Church of Voice",
+    "88,98": "Church of Voice",
+    "71,93": "Church of Voice",
+    "70,93": "Church of Voice",
+    "69,93": "Church of Voice",
+    "68,93": "Church of Voice",
+    "71,92": "Church of Voice",
+    "71,94": "Church of Voice",
+    "72,93": "Church of Voice",
+    "72,94": "Church of Voice",
+    "73,94": "Church of Voice",
+    "73,95": "Church of Voice",
+    "74,94": "Church of Voice",
+    "74,95": "Church of Voice",
+    "128,57": "Zhentarim",
+    "129,57": "Zhentarim",
+    "130,56": "Zhentarim",
+    "131,56": "Zhentarim",
+    "132,56": "Zhentarim",
+    "131,57": "Zhentarim",
+    "130,57": "Zhentarim",
+    "132,57": "Zhentarim",
+    "133,56": "Zhentarim",
+    "134,56": "Zhentarim",
+    "133,57": "Zhentarim",
+    "132,58": "Zhentarim",
+    "131,58": "Zhentarim",
+    "134,55": "Zhentarim",
+    "133,55": "Zhentarim",
+    "132,55": "Zhentarim",
+    "131,55": "Zhentarim",
+    "130,55": "Zhentarim",
+    "129,56": "Zhentarim",
+    "128,56": "Zhentarim",
+    "127,57": "Zhentarim",
+    "126,57": "Zhentarim",
+    "124,58": "Church of Voice",
+    "125,57": "Church of Voice",
+    "126,56": "Church of Voice",
+    "127,56": "Church of Voice",
+    "128,55": "Church of Voice",
+    "129,55": "Church of Voice",
+    "130,54": "Church of Voice",
+    "131,54": "Church of Voice",
+    "132,54": "Church of Voice",
+    "133,54": "Church of Voice",
+    "134,54": "Church of Voice",
+    "135,54": "Church of Voice",
+    "135,55": "Church of Voice",
+    "135,56": "Church of Voice",
+    "135,57": "Church of Voice",
+    "134,57": "Church of Voice",
+    "136,56": "Church of Voice",
+    "136,55": "Church of Voice",
+    "136,54": "Church of Voice",
+    "136,53": "Church of Voice",
+    "135,53": "Church of Voice",
+    "134,53": "Church of Voice",
+    "133,53": "Church of Voice",
+    "132,53": "Church of Voice",
+    "131,53": "Church of Voice",
+    "130,53": "Church of Voice",
+    "129,53": "Church of Voice",
+    "128,53": "Church of Voice",
+    "127,53": "Church of Voice",
+    "126,54": "Church of Voice",
+    "125,54": "Church of Voice",
+    "124,57": "Church of Voice",
+    "123,58": "Church of Voice",
+    "122,59": "Church of Voice",
+    "47,88": "Lords' Alliance",
+    "48,87": "Lords' Alliance",
+    "48,86": "Lords' Alliance",
+    "48,85": "Lords' Alliance",
+    "47,86": "Lords' Alliance",
+    "47,85": "Lords' Alliance",
+    "46,86": "Lords' Alliance",
+    "46,87": "Lords' Alliance",
+    "47,87": "Lords' Alliance",
+    "46,89": "Harpers",
+    "46,90": "Lords' Alliance",
+    "45,91": "Lords' Alliance",
+    "44,91": "Lords' Alliance",
+    "43,92": "Lords' Alliance",
+    "42,93": "Lords' Alliance",
+    "41,94": "Lords' Alliance",
+    "42,94": "Lords' Alliance",
+    "43,93": "Lords' Alliance",
+    "44,93": "Lords' Alliance",
+    "43,94": "Lords' Alliance",
+    "42,95": "Lords' Alliance",
+    "41,95": "Lords' Alliance",
+    "44,92": "Lords' Alliance",
+    "45,92": "Lords' Alliance",
+    "47,89": "Lords' Alliance",
+    "48,88": "Lords' Alliance",
+    "49,86": "Lords' Alliance",
+    "49,85": "Lords' Alliance",
+    "49,84": "Lords' Alliance",
+    "49,83": "Lords' Alliance",
+    "48,83": "Lords' Alliance",
+    "50,83": "Lords' Alliance",
+    "51,83": "Lords' Alliance",
+    "52,83": "Lords' Alliance",
+    "53,82": "Lords' Alliance",
+    "54,82": "Lords' Alliance",
+    "55,82": "Lords' Alliance",
+    "56,81": "Lords' Alliance",
+    "57,80": "Lords' Alliance",
+    "58,80": "Lords' Alliance",
+    "56,80": "Lords' Alliance",
+    "55,81": "Lords' Alliance",
+    "54,81": "Lords' Alliance",
+    "52,82": "Lords' Alliance",
+    "52,81": "Lords' Alliance",
+    "51,82": "Lords' Alliance",
+    "50,82": "Lords' Alliance",
+    "49,82": "Lords' Alliance",
+    "50,81": "Lords' Alliance",
+    "50,80": "Lords' Alliance",
+    "50,79": "Lords' Alliance",
+    "50,78": "Lords' Alliance",
+    "49,79": "Lords' Alliance",
+    "49,80": "Lords' Alliance",
+    "49,81": "Lords' Alliance",
+    "48,82": "Lords' Alliance",
+    "56,55": "Lords' Alliance",
+    "56,54": "Lords' Alliance",
+    "57,53": "Lords' Alliance",
+    "58,52": "Lords' Alliance",
+    "57,52": "Lords' Alliance",
+    "57,51": "Lords' Alliance",
+    "56,52": "Lords' Alliance",
+    "56,51": "Lords' Alliance",
+    "56,50": "Lords' Alliance",
+    "56,49": "Lords' Alliance",
+    "55,49": "Lords' Alliance",
+    "55,48": "Lords' Alliance",
+    "54,48": "Lords' Alliance",
+    "54,47": "Lords' Alliance",
+    "55,46": "Lords' Alliance",
+    "56,45": "Lords' Alliance",
+    "56,44": "Lords' Alliance",
+    "56,43": "Lords' Alliance",
+    "57,43": "Lords' Alliance",
+    "58,42": "Lords' Alliance",
+    "59,41": "Lords' Alliance",
+    "59,40": "Lords' Alliance",
+    "59,39": "Lords' Alliance",
+    "58,39": "Lords' Alliance",
+    "60,39": "Lords' Alliance",
+    "60,40": "Lords' Alliance",
+    "61,39": "Lords' Alliance",
+    "61,40": "Lords' Alliance",
+    "62,40": "Lords' Alliance",
+    "63,39": "Lords' Alliance",
+    "63,40": "Lords' Alliance",
+    "60,41": "Lords' Alliance",
+    "60,42": "Lords' Alliance",
+    "59,42": "Lords' Alliance",
+    "59,43": "Lords' Alliance",
+    "58,43": "Lords' Alliance",
+    "59,44": "Lords' Alliance",
+    "58,44": "Lords' Alliance",
+    "57,44": "Lords' Alliance",
+    "57,45": "Lords' Alliance",
+    "57,46": "Lords' Alliance",
+    "56,46": "Lords' Alliance",
+    "55,47": "Lords' Alliance",
+    "56,47": "Lords' Alliance",
+    "57,47": "Lords' Alliance",
+    "56,48": "Lords' Alliance",
+    "57,49": "Lords' Alliance",
+    "58,49": "Lords' Alliance",
+    "57,50": "Lords' Alliance",
+    "58,50": "Lords' Alliance",
+    "58,51": "Lords' Alliance",
+    "58,53": "Lords' Alliance",
+    "57,54": "Lords' Alliance",
+    "59,52": "Lords' Alliance",
+    "59,51": "Lords' Alliance",
+    "59,38": "Lords' Alliance",
+    "59,37": "Lords' Alliance",
+    "58,37": "Lords' Alliance",
+    "57,37": "Lords' Alliance",
+    "56,37": "Lords' Alliance",
+    "56,36": "Lords' Alliance",
+    "55,36": "Lords' Alliance",
+    "54,36": "Lords' Alliance",
+    "53,36": "Lords' Alliance",
+    "53,37": "Lords' Alliance",
+    "53,38": "Lords' Alliance",
+    "54,38": "Lords' Alliance",
+    "55,37": "Lords' Alliance",
+    "55,38": "Lords' Alliance",
+    "54,39": "Lords' Alliance",
+    "53,40": "Lords' Alliance",
+    "53,41": "Lords' Alliance",
+    "53,42": "Lords' Alliance",
+    "54,40": "Lords' Alliance",
+    "54,37": "Lords' Alliance",
+    "54,35": "Lords' Alliance",
+    "54,34": "Lords' Alliance",
+    "55,33": "Lords' Alliance",
+    "55,32": "Lords' Alliance",
+    "55,31": "Lords' Alliance",
+    "55,30": "Lords' Alliance",
+    "56,29": "Lords' Alliance",
+    "56,28": "Lords' Alliance",
+    "56,27": "Lords' Alliance",
+    "56,26": "Lords' Alliance",
+    "57,27": "Lords' Alliance",
+    "58,27": "Lords' Alliance",
+    "58,26": "Lords' Alliance",
+    "58,25": "Lords' Alliance",
+    "57,25": "Lords' Alliance",
+    "56,25": "Lords' Alliance",
+    "57,24": "Lords' Alliance",
+    "56,24": "Lords' Alliance",
+    "57,23": "Lords' Alliance",
+    "57,28": "Lords' Alliance",
+    "57,29": "Lords' Alliance",
+    "56,30": "Lords' Alliance",
+    "56,31": "Lords' Alliance",
+    "56,32": "Lords' Alliance",
+    "56,33": "Lords' Alliance",
+    "55,34": "Lords' Alliance",
+    "57,31": "Lords' Alliance",
+    "58,31": "Lords' Alliance",
+    "57,32": "Lords' Alliance",
+    "57,22": "Lords' Alliance",
+    "57,21": "Lords' Alliance",
+    "57,20": "Lords' Alliance",
+    "58,20": "Lords' Alliance",
+    "58,21": "Lords' Alliance",
+    "58,19": "Lords' Alliance",
+    "59,18": "Lords' Alliance",
+    "60,18": "Lords' Alliance",
+    "61,17": "Lords' Alliance",
+    "62,17": "Lords' Alliance",
+    "60,17": "Lords' Alliance",
+    "63,17": "Lords' Alliance",
+    "63,18": "Lords' Alliance",
+    "62,19": "Lords' Alliance",
+    "61,20": "Lords' Alliance",
+    "61,21": "Lords' Alliance",
+    "62,20": "Lords' Alliance",
+    "63,20": "Lords' Alliance",
+    "64,20": "Lords' Alliance",
+    "65,20": "Lords' Alliance",
+    "65,19": "Lords' Alliance",
+    "65,21": "Lords' Alliance",
+    "64,22": "Lords' Alliance",
+    "64,23": "Lords' Alliance",
+    "64,21": "Lords' Alliance",
+    "65,22": "Lords' Alliance",
+    "63,19": "Lords' Alliance",
+    "64,18": "Lords' Alliance",
+    "62,18": "Lords' Alliance",
+    "61,19": "Lords' Alliance",
+    "61,18": "Lords' Alliance",
+    "60,19": "Lords' Alliance",
+    "59,19": "Lords' Alliance",
+    "59,20": "Lords' Alliance",
+    "59,21": "Lords' Alliance",
+    "60,20": "Lords' Alliance",
+    "60,21": "Lords' Alliance",
+    "58,22": "Lords' Alliance",
+    "58,23": "Lords' Alliance",
+    "59,22": "Lords' Alliance",
+    "59,23": "Lords' Alliance",
+    "58,24": "Lords' Alliance",
+    "59,24": "Lords' Alliance",
+    "60,22": "Lords' Alliance",
+    "61,22": "Lords' Alliance",
+    "62,22": "Lords' Alliance",
+    "62,21": "Lords' Alliance",
+    "61,23": "Lords' Alliance",
+    "60,23": "Lords' Alliance",
+    "59,25": "Lords' Alliance",
+    "63,22": "Lords' Alliance",
+    "63,21": "Lords' Alliance",
+    "57,30": "Lords' Alliance",
+    "58,18": "Lords' Alliance",
+    "59,17": "Lords' Alliance",
+    "67,14": "Church of Voice",
+    "68,13": "Church of Voice",
+    "57,81": "Lords' Alliance",
+    "58,81": "Lords' Alliance",
+    "59,80": "Lords' Alliance",
+    "59,81": "Lords' Alliance",
+    "60,81": "Lords' Alliance",
+    "60,82": "Lords' Alliance",
+    "61,81": "Lords' Alliance",
+    "60,80": "Lords' Alliance",
+    "78,80": "Church of Voice",
+    "77,80": "Church of Voice",
+    "76,80": "Church of Voice",
+    "76,79": "Church of Voice",
+    "76,78": "Church of Voice",
+    "75,78": "Church of Voice",
+    "74,79": "Church of Voice",
+    "73,79": "Church of Voice",
+    "72,80": "Church of Voice",
+    "71,81": "Church of Voice",
+    "70,81": "Church of Voice",
+    "69,81": "Church of Voice",
+    "69,80": "Church of Voice",
+    "68,80": "Church of Voice",
+    "68,79": "Church of Voice",
+    "68,81": "Church of Voice",
+    "67,82": "Church of Voice",
+    "67,81": "Church of Voice",
+    "66,82": "Church of Voice",
+    "65,82": "Church of Voice",
+    "64,82": "Church of Voice",
+    "64,81": "Church of Voice",
+    "63,81": "Church of Voice",
+    "65,81": "Church of Voice",
+    "68,82": "Church of Voice",
+    "69,82": "Church of Voice",
+    "70,82": "Church of Voice",
+    "69,83": "Church of Voice",
+    "70,83": "Church of Voice",
+    "71,80": "Church of Voice",
+    "55,53": "Lords' Alliance",
+    "56,53": "Lords' Alliance",
+    "55,52": "Lords' Alliance",
+    "55,51": "Lords' Alliance",
+    "55,50": "Lords' Alliance",
+    "55,54": "Lords' Alliance",
+    "55,55": "Lords' Alliance",
+    "55,45": "Harpers",
+    "54,46": "Harpers",
+    "54,45": "Harpers",
+    "55,44": "Harpers",
+    "55,43": "Harpers",
+    "54,44": "Harpers",
+    "58,45": "Harpers",
+    "58,46": "Harpers",
+    "58,47": "Harpers",
+    "57,48": "Harpers",
+    "58,48": "Harpers",
+    "55,35": "Harpers",
+    "56,34": "Harpers",
+    "57,33": "Harpers",
+    "56,35": "Harpers",
+    "57,26": "Harpers",
+    "58,28": "Harpers",
+    "58,29": "Harpers",
+    "58,30": "Harpers",
+    "51,81": "Harpers",
+    "51,80": "Harpers",
+    "51,79": "Harpers",
+    "53,81": "Harpers",
+    "53,80": "Harpers",
+    "52,80": "Harpers",
+    "48,84": "Harpers",
+    "47,84": "Harpers",
+    "46,85": "Harpers",
+    "45,86": "Harpers",
+    "45,87": "Harpers",
+    "45,88": "Harpers",
+    "46,88": "Harpers",
+    "45,89": "Harpers",
+    "45,90": "Harpers",
+    "44,89": "Harpers",
+    "44,88": "Harpers",
+    "43,89": "Harpers",
+    "43,90": "Harpers",
+    "44,90": "Harpers",
+    "43,91": "Harpers",
+    "50,84": "Harpers",
+    "50,85": "Harpers",
+    "50,86": "Harpers",
+    "51,85": "Harpers",
+    "51,84": "Harpers",
+    "50,87": "Harpers",
+    "49,87": "Harpers",
+    "49,88": "Harpers",
+    "48,89": "Harpers",
+    "51,86": "Harpers",
+    "52,84": "Harpers",
+    "53,83": "Harpers",
+    "43,95": "Zhentarim",
+    "42,96": "Zhentarim",
+    "43,96": "Zhentarim",
+    "42,97": "Zhentarim",
+    "43,97": "Zhentarim",
+    "42,98": "Zhentarim",
+    "43,98": "Zhentarim",
+    "43,99": "Zhentarim",
+    "44,100": "Zhentarim",
+    "44,101": "Zhentarim",
+    "45,101": "Zhentarim",
+    "45,102": "Zhentarim",
+    "46,101": "Zhentarim",
+    "43,101": "Zhentarim",
+    "43,100": "Zhentarim",
+    "42,99": "Zhentarim",
+    "41,99": "Zhentarim",
+    "41,98": "Zhentarim",
+    "40,99": "Zhentarim",
+    "41,97": "Zhentarim",
+    "46,102": "Zhentarim",
+    "45,103": "Zhentarim",
+    "45,104": "Zhentarim",
+    "44,105": "Zhentarim",
+    "43,105": "Zhentarim",
+    "42,105": "Zhentarim",
+    "41,105": "Zhentarim",
+    "41,106": "Zhentarim",
+    "45,105": "Zhentarim",
+    "46,105": "Zhentarim",
+    "44,104": "Zhentarim",
+    "67,80": "Zhentarim",
+    "67,79": "Zhentarim",
+    "67,78": "Zhentarim",
+    "67,77": "Zhentarim",
+    "67,76": "Zhentarim",
+    "67,75": "Zhentarim",
+    "68,74": "Zhentarim",
+    "68,73": "Zhentarim",
+    "67,73": "Zhentarim",
+    "69,73": "Zhentarim",
+    "70,72": "Zhentarim",
+    "69,72": "Zhentarim",
+    "68,72": "Zhentarim",
+    "67,72": "Zhentarim",
+    "67,71": "Zhentarim",
+    "66,71": "Zhentarim",
+    "65,71": "Zhentarim",
+    "66,72": "Zhentarim",
+    "66,73": "Zhentarim",
+    "66,74": "Zhentarim",
+    "67,74": "Zhentarim",
+    "62,63": "Zhentarim",
+    "60,63": "Zhentarim",
+    "60,62": "Zhentarim",
+    "60,61": "Zhentarim",
+    "60,60": "Zhentarim",
+    "60,59": "Zhentarim",
+    "59,59": "Zhentarim",
+    "59,58": "Zhentarim",
+    "58,58": "Zhentarim",
+    "58,57": "Zhentarim",
+    "58,56": "Zhentarim",
+    "57,56": "Zhentarim",
+    "58,55": "Zhentarim",
+    "58,54": "Zhentarim",
+    "59,54": "Zhentarim",
+    "60,53": "Zhentarim",
+    "59,55": "Zhentarim",
+    "59,56": "Zhentarim",
+    "59,57": "Zhentarim",
+    "60,58": "Zhentarim",
+    "67,28": "Zhentarim",
+    "67,26": "Zhentarim",
+    "67,25": "Zhentarim",
+    "67,24": "Zhentarim",
+    "67,23": "Zhentarim",
+    "68,26": "Zhentarim",
+    "67,27": "Zhentarim",
+    "68,25": "Zhentarim",
+    "69,27": "Zhentarim",
+    "70,27": "Zhentarim",
+    "71,26": "Zhentarim",
+    "71,27": "Zhentarim",
+    "68,28": "Zhentarim",
+    "68,27": "Zhentarim",
+    "69,28": "Zhentarim",
+    "69,29": "Zhentarim",
+    "70,26": "Zhentarim",
+    "68,24": "Zhentarim",
+    "68,23": "Zhentarim",
+    "68,22": "Zhentarim",
+    "67,22": "Zhentarim",
+    "80,16": "Zhentarim",
+    "81,17": "Zhentarim",
+    "80,18": "Zhentarim",
+    "79,18": "Zhentarim",
+    "81,18": "Zhentarim",
+    "80,17": "Zhentarim",
+    "70,14": "Church of Voice",
+    "61,16": "Zhentarim",
+    "98,93": "Zhentarim",
+    "97,93": "Zhentarim",
+    "97,92": "Zhentarim",
+    "98,92": "Zhentarim",
+    "97,94": "Zhentarim",
+    "96,94": "Zhentarim",
+    "96,93": "Zhentarim",
+    "95,93": "Zhentarim",
+    "94,94": "Zhentarim",
+    "93,94": "Zhentarim",
+    "92,94": "Zhentarim",
+    "91,94": "Zhentarim",
+    "90,94": "Zhentarim",
+    "90,93": "Zhentarim",
+    "91,93": "Zhentarim",
+    "93,93": "Zhentarim",
+    "94,93": "Zhentarim",
+    "96,92": "Zhentarim",
+    "92,87": "Zhentarim",
+    "92,86": "Zhentarim",
+    "93,86": "Zhentarim",
+    "91,87": "Zhentarim",
+    "90,87": "Zhentarim",
+    "114,86": "Zhentarim",
+    "114,85": "Zhentarim",
+    "113,85": "Zhentarim",
+    "113,84": "Zhentarim",
+    "113,83": "Zhentarim",
+    "114,82": "Zhentarim",
+    "115,81": "Zhentarim",
+    "112,84": "Zhentarim",
+    "112,85": "Zhentarim",
+    "112,86": "Zhentarim",
+    "111,86": "Zhentarim",
+    "110,86": "Zhentarim",
+    "109,87": "Zhentarim",
+    "107,72": "Church of Voice",
+    "106,72": "Church of Voice",
+    "105,72": "Church of Voice",
+    "104,73": "Church of Voice",
+    "103,73": "Church of Voice",
+    "102,73": "Church of Voice",
+    "101,73": "Church of Voice",
+    "100,73": "Church of Voice",
+    "99,73": "Church of Voice",
+    "98,73": "Church of Voice",
+    "97,73": "Church of Voice",
+    "96,73": "Church of Voice",
+    "96,72": "Church of Voice",
+    "95,73": "Church of Voice",
+    "97,72": "Church of Voice",
+    "98,72": "Church of Voice",
+    "94,73": "Church of Voice",
+    "93,73": "Church of Voice",
+    "92,73": "Church of Voice",
+    "90,73": "Church of Voice",
+    "89,73": "Church of Voice",
+    "88,72": "Church of Voice",
+    "87,72": "Church of Voice",
+    "87,71": "Church of Voice",
+    "87,70": "Church of Voice",
+    "87,69": "Church of Voice",
+    "88,67": "Church of Voice",
+    "88,66": "Church of Voice",
+    "88,65": "Church of Voice",
+    "88,64": "Church of Voice",
+    "88,63": "Church of Voice",
+    "88,62": "Church of Voice",
+    "87,62": "Church of Voice",
+    "86,62": "Church of Voice",
+    "89,62": "Church of Voice",
+    "90,62": "Church of Voice",
+    "87,63": "Church of Voice",
+    "86,60": "Church of Voice",
+    "87,59": "Church of Voice",
+    "86,58": "Church of Voice",
+    "87,58": "Church of Voice",
+    "89,58": "Church of Voice",
+    "90,58": "Church of Voice",
+    "88,58": "Church of Voice",
+    "87,60": "Church of Voice",
+    "86,61": "Church of Voice",
+    "85,60": "Church of Voice",
+    "85,63": "Church of Voice",
+    "86,63": "Church of Voice",
+    "86,65": "Church of Voice",
+    "87,65": "Church of Voice",
+    "87,66": "Church of Voice",
+    "87,67": "Church of Voice",
+    "87,68": "Church of Voice",
+    "86,66": "Church of Voice",
+    "87,64": "Church of Voice",
+    "88,73": "Church of Voice",
+    "88,74": "Church of Voice",
+    "89,74": "Church of Voice",
+    "90,74": "Church of Voice",
+    "91,73": "Church of Voice",
+    "88,75": "Church of Voice",
+    "88,76": "Church of Voice",
+    "88,77": "Church of Voice",
+    "87,77": "Church of Voice",
+    "87,78": "Church of Voice",
+    "89,76": "Church of Voice",
+    "90,75": "Church of Voice",
+    "91,75": "Church of Voice",
+    "92,74": "Church of Voice",
+    "92,75": "Church of Voice",
+    "91,74": "Church of Voice",
+    "89,75": "Church of Voice",
+    "87,75": "Church of Voice",
+    "87,74": "Church of Voice",
+    "86,74": "Church of Voice",
+    "85,74": "Church of Voice",
+    "86,73": "Church of Voice",
+    "85,73": "Church of Voice",
+    "84,73": "Church of Voice",
+    "83,73": "Church of Voice",
+    "82,73": "Church of Voice",
+    "81,73": "Church of Voice",
+    "80,73": "Church of Voice",
+    "79,74": "Church of Voice",
+    "78,74": "Church of Voice",
+    "77,75": "Church of Voice",
+    "78,73": "Church of Voice",
+    "79,72": "Church of Voice",
+    "79,73": "Church of Voice",
+    "77,74": "Church of Voice",
+    "80,72": "Church of Voice",
+    "81,72": "Church of Voice",
+    "85,72": "Church of Voice",
+    "86,72": "Church of Voice",
+    "87,73": "Church of Voice",
+    "86,71": "Church of Voice",
+    "80,74": "Church of Voice",
+    "82,72": "Church of Voice",
+    "83,72": "Church of Voice",
+    "84,72": "Church of Voice",
+    "93,74": "Church of Voice",
+    "93,75": "Church of Voice",
+    "94,74": "Church of Voice",
+    "95,74": "Church of Voice",
+    "96,74": "Church of Voice",
+    "97,74": "Church of Voice",
+    "98,74": "Church of Voice",
+    "100,74": "Church of Voice",
+    "101,74": "Church of Voice",
+    "103,74": "Church of Voice",
+    "104,74": "Church of Voice",
+    "105,74": "Church of Voice",
+    "106,73": "Church of Voice",
+    "105,73": "Church of Voice",
+    "104,75": "Church of Voice",
+    "102,76": "Church of Voice",
+    "103,75": "Church of Voice",
+    "102,75": "Church of Voice",
+    "102,74": "Church of Voice",
+    "100,75": "Church of Voice",
+    "99,75": "Church of Voice",
+    "97,75": "Church of Voice",
+    "98,75": "Church of Voice",
+    "99,74": "Church of Voice",
+    "101,75": "Church of Voice",
+    "86,59": "Church of Voice",
+    "85,59": "Church of Voice",
+    "83,60": "Church of Voice",
+    "82,60": "Church of Voice",
+    "81,61": "Church of Voice",
+    "80,61": "Church of Voice",
+    "79,61": "Church of Voice",
+    "78,61": "Church of Voice",
+    "77,62": "Church of Voice",
+    "77,63": "Church of Voice",
+    "77,64": "Church of Voice",
+    "78,64": "Church of Voice",
+    "78,63": "Church of Voice",
+    "79,62": "Church of Voice",
+    "80,63": "Church of Voice",
+    "81,62": "Church of Voice",
+    "82,62": "Church of Voice",
+    "82,61": "Church of Voice",
+    "80,62": "Church of Voice",
+    "79,63": "Church of Voice",
+    "79,64": "Church of Voice",
+    "78,62": "Church of Voice",
+    "83,61": "Church of Voice",
+    "84,60": "Church of Voice",
+    "83,62": "Church of Voice",
+    "84,62": "Church of Voice",
+    "85,62": "Church of Voice",
+    "85,61": "Church of Voice",
+    "84,61": "Church of Voice",
+    "72,13": "Church of Voice",
+    "73,13": "Church of Voice",
+    "73,14": "Church of Voice",
+    "74,13": "Church of Voice",
+    "75,13": "Church of Voice",
+    "76,12": "Church of Voice",
+    "77,12": "Church of Voice",
+    "78,12": "Church of Voice",
+    "79,12": "Church of Voice",
+    "71,13": "Church of Voice",
+    "74,12": "Church of Voice",
+    "70,13": "Church of Voice",
+    "67,13": "Church of Voice",
+    "66,13": "Church of Voice",
+    "71,14": "Church of Voice",
+    "72,14": "Church of Voice",
+    "75,12": "Church of Voice",
+    "80,13": "Church of Voice",
+    "81,13": "Church of Voice",
+    "80,14": "Church of Voice",
+    "81,14": "Church of Voice",
+    "80,15": "Church of Voice",
+    "81,15": "Church of Voice",
+    "82,13": "Church of Voice",
+    "82,14": "Church of Voice",
+    "82,15": "Church of Voice",
+    "82,16": "Church of Voice",
+    "82,17": "Church of Voice",
+    "83,17": "Church of Voice",
+    "82,18": "Church of Voice",
+    "83,18": "Church of Voice",
+    "84,17": "Church of Voice",
+    "84,16": "Church of Voice",
+    "85,16": "Church of Voice",
+    "85,15": "Church of Voice",
+    "86,15": "Church of Voice",
+    "86,14": "Church of Voice",
+    "87,14": "Church of Voice",
+    "87,13": "Church of Voice",
+    "88,12": "Church of Voice",
+    "89,11": "Church of Voice",
+    "90,10": "Church of Voice",
+    "86,13": "Church of Voice",
+    "85,14": "Church of Voice",
+    "84,15": "Church of Voice",
+    "83,16": "Church of Voice",
+    "83,15": "Church of Voice",
+    "83,14": "Church of Voice",
+    "83,13": "Church of Voice",
+    "82,12": "Church of Voice",
+    "80,12": "Church of Voice",
+    "81,12": "Church of Voice",
+    "84,14": "Church of Voice",
+    "84,18": "Church of Voice",
+    "84,19": "Church of Voice",
+    "84,20": "Church of Voice",
+    "85,20": "Church of Voice",
+    "86,20": "Church of Voice",
+    "86,19": "Church of Voice",
+    "85,19": "Church of Voice",
+    "87,19": "Church of Voice",
+    "88,19": "Church of Voice",
+    "89,19": "Church of Voice",
+    "90,19": "Church of Voice",
+    "91,18": "Church of Voice",
+    "92,18": "Church of Voice",
+    "93,18": "Church of Voice",
+    "94,18": "Church of Voice",
+    "94,19": "Church of Voice",
+    "93,20": "Church of Voice",
+    "93,21": "Church of Voice",
+    "92,22": "Church of Voice",
+    "91,23": "Church of Voice",
+    "90,24": "Church of Voice",
+    "94,17": "Church of Voice",
+    "93,17": "Church of Voice",
+    "92,17": "Church of Voice",
+    "90,18": "Church of Voice",
+    "89,18": "Church of Voice",
+    "88,18": "Church of Voice",
+    "87,18": "Church of Voice",
+    "86,18": "Church of Voice",
+    "85,18": "Church of Voice",
+    "85,17": "Church of Voice",
+    "86,16": "Church of Voice",
+    "87,15": "Church of Voice",
+    "88,15": "Church of Voice",
+    "88,16": "Church of Voice",
+    "89,16": "Church of Voice",
+    "87,17": "Church of Voice",
+    "86,17": "Church of Voice",
+    "88,17": "Church of Voice",
+    "87,16": "Church of Voice",
+    "94,20": "Church of Voice",
+    "94,21": "Church of Voice",
+    "95,21": "Church of Voice",
+    "95,22": "Church of Voice",
+    "96,21": "Church of Voice",
+    "96,22": "Church of Voice",
+    "95,23": "Church of Voice",
+    "96,23": "Church of Voice",
+    "96,24": "Church of Voice",
+    "97,24": "Church of Voice",
+    "97,25": "Church of Voice",
+    "96,26": "Church of Voice",
+    "96,27": "Church of Voice",
+    "95,27": "Church of Voice",
+    "94,28": "Church of Voice",
+    "93,29": "Church of Voice",
+    "93,30": "Church of Voice",
+    "92,31": "Church of Voice",
+    "91,32": "Church of Voice",
+    "92,32": "Church of Voice",
+    "91,33": "Church of Voice",
+    "94,29": "Church of Voice",
+    "95,28": "Church of Voice",
+    "97,26": "Church of Voice",
+    "98,25": "Church of Voice",
+    "99,24": "Church of Voice",
+    "99,25": "Church of Voice",
+    "98,26": "Church of Voice",
+    "97,30": "Church of Voice",
+    "97,31": "Church of Voice",
+    "96,32": "Church of Voice",
+    "95,32": "Church of Voice",
+    "95,33": "Church of Voice",
+    "96,33": "Church of Voice",
+    "96,34": "Church of Voice",
+    "95,34": "Church of Voice",
+    "94,34": "Church of Voice",
+    "93,35": "Church of Voice",
+    "93,36": "Church of Voice",
+    "92,36": "Church of Voice",
+    "92,37": "Church of Voice",
+    "91,38": "Church of Voice",
+    "91,39": "Church of Voice",
+    "90,40": "Church of Voice",
+    "90,41": "Church of Voice",
+    "89,42": "Church of Voice",
+    "88,43": "Church of Voice",
+    "89,43": "Church of Voice",
+    "89,44": "Church of Voice",
+    "90,44": "Church of Voice",
+    "91,44": "Church of Voice",
+    "91,43": "Church of Voice",
+    "90,43": "Church of Voice",
+    "91,37": "Church of Voice",
+    "91,36": "Church of Voice",
+    "90,35": "Church of Voice",
+    "91,34": "Church of Voice",
+    "90,34": "Church of Voice",
+    "89,34": "Church of Voice",
+    "88,35": "Church of Voice",
+    "87,35": "Church of Voice",
+    "86,36": "Church of Voice",
+    "85,37": "Church of Voice",
+    "85,38": "Church of Voice",
+    "84,39": "Church of Voice",
+    "83,40": "Church of Voice",
+    "82,40": "Church of Voice",
+    "81,41": "Church of Voice",
+    "80,41": "Church of Voice",
+    "80,42": "Church of Voice",
+    "79,43": "Church of Voice",
+    "78,44": "Church of Voice",
+    "79,44": "Church of Voice",
+    "80,43": "Church of Voice",
+    "81,43": "Church of Voice",
+    "81,44": "Church of Voice",
+    "82,45": "Church of Voice",
+    "83,45": "Church of Voice",
+    "83,46": "Church of Voice",
+    "82,44": "Church of Voice",
+    "81,42": "Church of Voice",
+    "77,44": "Church of Voice",
+    "76,45": "Church of Voice",
+    "77,45": "Church of Voice",
+    "76,46": "Church of Voice",
+    "75,46": "Church of Voice",
+    "74,46": "Church of Voice",
+    "73,47": "Church of Voice",
+    "72,47": "Church of Voice",
+    "71,48": "Church of Voice",
+    "71,49": "Church of Voice",
+    "72,48": "Church of Voice",
+    "72,49": "Church of Voice",
+    "73,49": "Church of Voice",
+    "74,49": "Church of Voice",
+    "73,50": "Church of Voice",
+    "74,50": "Church of Voice",
+    "73,51": "Church of Voice",
+    "74,51": "Church of Voice",
+    "73,52": "Church of Voice",
+    "74,52": "Church of Voice",
+    "75,52": "Church of Voice",
+    "75,53": "Church of Voice",
+    "76,53": "Church of Voice",
+    "77,53": "Church of Voice",
+    "78,53": "Church of Voice",
+    "76,52": "Church of Voice",
+    "76,51": "Church of Voice",
+    "75,51": "Church of Voice",
+    "73,46": "Church of Voice",
+    "75,45": "Church of Voice",
+    "76,44": "Church of Voice",
+    "78,60": "Church of Voice",
+    "78,59": "Church of Voice",
+    "77,58": "Church of Voice",
+    "77,57": "Church of Voice",
+    "78,56": "Church of Voice",
+    "78,55": "Church of Voice",
+    "78,54": "Church of Voice",
+    "77,54": "Church of Voice",
+    "76,55": "Church of Voice",
+    "75,55": "Church of Voice",
+    "74,56": "Church of Voice",
+    "73,57": "Church of Voice",
+    "72,57": "Church of Voice",
+    "73,56": "Church of Voice",
+    "74,55": "Church of Voice",
+    "75,54": "Church of Voice",
+    "76,54": "Church of Voice",
+    "76,63": "Church of Voice",
+    "75,64": "Church of Voice",
+    "74,65": "Church of Voice",
+    "73,65": "Church of Voice",
+    "72,66": "Church of Voice",
+    "71,66": "Church of Voice",
+    "70,66": "Church of Voice",
+    "69,67": "Church of Voice",
+    "72,65": "Church of Voice",
+    "75,65": "Church of Voice",
+    "76,65": "Church of Voice",
+    "77,65": "Church of Voice",
+    "76,64": "Church of Voice",
+    "74,64": "Church of Voice",
+    "73,64": "Church of Voice",
+    "68,14": "Church of Voice",
+    "69,14": "Church of Voice",
+    "69,13": "Church of Voice",
+    "69,15": "Church of Voice",
+    "70,15": "Church of Voice",
+    "65,13": "Church of Voice",
+    "65,12": "Church of Voice",
+    "64,12": "Church of Voice",
+    "63,12": "Church of Voice",
+    "63,13": "Church of Voice",
+    "64,13": "Church of Voice",
+    "65,14": "Church of Voice",
+    "66,14": "Church of Voice",
+    "68,15": "Church of Voice",
+    "69,16": "Church of Voice",
+    "68,17": "Church of Voice",
+    "68,18": "Church of Voice",
+    "69,18": "Church of Voice",
+    "68,19": "Church of Voice",
+    "69,17": "Church of Voice",
+    "81,16": "Church of Voice",
+    "78,58": "Church of Voice",
+    "88,99": "Church of Voice",
+    "87,100": "Church of Voice",
+    "87,101": "Church of Voice",
+    "86,102": "Church of Voice",
+    "86,103": "Church of Voice",
+    "86,104": "Church of Voice",
+    "86,106": "Church of Voice",
+    "86,107": "Church of Voice",
+    "86,108": "Church of Voice",
+    "86,109": "Church of Voice",
+    "85,111": "Church of Voice",
+    "85,112": "Church of Voice",
+    "85,113": "Church of Voice",
+    "85,114": "Church of Voice",
+    "85,115": "Church of Voice",
+    "85,116": "Church of Voice",
+    "86,116": "Church of Voice",
+    "87,115": "Church of Voice",
+    "87,116": "Church of Voice",
+    "89,116": "Church of Voice",
+    "90,117": "Church of Voice",
+    "91,117": "Church of Voice",
+    "93,117": "Church of Voice",
+    "93,118": "Church of Voice",
+    "92,117": "Church of Voice",
+    "91,116": "Church of Voice",
+    "88,116": "Church of Voice",
+    "88,115": "Church of Voice",
+    "88,114": "Church of Voice",
+    "86,115": "Church of Voice",
+    "86,111": "Church of Voice",
+    "86,110": "Church of Voice",
+    "85,109": "Church of Voice",
+    "85,108": "Church of Voice",
+    "85,107": "Church of Voice",
+    "85,106": "Church of Voice",
+    "85,104": "Church of Voice",
+    "85,105": "Church of Voice",
+    "84,106": "Church of Voice",
+    "83,107": "Church of Voice",
+    "82,107": "Church of Voice",
+    "81,108": "Church of Voice",
+    "84,107": "Church of Voice",
+    "82,108": "Church of Voice",
+    "80,109": "Church of Voice",
+    "80,110": "Church of Voice",
+    "79,111": "Church of Voice",
+    "78,112": "Church of Voice",
+    "77,113": "Church of Voice",
+    "77,114": "Church of Voice",
+    "76,115": "Church of Voice",
+    "75,116": "Church of Voice",
+    "74,117": "Church of Voice",
+    "73,118": "Church of Voice",
+    "72,118": "Church of Voice",
+    "72,119": "Church of Voice",
+    "72,120": "Church of Voice",
+    "71,122": "Church of Voice",
+    "70,123": "Church of Voice",
+    "69,124": "Church of Voice",
+    "70,125": "Church of Voice",
+    "69,125": "Church of Voice",
+    "70,124": "Church of Voice",
+    "71,123": "Church of Voice",
+    "72,121": "Church of Voice",
+    "72,124": "Church of Voice",
+    "73,124": "Church of Voice",
+    "74,124": "Church of Voice",
+    "71,124": "Church of Voice",
+    "75,124": "Church of Voice",
+    "76,123": "Church of Voice",
+    "77,123": "Church of Voice",
+    "75,123": "Church of Voice",
+    "96,123": "Church of Voice",
+    "96,122": "Church of Voice",
+    "94,123": "Church of Voice",
+    "94,122": "Church of Voice",
+    "93,122": "Church of Voice",
+    "94,121": "Church of Voice",
+    "92,122": "Church of Voice",
+    "91,123": "Church of Voice",
+    "90,122": "Church of Voice",
+    "89,122": "Church of Voice",
+    "87,122": "Church of Voice",
+    "86,122": "Church of Voice",
+    "86,121": "Church of Voice",
+    "85,121": "Church of Voice",
+    "88,122": "Church of Voice",
+    "88,121": "Church of Voice",
+    "89,120": "Church of Voice",
+    "90,119": "Church of Voice",
+    "92,118": "Church of Voice",
+    "91,118": "Church of Voice",
+    "91,119": "Church of Voice",
+    "90,120": "Church of Voice",
+    "89,121": "Church of Voice",
+    "87,121": "Church of Voice",
+    "86,120": "Church of Voice",
+    "84,121": "Church of Voice",
+    "83,121": "Church of Voice",
+    "83,120": "Church of Voice",
+    "82,121": "Church of Voice",
+    "80,121": "Church of Voice",
+    "79,122": "Church of Voice",
+    "78,123": "Church of Voice",
+    "79,121": "Church of Voice",
+    "81,121": "Church of Voice",
+    "80,122": "Church of Voice",
+    "84,120": "Church of Voice",
+    "85,120": "Church of Voice",
+    "68,124": "Church of Voice",
+    "67,124": "Church of Voice",
+    "66,125": "Church of Voice",
+    "66,124": "Church of Voice",
+    "65,124": "Church of Voice",
+    "65,123": "Church of Voice",
+    "64,123": "Church of Voice",
+    "69,123": "Church of Voice",
+    "68,123": "Church of Voice",
+    "64,124": "Church of Voice",
+    "63,124": "Church of Voice",
+    "63,123": "Church of Voice",
+    "63,122": "Church of Voice",
+    "62,122": "Church of Voice",
+    "62,121": "Church of Voice",
+    "62,123": "Church of Voice"
+};
+
+// view transform
+let scale = 0.15;
+let panX = 0;
+let panY = 0;
+
+// grid
+let HEX_SIZE = 34;
+let SHOW_GRID = true;
+let ALPHA = 0.42;
+
+const img = document.getElementById("baseMap");
+const canvas = document.getElementById("hexCanvas");
+const ctx = canvas.getContext("2d");
+const world = document.getElementById("world");
+const viewport = document.getElementById("viewport");
+
+function init(){
+  refreshFactionUI();
+
+  img.onload = ()=>{
+    canvas.width = img.naturalWidth;
+    canvas.height = img.naturalHeight;
+    world.style.width = img.naturalWidth + "px";
+    world.style.height = img.naturalHeight + "px";
+    centerMap();
+    draw();
+  };
+
+  if(img.complete && img.naturalWidth) img.onload();
+
+  bindUI();
+}
+init();
+
+/* =========================
+   Hex Math (pointy top axial)
+========================= */
+
+function hexToPixel(q,r){
+  const x = HEX_SIZE * Math.sqrt(3) * (q + r/2);
+  const y = HEX_SIZE * 1.5 * r;
+  return {x,y};
+}
+
+function pixelToHex(x,y){
+  const q = ((Math.sqrt(3)/3 * x) - (1/3 * y)) / HEX_SIZE;
+  const r = (2/3 * y) / HEX_SIZE;
+  return hexRound(q,r);
+}
+
+function hexRound(q,r){
+  let x=q, z=r, y=-x-z;
+
+  let rx=Math.round(x), ry=Math.round(y), rz=Math.round(z);
+
+  let x_diff=Math.abs(rx-x);
+  let y_diff=Math.abs(ry-y);
+  let z_diff=Math.abs(rz-z);
+
+  if(x_diff > y_diff && x_diff > z_diff) rx = -ry-rz;
+  else if(y_diff > z_diff) ry = -rx-rz;
+  else rz = -rx-ry;
+
+  return {q:rx, r:rz};
+}
+
+function hexCorners(cx,cy){
+  const pts=[];
+  for(let i=0;i<6;i++){
+    const angle = Math.PI/180 * (60*i - 30);
+    pts.push({
+      x: cx + HEX_SIZE*Math.cos(angle),
+      y: cy + HEX_SIZE*Math.sin(angle)
+    });
+  }
+  return pts;
+}
+
+/* =========================
+   Drawing
+========================= */
+
+function draw(){
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+
+  const cols = Math.ceil(canvas.width / (HEX_SIZE*1.6)) + 4;
+  const rows = Math.ceil(canvas.height / (HEX_SIZE*1.4)) + 4;
+
+  // Fill ownership first
+  for(const key in ownership){
+    const [q,r] = key.split(",").map(Number);
+    drawHex(q,r,true);
+  }
+
+  if(SHOW_GRID){
+    for(let r=-2;r<rows;r++){
+      for(let q=-2;q<cols;q++){
+        drawHex(q,r,false);
+      }
+    }
+  }
+
+  applyTransform();
+}
+
+function drawHex(q,r,filled){
+  const {x,y}=hexToPixel(q,r);
+  const pts=hexCorners(x,y);
+
+  ctx.beginPath();
+  ctx.moveTo(pts[0].x,pts[0].y);
+  for(let i=1;i<6;i++) ctx.lineTo(pts[i].x,pts[i].y);
+  ctx.closePath();
+
+  const key = `${q},${r}`;
+  const owner = ownership[key];
+
+  if(filled && owner){
+    ctx.fillStyle = hexToRGBA(factions[owner] || "#ffffff", ALPHA);
+    ctx.fill();
+  }
+
+  // border logic: thicker if adjacent faction changes
+  let lineW = 0.55;
+  let stroke = "rgba(255,255,255,.18)";
+
+  if(owner){
+    lineW = 1.2;
+    stroke = "rgba(255,255,255,.35)";
+  }
+
+  ctx.lineWidth = lineW;
+  ctx.strokeStyle = stroke;
+  ctx.stroke();
+
+  // Distinct territorial borders
+  if(owner){
+    const dirs = [
+      [1,0],[1,-1],[0,-1],[-1,0],[-1,1],[0,1]
+    ];
+
+    dirs.forEach((d,i)=>{
+      const nk = `${q+d[0]},${r+d[1]}`;
+      const nOwner = ownership[nk];
+      if(nOwner !== owner){
+        const a = pts[i];
+        const b = pts[(i+1)%6];
+        ctx.beginPath();
+        ctx.moveTo(a.x,a.y);
+        ctx.lineTo(b.x,b.y);
+        ctx.lineWidth = 3;
+        ctx.strokeStyle = factions[owner];
+        ctx.stroke();
+      }
+    });
+  }
+}
+
+function hexToRGBA(hex,a){
+  const n = hex.replace("#","");
+  const r=parseInt(n.substring(0,2),16);
+  const g=parseInt(n.substring(2,4),16);
+  const b=parseInt(n.substring(4,6),16);
+  return `rgba(${r},${g},${b},${a})`;
+}
+
+function applyTransform(){
+
+  const wrap = document.getElementById("mapWrap");
+  const viewW = wrap.clientWidth;
+  const viewH = wrap.clientHeight;
+
+  const mapW = canvas.width * scale;
+  const mapH = canvas.height * scale;
+
+  // Prevent dragging too far away
+  const minX = Math.min(0, viewW - mapW);
+  const minY = Math.min(0, viewH - mapH);
+
+  const maxX = 0;
+  const maxY = 0;
+
+  panX = Math.max(minX, Math.min(maxX, panX));
+  panY = Math.max(minY, Math.min(maxY, panY));
+
+  world.style.transform =
+    `translate(${panX}px,${panY}px) scale(${scale})`;
+}
+
+/* =========================
+   Interaction
+========================= */
+
+let dragging=false;
+let paintDrag=false;
+let lastX=0,lastY=0;
+
+viewport.addEventListener("mousedown",(e)=>{
+  if(e.shiftKey){
+    paintDrag=true;
+    paintAtEvent(e);
+    return;
+  }
+  dragging=true;
+  viewport.classList.add("dragging");
+  lastX=e.clientX;
+  lastY=e.clientY;
+});
+
+window.addEventListener("mouseup",()=>{
+  dragging=false;
+  paintDrag=false;
+  viewport.classList.remove("dragging");
+});
+
+window.addEventListener("mousemove",(e)=>{
+  if(dragging){
+    panX += e.clientX-lastX;
+    panY += e.clientY-lastY;
+    lastX=e.clientX;
+    lastY=e.clientY;
+    applyTransform();
+  }
+
+  if(paintDrag) paintAtEvent(e);
+
+  hoverAtEvent(e);
+});
+
+//viewport.addEventListener("click",(e)=> paintAtEvent(e));
+
+viewport.addEventListener("wheel",(e)=>{
+  e.preventDefault();
+  const delta = e.deltaY < 0 ? 1.08 : 0.92;
+  scale *= delta;
+  scale = Math.max(0.15, Math.min(3, scale));
+  applyTransform();
+},{passive:false});
+
+function screenToMap(clientX,clientY){
+  const rect = viewport.getBoundingClientRect();
+  const x = (clientX - rect.left - panX) / scale;
+  const y = (clientY - rect.top - panY) / scale;
+  return {x,y};
+}
+
+function paintAtEvent(e){
+  const p = screenToMap(e.clientX,e.clientY);
+  const h = pixelToHex(p.x,p.y);
+  const key = `${h.q},${h.r}`;
+
+  if(mode==="erase") delete ownership[key];
+  else ownership[key]=activeFaction;
+
+  draw();
+}
+
+function hoverAtEvent(e){
+  const p = screenToMap(e.clientX,e.clientY);
+  const h = pixelToHex(p.x,p.y);
+  const key = `${h.q},${h.r}`;
+  const owner = ownership[key] || "Unclaimed";
+  document.getElementById("hoverText").textContent =
+    `Hex ${key} • ${owner}`;
+}
+
+/* =========================
+   UI
+========================= */
+
+function bindUI(){
+  document.getElementById("saveFaction").onclick=()=>{
+    const n = document.getElementById("fName").value.trim();
+    const c = document.getElementById("fColor").value;
+    if(!n) return;
+    factions[n]=c;
+    activeFaction=n;
+    refreshFactionUI();
+    draw();
+  };
+
+  document.getElementById("paintMode").onclick=()=>mode="paint";
+  document.getElementById("eraseMode").onclick=()=>mode="erase";
+
+  document.getElementById("factions").onchange=(e)=>{
+    activeFaction=e.target.value;
+  };
+
+  document.getElementById("hexSize").oninput=(e)=>{
+    HEX_SIZE = +e.target.value;
+    draw();
+  };
+
+  document.getElementById("opacity").oninput=(e)=>{
+    ALPHA = (+e.target.value)/100;
+    draw();
+  };
+
+  document.getElementById("regen").onclick=draw;
+
+  document.getElementById("toggleGrid").onclick=()=>{
+    SHOW_GRID=!SHOW_GRID;
+    draw();
+  };
+
+  document.getElementById("exportBtn").onclick=()=>{
+    const payload = {
+      hexSize:HEX_SIZE,
+      opacity:ALPHA,
+      factions,
+      ownership
+    };
+    document.getElementById("dataBox").value =
+      JSON.stringify(payload,null,2);
+  };
+
+  document.getElementById("importBtn").onclick=()=>{
+    try{
+      const data = JSON.parse(document.getElementById("dataBox").value);
+      Object.assign(factions,data.factions||{});
+      ownership = data.ownership || {};
+      HEX_SIZE = data.hexSize || HEX_SIZE;
+      ALPHA = data.opacity ?? ALPHA;
+      document.getElementById("hexSize").value = HEX_SIZE;
+      document.getElementById("opacity").value = ALPHA*100;
+      refreshFactionUI();
+      draw();
+    }catch(err){
+      alert("Invalid JSON");
+    }
+  };
+}
+
+function refreshFactionUI(){
+  const sel = document.getElementById("factions");
+  sel.innerHTML="";
+  Object.keys(factions).forEach(name=>{
+    if(name==="None") return;
+    const o=document.createElement("option");
+    o.value=name;
+    o.textContent=name;
+    if(name===activeFaction) o.selected=true;
+    sel.appendChild(o);
+  });
+
+  const legend=document.getElementById("legend");
+  legend.innerHTML="";
+  Object.entries(factions).forEach(([name,color])=>{
+    if(name==="None") return;
+    const d=document.createElement("div");
+    d.className="legendItem";
+    d.innerHTML=`<div class="sw" style="background:${color}"></div>${name}`;
+    legend.appendChild(d);
+  });
+}
+
+function centerMap(){
+  const wrap = document.getElementById("mapWrap");
+
+  const viewW = wrap.clientWidth;
+  const viewH = wrap.clientHeight;
+
+  const mapW = canvas.width * scale;
+  const mapH = canvas.height * scale;
+
+  panX = (viewW - mapW) / 2;
+  panY = (viewH - mapH) / 2;
+
+  applyTransform();
+}
+</script>
+</body>
+</html>
