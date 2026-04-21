@@ -113,6 +113,7 @@ Referenced via user prompt / publicly available map. :contentReference[oaicite:0
     position:absolute;
     inset:0;
     cursor:grab;
+    touch-action:none;
   }
 
   #viewport.dragging{ cursor:grabbing; }
@@ -2251,6 +2252,82 @@ window.addEventListener("mousemove",(e)=>{
   if(paintDrag) paintAtEvent(e);
 
   hoverAtEvent(e);
+});
+
+let touchMode = false;
+let lastTouchDist = 0;
+
+viewport.addEventListener("touchstart", (e) => {
+
+  if (e.touches.length === 1) {
+    touchMode = true;
+    lastX = e.touches[0].clientX;
+    lastY = e.touches[0].clientY;
+  }
+
+  if (e.touches.length === 2) {
+    touchMode = false;
+    lastTouchDist = getTouchDistance(e.touches);
+  }
+
+}, { passive:false });
+
+
+viewport.addEventListener("touchmove", (e) => {
+  e.preventDefault();
+
+  // one finger pan
+  if (e.touches.length === 1 && touchMode) {
+
+    const x = e.touches[0].clientX;
+    const y = e.touches[0].clientY;
+
+    panX += x - lastX;
+    panY += y - lastY;
+
+    lastX = x;
+    lastY = y;
+
+    applyTransform();
+  }
+
+  // pinch zoom
+  if (e.touches.length === 2) {
+
+    const dist = getTouchDistance(e.touches);
+
+    if (lastTouchDist > 0) {
+      const ratio = dist / lastTouchDist;
+      scale *= ratio;
+      scale = Math.max(1, Math.min(3, scale));
+      applyTransform();
+    }
+
+    lastTouchDist = dist;
+  }
+
+}, { passive:false });
+
+
+viewport.addEventListener("touchend", () => {
+  touchMode = false;
+  lastTouchDist = 0;
+});
+
+
+function getTouchDistance(touches){
+  const dx = touches[0].clientX - touches[1].clientX;
+  const dy = touches[0].clientY - touches[1].clientY;
+  return Math.sqrt(dx*dx + dy*dy);
+}
+
+viewport.addEventListener("touchend",(e)=>{
+  if(e.changedTouches.length===1){
+    hoverAtEvent({
+      clientX:e.changedTouches[0].clientX,
+      clientY:e.changedTouches[0].clientY
+    });
+  }
 });
 
 //viewport.addEventListener("click",(e)=> paintAtEvent(e));
