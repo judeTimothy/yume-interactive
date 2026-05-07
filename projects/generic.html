@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Project showcase page for YUME Interactive." />
+
+  <title>Work In Progress — YUME Interactive</title>
+
+  <link rel="icon" href="favicon.ico">
+  <link rel="stylesheet" href="styles.css" />
+
+  <style>
+    .project-hero {
+      padding-top: 10rem;
+      padding-bottom: 4rem;
+    }
+
+    .project-back {
+      margin-bottom: 2rem;
+    }
+
+    .project-back a {
+      display: inline-flex;
+      align-items: center;
+      gap: .5rem;
+      text-decoration: none;
+      color: var(--text-color, #fff);
+      opacity: .8;
+      transition: opacity .2s ease;
+    }
+
+    .project-back a:hover {
+      opacity: 1;
+    }
+
+    .project-header {
+      display: grid;
+      gap: 1.5rem;
+      margin-bottom: 4rem;
+    }
+
+    .project-eyebrow {
+      display: inline-flex;
+      width: fit-content;
+      padding: .35rem .75rem;
+      border-radius: 999px;
+      background: rgba(255,255,255,.06);
+      border: 1px solid rgba(255,255,255,.08);
+      font-size: .8rem;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+    }
+
+    .project-title {
+      font-size: clamp(2.5rem, 6vw, 5rem);
+      line-height: .95;
+      max-width: 100%;
+    }
+
+    .project-summary {
+      max-width: 100%;
+      opacity: .8;
+      line-height: 1.7;
+    }
+
+    .project-banner {
+      width: 100%;
+      aspect-ratio: 16 / 8;
+      border-radius: 2rem;
+      overflow: hidden;
+      background: linear-gradient(135deg, #1a1d27, #d13b2f);
+      margin-bottom: 5rem;
+      background-size: cover;
+      background-position: center;
+      border: 1px solid rgba(255,255,255,.08);
+    }
+
+    .project-layout {
+      display: grid;
+      grid-template-columns: 240px 1fr;
+      gap: 3rem;
+      margin-bottom: 5rem;
+    }
+
+    .project-sidebar h3 {
+      margin-bottom: 1rem;
+    }
+
+    .project-meta-list {
+      display: grid;
+      gap: 1rem;
+    }
+
+    .project-meta-item {
+      padding-bottom: 1rem;
+      border-bottom: 1px solid rgba(255,255,255,.08);
+    }
+
+    .project-meta-item strong {
+      display: block;
+      margin-bottom: .25rem;
+    }
+
+    .project-content {
+      display: grid;
+      gap: 1.5rem;
+    }
+
+    .project-content p {
+      line-height: 1.8;
+      opacity: .9;
+    }
+
+    .project-gallery {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 1rem;
+      margin-top: 2rem;
+    }
+
+    .project-gallery-image {
+      aspect-ratio: 4 / 3;
+      border-radius: 1.5rem;
+      background-size: cover;
+      background-position: center;
+      border: 1px solid rgba(255,255,255,.08);
+      background-color: rgba(255,255,255,.04);
+    }
+
+    .project-actions {
+      margin-top: 3rem;
+      display: flex;
+	  justify-content: center;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    @media (max-width: 900px) {
+      .project-layout {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <main>
+    <section class="section project-hero">
+      <div class="wide">
+
+        <div class="project-back">
+          <a href="index.html">
+            ← Back to Homepage
+          </a>
+        </div>
+
+        <div class="project-header" >
+          <span class="project-eyebrow" style="display: none">
+            Graphics Design · Government
+          </span>
+
+          <h1 class="project-title">
+            This Page is a Work in Progress
+          </h1>
+
+          <p class="project-summary">
+            Thanks for choosing YUME Interactive! This page is being constructed to better serve your needs. Feel free to browse our current catalog or message us directly through our contact channels, or email us at interactive.yume@gmail.com
+          </p>
+        </div>
+
+        <div
+          class="project-banner"
+          style="background-image: url('assets/colliers-redacted.webp');"
+        ></div>
+
+        <div class="project-layout" style="display: none">
+          <aside class="project-sidebar">
+            <h3>Project Info</h3>
+
+            <div class="project-meta-list">
+              <div class="project-meta-item">
+                <strong>Role</strong>
+                <span>Game Developer · UI/UX Designer</span>
+              </div>
+
+              <div class="project-meta-item">
+                <strong>Tools</strong>
+                <span>Unity · Figma · Photoshop</span>
+              </div>
+
+              <div class="project-meta-item">
+                <strong>Timeline</strong>
+                <span>2026</span>
+              </div>
+
+              <div class="project-meta-item">
+                <strong>Status</strong>
+                <span>Active Development</span>
+              </div>
+            </div>
+          </aside>
+
+          <div class="project-content">
+            <h2>Overview</h2>
+            <p>
+             This project was a call-to-action poster for a private investment meetup focused on regional real estate discussions. The goal was to communicate intent immediately and without ambiguity. Everything in the composition was built around that clarity: strong hierarchy, minimal visual noise, and a layout that prioritizes cohesion with the elements within the piece.
+			 <br>
+			 <br>
+			The process started with defining the information structure before anything visual. I mapped out what needed to be seen first, what supported it, and what could be removed without weakening the message. From there, typography became the main design tool—what fits for a corporate meetup and discard what feels corny. Spacing and alignment were treated as active elements, helping control pacing and emphasis rather than just organizing content.
+			<br>
+			 <br>
+			The project went through multiple iterations, largely because several information elements were non-negotiable and had to remain intact. This meant the design couldn’t be simplified in the usual sense of “cutting down content”—instead, the challenge was working around fixed data while still finding a clean and readable structure. A lot of the refinement came from repositioning and rebalancing rather than removing, making sure nothing essential felt visually heavy or awkwardly placed.
+			<br>
+			 <br>
+			Client direction played a significant role throughout the process, especially in how information was prioritized and presented. The final outcome sits in a middle ground between strict informational requirements and design clarity. It resolves that tension by maintaining full content integrity while still delivering a controlled, minimal composition where hierarchy, spacing, and typography do most of the work. The result is a compromise, but one where neither clarity nor message strength was sacrificed.
+			<br>
+			 <br>
+			The project was executed under an extremely tight turnaround of roughly two hours leading up to the event, which required fast but deliberate decision-making throughout the design process. With essentially no room for extended exploration, the focus shifted toward rapid iteration—testing layout variations, adjusting hierarchy on the fly, and refining spacing and typography until the information felt immediate and well-structured.
+			<br>
+			 <br>
+			Despite the time constraints, the final output held up well in real-world use and met its intended purpose during the event. From what followed, it was considered successful in terms of clarity, communication, and reception by its target audience, reinforcing the effectiveness of keeping the design direct, structured, and purpose-driven under pressure.
+			<br>
+			 <br>
+			The final direction is intentionally minimal and corporate, avoiding decorative elements in favor of a direct, almost declarative presentation style. The focus was on precision—making sure every line carries weight, and that the composition feels deliberate rather than styled.
+            </p>
+
+            </div>
+			
+			
+          </div>
+		  <div class="project-actions">
+              <a class="btn btn-primary" href="https://judetimothy.github.io/yume-interactive/#contact">
+                Get in Touch
+              </a>
+
+              <a class="btn btn-secondary" href="https://judetimothy.github.io/yume-interactive/#work>
+                Browse Work
+              </a>
+            </div>
+        </div>
+		
+      </div>
+	  
+    </section>
+	
+  </main>
+</body>
+</html>
