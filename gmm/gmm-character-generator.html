@@ -1,0 +1,1359 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Grace, Might &amp; Magicks — Character Dossier Generator</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+SC:wght@600;700&family=Spectral:ital,wght@0,400;0,500;0,600;1,400&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#0f0d0b;
+    --panel:#181410;
+    --panel-2:#1f1a15;
+    --line:#3a2f26;
+    --bone:#e9e1d1;
+    --bone-dim:#a99c86;
+    --blood:#8a3226;
+    --blood-bright:#b6402f;
+    --gold:#b8974f;
+    --gold-dim:#8a7440;
+    --ok:#5c7a52;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:
+      radial-gradient(1100px 700px at 12% -10%, #201811 0%, transparent 60%),
+      radial-gradient(900px 600px at 110% 10%, #1a1410 0%, transparent 55%),
+      var(--ink);
+    color:var(--bone);
+    font-family:'Spectral', serif;
+    padding:28px 18px 80px;
+    line-height:1.5;
+  }
+  .wrap{max-width:980px;margin:0 auto;}
+
+  /* ---------- Header ---------- */
+  header{
+    display:flex;
+    align-items:center;
+    gap:18px;
+    padding-bottom:22px;
+    margin-bottom:26px;
+    border-bottom:1px solid var(--line);
+  }
+  .mark{
+    flex:0 0 auto;
+    width:64px;
+    height:64px;
+    border-radius:4px;
+    overflow:hidden;
+  }
+  .mark img{
+    width:100%;
+    height:100%;
+    object-fit:cover;
+    display:block;
+  }
+  .title-block{flex:1;min-width:0;}
+  h1{
+    font-family:'Cormorant SC', serif;
+    font-weight:700;
+    letter-spacing:0.06em;
+    font-size:30px;
+    margin:0;
+    color:var(--bone);
+    text-transform:uppercase;
+  }
+  .subtitle{
+    color:var(--gold);
+    font-family:'JetBrains Mono', monospace;
+    font-size:11px;
+    letter-spacing:0.14em;
+    text-transform:uppercase;
+    margin-top:4px;
+  }
+
+  /* ---------- Toolbar ---------- */
+  .toolbar{
+    display:flex;
+    gap:10px;
+    flex-wrap:wrap;
+    margin-bottom:26px;
+  }
+  button{
+    font-family:'JetBrains Mono', monospace;
+    font-size:12px;
+    letter-spacing:0.06em;
+    text-transform:uppercase;
+    padding:10px 16px;
+    border-radius:3px;
+    border:1px solid var(--line);
+    background:var(--panel-2);
+    color:var(--bone);
+    cursor:pointer;
+    transition:border-color .15s ease, color .15s ease, background .15s ease;
+  }
+  button:hover{border-color:var(--gold-dim);color:var(--gold);}
+  button.primary{
+    background:var(--blood);
+    border-color:var(--blood);
+    color:var(--bone);
+  }
+  button.primary:hover{background:var(--blood-bright);border-color:var(--blood-bright);color:#fff;}
+  button.die{
+    padding:9px 11px;
+    font-size:14px;
+    line-height:1;
+  }
+
+  /* ---------- Sections ---------- */
+  section{
+    background:var(--panel);
+    border:1px solid var(--line);
+    border-radius:4px;
+    padding:22px 24px;
+    margin-bottom:18px;
+    position:relative;
+  }
+  section::before{
+    content:attr(data-step);
+    position:absolute;
+    top:-11px;
+    left:20px;
+    background:var(--ink);
+    padding:0 8px;
+    font-family:'JetBrains Mono', monospace;
+    font-size:10px;
+    letter-spacing:0.12em;
+    color:var(--gold-dim);
+    text-transform:uppercase;
+  }
+  h2{
+    font-family:'Cormorant SC', serif;
+    font-size:20px;
+    letter-spacing:0.04em;
+    text-transform:uppercase;
+    margin:0 0 16px;
+    color:var(--gold);
+    border-bottom:1px solid var(--line);
+    padding-bottom:10px;
+  }
+
+  .field{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    margin-bottom:12px;
+  }
+  .field label{
+    width:120px;
+    flex:0 0 120px;
+    font-family:'JetBrains Mono', monospace;
+    font-size:11px;
+    text-transform:uppercase;
+    letter-spacing:0.06em;
+    color:var(--bone-dim);
+  }
+  select,input[type="text"]{
+    flex:1;
+    padding:9px 10px;
+    background:#0f0c09;
+    border:1px solid var(--line);
+    border-radius:3px;
+    color:var(--bone);
+    font-family:'Spectral', serif;
+    font-size:14px;
+  }
+  select:focus,input:focus{outline:1px solid var(--gold-dim);}
+
+  .feature-box{
+    margin:0 0 16px 130px;
+    padding:12px 14px;
+    background:#120f0c;
+    border-left:2px solid var(--blood);
+    font-size:13.5px;
+    color:var(--bone-dim);
+  }
+  .feature-box .fname{
+    color:var(--gold);
+    font-weight:600;
+    font-family:'JetBrains Mono', monospace;
+    font-size:11px;
+    text-transform:uppercase;
+    letter-spacing:0.05em;
+    display:block;
+    margin-bottom:4px;
+  }
+  .feature-box .badge{
+    display:inline-block;
+    margin-top:8px;
+    padding:2px 8px;
+    font-family:'JetBrains Mono', monospace;
+    font-size:10.5px;
+    color:var(--ok);
+    border:1px solid var(--ok);
+    border-radius:2px;
+  }
+
+  /* ---------- Stats grid ---------- */
+  .stats{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:16px;
+  }
+  .stat{
+    background:#120f0c;
+    border:1px solid var(--line);
+    border-radius:3px;
+    padding:14px;
+    text-align:center;
+  }
+  .stat label{
+    display:block;
+    font-family:'JetBrains Mono', monospace;
+    font-size:11px;
+    letter-spacing:0.1em;
+    text-transform:uppercase;
+    color:var(--bone-dim);
+    margin-bottom:8px;
+  }
+  .stat select{
+    text-align:center;
+    font-family:'JetBrains Mono', monospace;
+    font-size:20px;
+    font-weight:600;
+    color:var(--gold);
+  }
+  .stat-desc{
+    font-size:11.5px;
+    color:var(--bone-dim);
+    margin-top:8px;
+    line-height:1.35;
+  }
+
+  /* ---------- Tables ---------- */
+  .mini-table{
+    width:100%;
+    border-collapse:collapse;
+    font-size:12.5px;
+    margin:10px 0 4px 130px;
+    width:calc(100% - 130px);
+  }
+  .mini-table th,.mini-table td{
+    border:1px solid var(--line);
+    padding:6px 8px;
+    text-align:left;
+  }
+  .mini-table th{
+    background:#120f0c;
+    color:var(--gold);
+    font-family:'JetBrains Mono', monospace;
+    font-size:10.5px;
+    text-transform:uppercase;
+    letter-spacing:0.04em;
+  }
+  .mini-table td{color:var(--bone-dim);}
+  .mini-table tr.active td{color:var(--bone);background:#1c1610;}
+
+  /* ---------- Spells ---------- */
+  .spell-note{
+    margin-left:130px;
+    font-size:13px;
+    color:var(--bone-dim);
+    margin-bottom:10px;
+  }
+  .spell-list{
+    display:flex;
+    flex-direction:column;
+    gap:16px;
+    margin-left:130px;
+  }
+  .spell-slot{
+    width:100%;
+  }
+  .spell-slot select{
+    width:100%;
+    background:#120f0c;
+    border:1px solid var(--line);
+    border-radius:3px;
+    padding:8px 10px;
+    font-size:13px;
+  }
+
+  /* ---------- Summary / Dossier ---------- */
+
+  #dossier-sheet{
+    background:#100d0a;
+    border:1px solid var(--line);
+    border-radius:4px;
+    padding:24px;
+    margin-bottom:18px;
+  }
+  .dossier-header{
+    display:flex;
+    justify-content:space-between;
+    align-items:baseline;
+    flex-wrap:wrap;
+    gap:8px;
+    border-bottom:2px solid var(--gold-dim);
+    padding-bottom:10px;
+    margin-bottom:6px;
+  }
+  .dossier-name{
+    font-family:'Cormorant SC', serif;
+    font-size:28px;
+    letter-spacing:0.03em;
+    text-transform:uppercase;
+    color:var(--bone);
+  }
+  .dossier-level{
+    font-family:'JetBrains Mono', monospace;
+    font-size:13px;
+    color:var(--gold);
+    text-transform:uppercase;
+    letter-spacing:0.06em;
+  }
+  .dossier-subline{
+    font-family:'JetBrains Mono', monospace;
+    font-size:11px;
+    letter-spacing:0.05em;
+    text-transform:uppercase;
+    color:var(--bone-dim);
+    margin-bottom:20px;
+  }
+  .dossier-stats-row{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:10px;
+    margin-bottom:12px;
+  }
+  .dossier-stat{
+    text-align:center;
+    padding:10px 6px;
+    background:#0c0a08;
+    border:1px solid var(--line);
+    border-radius:3px;
+  }
+  .dossier-stat .v{
+    font-family:'JetBrains Mono', monospace;
+    font-size:18px;
+    font-weight:600;
+    color:var(--gold);
+  }
+  .dossier-stat .l{
+    font-family:'JetBrains Mono', monospace;
+    font-size:9px;
+    text-transform:uppercase;
+    letter-spacing:0.06em;
+    color:var(--bone-dim);
+    margin-top:4px;
+  }
+  .dossier-block{margin-bottom:20px;}
+  .dossier-block:last-child{margin-bottom:0;}
+  .dossier-block h3{
+    font-family:'Cormorant SC', serif;
+    font-size:15px;
+    text-transform:uppercase;
+    letter-spacing:0.06em;
+    color:var(--gold);
+    border-bottom:1px solid var(--line);
+    padding-bottom:6px;
+    margin:0 0 10px;
+  }
+  .dossier-entry{
+    margin-bottom:10px;
+    font-size:13.5px;
+    color:var(--bone-dim);
+    padding-left:12px;
+    border-left:2px solid var(--blood);
+  }
+  .dossier-entry:last-child{margin-bottom:0;}
+  .dossier-entry .fname{
+    display:block;
+    font-family:'JetBrains Mono', monospace;
+    font-size:11px;
+    text-transform:uppercase;
+    letter-spacing:0.04em;
+    color:var(--bone);
+    margin-bottom:2px;
+  }
+  .dossier-entry .badge{
+    display:inline-block;
+    margin-top:6px;
+    margin-right:4px;
+    padding:2px 8px;
+    font-family:'JetBrains Mono', monospace;
+    font-size:10px;
+    color:var(--ok);
+    border:1px solid var(--ok);
+    border-radius:2px;
+  }
+
+  textarea{
+    width:100%;
+    min-height:220px;
+    background:#0f0c09;
+    border:1px solid var(--line);
+    border-radius:3px;
+    color:var(--bone-dim);
+    font-family:'JetBrains Mono', monospace;
+    font-size:12px;
+    padding:14px;
+    resize:vertical;
+  }
+  .fine{
+    font-size:11px;
+    color:var(--bone-dim);
+    margin-top:8px;
+    font-style:italic;
+  }
+
+  @media(max-width:640px){
+    .field{flex-direction:column;align-items:stretch;}
+    .field label{width:auto;}
+    .feature-box,.mini-table,.spell-note,.spell-list{margin-left:0;width:100%;}
+    .stats{grid-template-columns:1fr;}
+    .dossier-resources-row{grid-template-columns:repeat(2,1fr);}
+  }
+
+  /* ---------- Resource circle tracks ---------- */
+  .dossier-resources-row{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:10px;
+    margin-bottom:22px;
+  }
+  .circle-track{
+    display:flex;
+    justify-content:center;
+    flex-wrap:wrap;
+    gap:3px;
+    margin-top:8px;
+  }
+  .circle{
+    width:13px;
+    height:13px;
+    border:1.5px solid var(--gold-dim);
+    border-radius:50%;
+    display:inline-block;
+    cursor:pointer;
+    background:transparent;
+    padding:0;
+  }
+  .circle.active{
+    border-color:var(--gold);
+    border-width:2px;
+  }
+  .circle.inactive{
+    border-color:rgba(184,151,79,0.28);
+    border-style:dashed;
+  }
+  .circle.filled{
+    background:var(--gold);
+    border-color:var(--gold);
+    border-style:solid;
+  }
+
+  @media print{
+    #d-magicks-block{
+      break-before:page;
+      page-break-before:always;
+    }
+    body{background:#fff !important;padding:0;margin:0;}
+    .no-print{display:none !important;}
+    .wrap{max-width:100%;}
+    section{padding:0 !important;border:none !important;background:transparent !important;margin:0 !important;}
+    section::before{display:none !important;}
+    #dossier-sheet{
+      background:#fff;
+      border:none;
+      padding:0;
+      color:#111;
+    }
+    #dossier-sheet .dossier-name,#dossier-sheet h3{color:#111;}
+    #dossier-sheet .dossier-level,#dossier-sheet .dossier-subline{color:#444;}
+    #dossier-sheet .dossier-stat{background:#fff;border-color:#999;}
+    #dossier-sheet .dossier-stat .v{color:#111;}
+    #dossier-sheet .dossier-stat .l{color:#444;}
+    #dossier-sheet .dossier-entry{border-left-color:#111;color:#333;}
+    #dossier-sheet .dossier-entry .fname{color:#111;}
+    #dossier-sheet .dossier-entry .badge{color:#333;border-color:#666;}
+    #dossier-sheet .circle{border-color:#333;}
+    #dossier-sheet .circle.active{border-color:#111;}
+    #dossier-sheet .circle.inactive{border-color:#ccc;}
+    #dossier-sheet .circle.filled{background:#111;border-color:#111;}
+  }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+
+  <header class="no-print">
+    <div class="mark">
+      <img src="logo_gmm.png" alt="Grace, Might & Magicks logo" onerror="this.style.display='none'">
+    </div>
+    <div class="title-block">
+      <h1>Grace, Might &amp; Magicks</h1>
+      <div class="subtitle">Quick Character Generator · Public Playtest v0.3.5</div>
+    </div>
+  </header>
+
+  <div class="toolbar no-print">
+    <button class="primary" onclick="generateCharacter()">🎲 Generate Full Character</button>
+    <button onclick="exportJSON()">Copy JSON</button>
+  </div>
+
+  <!-- ============ IDENTITY ============ -->
+  <section data-step="Identity" class="no-print">
+    <h2>Identity</h2>
+    <div class="field">
+      <label>Name</label>
+      <input type="text" id="name" placeholder="Character name" onchange="updateCharacter()">
+      <button class="die" onclick="rerollName()">🎲</button>
+    </div>
+    <div class="field">
+      <label>Level</label>
+      <input type="text" id="level" value="1" readonly>
+    </div>
+  </section>
+
+  <!-- ============ ORIGIN ============ -->
+  <section data-step="Origin" class="no-print">
+    <h2>Ancestry, Background &amp; Occupation</h2>
+
+    <div class="field">
+      <label>Ancestry</label>
+      <select id="ancestry" onchange="onFieldChange('ancestry')"></select>
+      <button class="die" onclick="rerollField('ancestry')">🎲</button>
+    </div>
+    <div class="feature-box" id="ancestry-feature"></div>
+
+    <div class="field">
+      <label>Background</label>
+      <select id="background" onchange="onFieldChange('background')"></select>
+      <button class="die" onclick="rerollField('background')">🎲</button>
+    </div>
+    <div class="feature-box" id="background-feature"></div>
+
+    <div class="field">
+      <label>Occupation</label>
+      <select id="occupation" onchange="onFieldChange('occupation')"></select>
+      <button class="die" onclick="rerollField('occupation')">🎲</button>
+    </div>
+    <div class="feature-box" id="occupation-feature"></div>
+  </section>
+
+  <!-- ============ ABILITY SCORES ============ -->
+  <section data-step="Ability Scores" class="no-print">
+    <h2>Ability Scores</h2>
+    <p class="fine" style="margin-left:0;margin-top:-8px;margin-bottom:16px;">
+      Standard array of +2 / +1 / -1. Each value is assigned to exactly one score — changing one swaps it with whichever score currently holds that value.
+    </p>
+    <div class="stats">
+      <div class="stat">
+        <label>Grace</label>
+        <select id="stat_Grace" onchange="changeStat('Grace')"></select>
+        <div class="stat-desc">Agility, precision, awareness, social finesse.</div>
+      </div>
+      <div class="stat">
+        <label>Might</label>
+        <select id="stat_Might" onchange="changeStat('Might')"></select>
+        <div class="stat-desc">Physical strength, endurance, resilience, determination.</div>
+      </div>
+      <div class="stat">
+        <label>Magicks</label>
+        <select id="stat_Magicks" onchange="changeStat('Magicks')"></select>
+        <div class="stat-desc">Affinity for the mystical forces that shape the world.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ ARCHETYPE ============ -->
+  <section data-step="Archetype" class="no-print">
+    <h2>Archetype</h2>
+    <div class="field">
+      <label>Archetype</label>
+      <select id="archetype" onchange="onFieldChange('archetype')"></select>
+      <button class="die" onclick="rerollField('archetype')">🎲</button>
+    </div>
+    <div class="feature-box" id="archetype-feature"></div>
+  </section>
+
+  <!-- ============ EXPERTISE ============ -->
+  <section data-step="Expertise" class="no-print">
+    <h2>Expertise</h2>
+    <div class="field">
+      <label>Expertise</label>
+      <select id="expertise" onchange="onExpertiseChange()"></select>
+      <button class="die" onclick="rerollField('expertise')">🎲</button>
+    </div>
+    <div class="field" id="expertise-custom-field" style="display:none;">
+      <label>Custom</label>
+      <input type="text" id="expertise-custom" placeholder="Type your own Expertise" oninput="updateCharacter()">
+    </div>
+    <p class="fine" style="margin-left:0;">
+      Not a combat stat — grants +1 die when this narrow field of training applies. Should be specific, not broad. The book intends Expertise to be freeform — pick "Custom…" to write your own.
+    </p>
+  </section>
+
+  <!-- ============ MAGICKS ============ -->
+  <section data-step="Magicks" class="no-print">
+    <h2>Magicks</h2>
+    <div class="spell-note" id="magicks-note"></div>
+    <div class="field" id="spell-reroll-field" style="margin-left:130px;width:auto;">
+      <button class="die" onclick="rerollSpells()">🎲 Reroll Spells</button>
+    </div>
+    <div class="spell-list" id="spell-list"></div>
+  </section>
+
+  <!-- ============ EQUIPMENT ============ -->
+  <section data-step="Equipment" class="no-print">
+    <h2>Starting Equipment</h2>
+
+    <div class="field">
+      <label>Weapon</label>
+      <select id="weapon" onchange="onFieldChange('weapon')"></select>
+      <button class="die" onclick="rerollField('weapon')">🎲</button>
+    </div>
+    <div class="feature-box" id="weapon-feature"></div>
+
+    <div class="field">
+      <label>Armor</label>
+      <select id="armor" onchange="onFieldChange('armor')"></select>
+      <button class="die" onclick="rerollField('armor')">🎲</button>
+    </div>
+    <div class="feature-box" id="armor-feature"></div>
+
+    <div class="field">
+      <label>Equipment Set</label>
+      <select id="equipmentSet" onchange="onFieldChange('equipmentSet')"></select>
+      <button class="die" onclick="rerollField('equipmentSet')">🎲</button>
+    </div>
+    <div class="feature-box" id="equipmentSet-feature"></div>
+  </section>
+
+  <!-- ============ SUMMARY ============ -->
+  <section data-step="Character Sheet">
+    <h2 class="no-print">Character Summary</h2>
+
+    <div class="toolbar no-print" style="margin-bottom:18px;">
+      <button class="primary" style="display:none" onclick="window.print()">🖨️ Print Character Sheet</button>
+	  <button class="primary" onclick="downloadPDF()">📄 Download Character Sheet PDF</button>
+    </div>
+
+    <div id="dossier-sheet">
+      <div class="dossier-header">
+        <div class="dossier-name" id="d-name">—</div>
+        <div class="dossier-level">Level <span id="d-level">1</span></div>
+      </div>
+      <div class="dossier-subline" id="d-subline"></div>
+
+      <div class="dossier-stats-row" id="d-abilities-row"></div>
+      <div class="dossier-resources-row" id="d-resources-row"></div>
+
+      <div class="dossier-block">
+        <h3>Ancestry</h3>
+        <div id="d-origin"></div>
+      </div>
+
+      <div class="dossier-block">
+        <h3>Archetype</h3>
+        <div id="d-archetype"></div>
+      </div>
+
+      <div class="dossier-block">
+        <h3>Expertise</h3>
+        <div id="d-expertise"></div>
+      </div>
+	  
+	  <div class="dossier-block">
+        <h3>Equipment</h3>
+        <div id="d-equipment"></div>
+      </div>
+	  
+      <div class="dossier-block" id="d-magicks-block">
+        <h3>Magicks</h3>
+        <div id="d-magicks"></div>
+      </div>
+
+      
+    </div>
+
+    <div id="json-block" class="no-print">
+      <textarea id="output" readonly></textarea>
+      <p class="fine">
+        Evasion = Grace bonus + Archetype bonus + Armor modifier. Medium Armor caps the Grace-bonus portion at +2; Heavy Armor drops total Evasion to 0 regardless of bonus or archetype.
+      </p>
+    </div>
+  </section>
+
+</div>
+
+<script>
+
+/*****************************************************************
+ * CONFIG
+ *
+ * Set to true to show the raw JSON output block by default.
+ * Can also be flipped from the browser console at any time:
+ *   SHOW_JSON_OUTPUT = true; toggleJsonVisibility();
+ *****************************************************************/
+
+let SHOW_JSON_OUTPUT = false;
+
+function toggleJsonVisibility(){
+  document.getElementById("json-block").style.display = SHOW_JSON_OUTPUT ? "block" : "none";
+}
+
+/*****************************************************************
+ * DATA — transcribed from Grace, Might & Magicks, Public Playtest v0.3.5
+ *****************************************************************/
+
+const NAMES = [
+  "Aldric","Bren","Cassia","Dorian","Elara","Fen","Mara","Riven",
+  "Ysolde","Corin","Petra","Halric","Sena","Otho","Wren","Ilka",
+  "Doran","Maeve","Threk","Anwen","Bastian","Coralie","Gareth","Sable",
+  "Auren","Briala","Caelan","Draven","Eamon","Faelan","Gwyn","Isolde",
+  "Jorren","Kael","Liora","Merek","Nerys","Orin","Perrin","Quill",
+  "Ronan","Sylas","Talia","Ulric","Vaela","Wyatt","Xavian","Zarek",
+  "Alwen","Brann","Cerys","Daelen","Eira","Fiora","Galen","Hesta",
+  "Ivor","Jessa","Kieran","Lyra","Merrik","Nolan","Orla","Rhea",
+  "Seren","Theron","Varek","Ysran","Zephyr","Calix","Eldrin","Nyra",
+  "Ethes","Lany Mynge","Folke","Riffin","Bertio","Vyncis",
+  "Gauwis Wroby","Stiny","Theny","Helrey","Geoffry","Eorhtwulf","Eamard","Symas","Harder Corby",
+  "Aebin","Gylan","Gyles","Waldu","Walda","Alwin","Beren","Cedric","Delia","Edric","Fenna","Garran","Helena","Ilan","Joren",
+"Kaela","Lennox","Maren","Nolan","Oren","Rylan","Sorin","Tavin","Vera","Willem","Hugh","Milo","Tomas","Edwin","Rolf","Nessa","Marta","Elsie","Bryn","Colm",
+"Ansel","Pippa","Tilda","Garrick","Willa","Bram","Etta","Jonas","Lina","Faris"
+];
+
+const SURNAMES = [
+  "Ashford","Blackthorn","Brightwood","Crowe","Duskmere","Emberfall",
+  "Fairholt","Frost","Grimward","Hawthorne","Ironvale","Kestrel",
+  "Larkspur","Mournwood","Nightbrook","Oakheart","Ravencrest","Redwyne",
+  "Rook","Silvermere","Stone","Stormborn","Thorne","Vale",
+  "Voss","Wintermere","Wolfe","Dawnbringer","Greymark","Holloway",
+  "Kingsley","Ashen","Briar","Coldbrook","Darkmoor","Eldridge",
+  "Falconer","Glenwood","Harrow","Ivory","Locke","Moonfall",
+  "Norwyn","Pyre","Quickthorn","Rime","Sorrow","Thornfield","the Stubborn","the Quiet","the Old Hand","the Rough","the Patient",
+"the Scarred","the Heavy","the Tall","the Short","the Hard",
+"the Careful","the Watchful","the Steady","the Cold Eye","the Slow",
+"the Strongback","the Grizzled","the Plain","the Lucky","the Unbent","Barrow","Bramble","Carter","Cobb","Dale","Eaves","Fallow","Fletcher","Grove","Hale",
+"Harper","Hearth","Miller","Pike","Reed","Shepherd","Tanner","Wells","the Dusty","the Bent","Beck","Clay","Dyer","Fenn","Graves","Holt","Moss","Parker","Rooke","the Weathered"
+];
+
+const ANCESTRIES = [
+  { name:"Human", featureName:"Human Spirit", featureText:"When you go down to 0 Hit Points, you gain an action which you can use immediately. After resolving your action, you die.", hpTag:"Sturdy", hp:3 },
+  { name:"Dwarf", featureName:"Unshaken Foundation", featureText:"Once per session, when a roll draws on your foundation of stone and metalwork, you can consider one fail a success.", hpTag:"Sturdy", hp:3 },
+  { name:"Elf", featureName:"Long Memory", featureText:"Once per session, when a roll draws on long memory, you can consider one fail a success.", hpTag:"Lean", hp:2 },
+  { name:"Halfling", featureName:"Unassuming", featureText:"Once per scene, when you'd be the first person suspected, blamed, or searched, you may have that attention fall elsewhere given that you don't have any concrete evidence on you.", hpTag:"Lean", hp:2 },
+  { name:"Orc", featureName:"Marked by War", featureText:"Once per scene, the first time you hit a target that has a history of war or battle, you deal 1 more damage.", hpTag:"Sturdy", hp:3 },
+  { name:"Goblin", featureName:"Skittish", featureText:"Whenever you examine wreckage, ruins, refuse heap, or spoils of war, you know if it is poisoned or trapped. If someone else triggers a trap from those, you can immediately move out of the way.", hpTag:"Lean", hp:2 },
+  { name:"Gnome", featureName:"Analytical", featureText:"Once per scene, you may ask the GM one yes/no question about a creature's nature, intent, or weakness.", hpTag:"Lean", hp:2 },
+  { name:"Beastkin", featureName:"Wild Instinct", featureText:"Once per scene, you are forewarned when conflict breaks out. You can move to reposition before everyone has made their move. This doesn't count against your movement.", hpTag:"Sturdy", hp:3 }
+];
+
+const BACKGROUNDS = [
+  { name:"Noble", featureName:"Inherited Favor", featureText:"Once per session, call in a favor from your family name. In scenes where this matters, you gain an additional die. The GM decides if this has complications later on." },
+  { name:"Commoner", featureName:"One of the People", featureText:"Laborers, farmers, and servants speak freely around you and trust you with information they wouldn't give someone dressed finer or more official. You lose this bonus when you deliberately wear fine clothes." },
+  { name:"Outcast", featureName:"No Home to Return To", featureText:"Being exiled or banished from a town or settlement doesn't affect you. Being unwelcome has always been your thing." },
+  { name:"Foreigner", featureName:"An Outsider's Eye", featureText:"You immediately notice one thing about a place, custom, or person that would strike an outsider as strange that locals have stopped noticing, every time you enter a new town or settlement." },
+  { name:"Criminal", featureName:"Knows a Guy", featureText:"In any settlement of reasonable size, you always have connections to people from down under. Whether they'll want to strike a deal with you or not is a separate matter." },
+  { name:"Pilgrim", featureName:"Faith on the Road", featureText:"You are always welcome to rest, eat, and shelter for at least one night at any shrine, temple, or religious site of any faith, provided you come in peace." },
+  { name:"Scholar", featureName:"Always Prepared", featureText:"Once per session, declare that you've already read about something in the current scene — you can ask the GM one factual question about a monster, a well-known NPC, an event, or an enemy." },
+  { name:"Orphan", featureName:"Raised by Circumstance", featureText:"You always know how to find food, shelter, or safety for one night in any settlement, no matter how hostile." }
+];
+
+const OCCUPATIONS = [
+  { name:"Blacksmith", featureName:"Trained Eye", featureText:"You can always tell how a weapon or piece of armor was made, roughly how old it is, and how well it was crafted, just by examining it. You can also determine if the equipment is counterfeit or fraudulent." },
+  { name:"Hunter", featureName:"Expert Tracker", featureText:"You always know whether a stretch of wilderness has been recently traveled, hunted, or disturbed, and roughly what kind of creature did it. You can track its footsteps or scent if it leaves any." },
+  { name:"Farmer", featureName:"Green Thumb", featureText:"You always have a fair read on tomorrow's weather just from observing the sky, wind, and land. You always know whether nearby soil, water, or livestock is healthy or blighted." },
+  { name:"Sailor", featureName:"Mariner", featureText:"You always know the safest nearby route across open water, and you can tell a storm is coming hours before it does. You are an expert swimmer." },
+  { name:"Innkeeper", featureName:"Social Awareness", featureText:"Within moments of entering a public gathering space, you know who's in charge, who's dangerous, and who's about to cause trouble." },
+  { name:"Mason", featureName:"Master Builder", featureText:"You can always tell whether a wall, floor, or ceiling is load-bearing, unstable, or hollow, and identify the fastest way to bring it down if needed." },
+  { name:"Scribe", featureName:"Trained Hand", featureText:"Given a few minutes to study a sample, you can forge, copy, or recognize a forgery of any handwriting or document." },
+  { name:"Merchant", featureName:"Knows the Price", featureText:"You always know the fair market value of any mundane item, and can tell when someone is lying to you about price, quality, or origin. You immediately know if someone is ripping you off." }
+];
+
+const ARCHETYPES = [
+  { name:"Strongman", featureName:"Immovable Force", featureText:"You have the ability to shove an adjacent enemy back one Proximity band with no roll required.", bonusTag:"Durable", hpBonus:3, evasionBonus:0 },
+  { name:"Scout", featureName:"Vanguard's Eye", featureText:"When you spot danger before it spots you, your allies act as though they are forewarned too. You and your allies can move to reposition before everyone has made their move. This doesn't count against your movement.", bonusTag:"Slick", hpBonus:0, evasionBonus:1 },
+  { name:"Duelist", featureName:"Measured Strike", featureText:"Fighting a single opponent one-on-one, the first successful hit you land against them this scene adds 1 more damage.", bonusTag:"Tough", hpBonus:2, evasionBonus:0 },
+  { name:"Warden", featureName:"Steadfast Watch", featureText:"When an ally within Melee Proximity is about to take damage you saw coming, take that damage in their place instead.", bonusTag:"Durable", hpBonus:3, evasionBonus:0 },
+  { name:"Envoy", featureName:"Silver Accord", featureText:"When a conflict is about to lead to inevitable violence, attempt to talk down one specific individual. Once per scene, you can treat one failed roll as a success this way.", bonusTag:"Slick", hpBonus:0, evasionBonus:1 },
+  { name:"Trickster", featureName:"Sleight of Circumstance", featureText:"Create a distraction that draws a target's attention onto you. Once per scene, you can immediately roll your Help die to any ally you can see after they roll.", bonusTag:"Slick", hpBonus:0, evasionBonus:1 },
+  { name:"Herbalist", featureName:"Practiced Remedy", featureText:"When you perform a Healing action, heal an additional HP.", bonusTag:"Tough", hpBonus:2, evasionBonus:0 },
+  { name:"Adept", featureName:"Attuned Mind", featureText:"Once per Long Downtime, you can safely cast a spell without counting it against your safe casts.", bonusTag:"Tough", hpBonus:2, evasionBonus:0 }
+];
+
+const EXPERTISE_EXAMPLES = [
+  "Locksmith","Swashbuckler","Ancient Magicka","Mountain Guide","Assassination",
+  "Espionage","Falconry","Cartography","Poisoncraft","Siege Engineering",
+  "Riverboat Navigation","Beast Taming","Forgery","Court Etiquette","Bell-Diving"
+];
+
+const WEAPONS = [
+  { name:"Unarmed", damage:"+0", bonus:"Might", tag:"—" },
+  { name:"Improvised", damage:"+1", bonus:"Might", tag:"Improvised" },
+  { name:"Dagger", damage:"+2", bonus:"Grace", tag:"Concealable" },
+  { name:"Sidearm", damage:"+3", bonus:"Grace", tag:"—" },
+  { name:"Mainhand", damage:"+3/+4", bonus:"Grace or Might", tag:"Versatile" },
+  { name:"Great Weapon", damage:"+5", bonus:"Might", tag:"Heavy" },
+  { name:"Polearm", damage:"+3", bonus:"Might", tag:"Reach" },
+  { name:"Bow", damage:"+3", bonus:"Grace", tag:"Ranged" },
+  { name:"Crossbow", damage:"+4", bonus:"Grace", tag:"Ranged, Reload" },
+  { name:"Firearm", damage:"+6", bonus:"Grace", tag:"Ranged, Reload, Sundering, Misfire" }
+];
+
+const WEAPON_TAGS = {
+  "Improvised": "After you successfully land a hit with this weapon, if there are any 1s on the dice roll, this weapon breaks.",
+  "Concealable": "You can easily hide this weapon and bring it to places where weapons are otherwise forbidden.",
+  "Versatile": "You can choose to one-hand (Grace) or two-hand (Might) this weapon.",
+  "Heavy": "On a critical hit, the target is made Prone.",
+  "Reach": "You can attack creatures from one more Proximity than normal.",
+  "Ranged": "You can attack creatures from Distant Proximity.",
+  "Reload": "After attacking, the weapon must be reloaded before it can attack again. Reloading requires one Action.",
+  "Sundering": "The attack reduces Armor Durability by 1 if it deals damage.",
+  "Misfire": "Rolling a 1 counts against your successes. If this makes you miss your attack, the weapon misfires and you receive 1 HP damage. The weapon is now broken and cannot be used until repaired during Downtime."
+};
+
+const ARMORS = [
+  { name:"Clothing", rating:0, evasion:"+1", special:"—" },
+  { name:"Light Armor", rating:1, evasion:"0", special:"—" },
+  { name:"Medium Armor", rating:2, evasion:"0", special:"Evasion from Grace bonus capped at +2" },
+  { name:"Heavy Armor", rating:3, evasion:"0", special:"Disadvantage on Stealth; Evasion becomes 0" }
+];
+
+const EQUIPMENT_SETS = [
+  { name:"Set A", items:["Backpack","Bedroll","Mess kit","Tinderbox","Torch","5 rations","Waterskin","Healing potion (2 HP)","5 gold pieces"] },
+  { name:"Set B", items:["Backpack","Crowbar","Hammer","10 pitons","Torch","5 rations","Waterskin","50 feet of hempen rope","5 gold pieces"] }
+];
+
+const SPELLS = [
+  { name:'Arc Bolt', tradition:'Lumomancy', statLabel:'Damage', statValue:'3', proximity:'Far', roll:'Spellcast', cost:'1 Safe Cast', description:'You make a Spellcast Roll to manifest an arc of light against a target you can see within reasonable Proximity. On a crit, the target also is pushed one Proximity away.' },
+  { name:'Ember Lance', tradition:'Pyromancy', statLabel:'Damage', statValue:'3', proximity:'Far', roll:'Spellcast', cost:'1 Safe Cast', description:'You make a Spellcast Roll to hurl a burning lance against a target you can see within reasonable Proximity. On a crit, the target also suffers Burning.' },
+  { name:'Heal', tradition:'Biomancy', statLabel:'Heal', statValue:'1 HP per Safe Cast', proximity:'Far', roll:'—', cost:'Variable (SC)', description:'You heal one creature you can see within reasonable Proximity. It gains 1 Hit Point for each safe cast you expend.' },
+  { name:'Restore', tradition:'Biomancy', statLabel:'Heal', statValue:'—', proximity:'Far', roll:'—', cost:'1 Safe Cast', description:'You remove Bleeding, Burning, Poisoned, slowed and stunned from one creature you can see within reasonable Proximity.' },
+  { name:'Surge', tradition:'Biomancy', statLabel:'Heal', statValue:'—', proximity:'Melee', roll:'—', cost:'1 Safe Cast', description:'You touch one creature you can see within Melee Proximity and give them a surge in strength and speed. They gain a +1 die bonus to their next Grace or Might action.' },
+  { name:'Lightning Strike', tradition:'Aeromancy', statLabel:'Damage', statValue:'4', proximity:'Extreme', roll:'Spellcast', cost:'1 Safe Cast', description:'You make a Spellcast Roll to summon a lightning strike against a target you can see within reasonable Proximity. On a crit, the target also suffers Sundering.' },
+  { name:'Stoneguard', tradition:'Geomancy', statLabel:'Heal', statValue:'—', proximity:'Melee', roll:'—', cost:'1 Safe Cast', description:'You touch one creature you can see within Melee Proximity and cover them with a temporary stone armor. They gain a +1 armor bonus until they are struck or until you cast Stoneguard on a different target.' },
+  { name:'Shadowspear', tradition:'Necromancy', statLabel:'Damage', statValue:'2', proximity:'Near', roll:'Spellcast', cost:'1 Safe Cast, 1 HP', description:'You make a Spellcast Roll to hurl a spear of dark energy against a target you can see within reasonable Proximity. Whenever you roll a 6 on the dice, you ignore 1 point of Armor.' },
+  { name:'Rimefrost', tradition:'Hydromancy', statLabel:'Damage', statValue:'—', proximity:'Near', roll:'Spell Resist', cost:'1 Safe Cast', description:'A target you can see within reasonable Proximity must make a Spell Resist against your Magicks bonus. Additionally, targets within Melee Range must also make the same Spell Resist. Whenever they fail, they are Restrained by magical ice.' },
+  { name:'Timewalk', tradition:'Chronomancy', statLabel:'Heal', statValue:'—', proximity:'Near', roll:'—', cost:'1 Safe Cast', description:'You can move to any unoccupied space within Near Proximity in a blink of an eye. This does not trigger any traps and features like Attack of Opportunity. This also does not count against your movement.' },
+  { name:'Gust', tradition:'Aeromancy', statLabel:'Damage', statValue:'—', proximity:'Close', roll:'Spell Resist', cost:'1 Safe Cast', description:'You summon a strong gust of wind to blow any number of creatures equal to your Magicks bonus within Close Proximity in front of you. Affected creatures must make a Spell Resist against your Magicks bonus. Whenever they fail, they are pushed one Proximity away.' },
+  { name:'Grasping Roots', tradition:'Biomancy', statLabel:'Damage', statValue:'—', proximity:'Close', roll:'Spell Resist', cost:'1 Safe Cast', description:'You create a terrain of grasping roots within Close Proximity around you. The first time a creature enters or ends their turn on the roots, they must make a Might Ability Roll against your Magicks bonus or become Restrained. You and others that resisted the spell may move across the terrain as if you were slowed. This spell permanently alters terrain.' },
+  { name:'Smoke Cover', tradition:'Aeromancy', statLabel:'Heal', statValue:'—', proximity:'Melee', roll:'—', cost:'1 Safe Cast', description:'You touch one creature you can see within Melee Proximity and cover them with a temporary smoke cover. They are hidden until they act.' },
+  { name:'Light', tradition:'Lumomancy', statLabel:'Heal', statValue:'—', proximity:'Melee', roll:'—', cost:'1 Safe Cast', description:'You touch one object you can see within Melee Proximity. That object emits a bright light that extends up to Far Proximity and can be seen by creatures far out the Distant Proximity.' },
+  { name:'Darkness', tradition:'Lumomancy', statLabel:'Damage', statValue:'—', proximity:'Melee', roll:'—', cost:'1 Safe Cast', description:'You create an area of pure magical darkness in an area around you snuffing out any non-magical light. Magical light effects are temporarily suspended within the area. snuf Creatures inside the darkness have Disadvantage in melee attacks and cannot perform features like Attack of Opportunity. s Additionally, they cannot make Ranged attacks beyond Melee Proximity. They are also hidden from other creatures outside the darkness.' },
+  { name:'Silence', tradition:'Desmomancy', statLabel:'Damage', statValue:'—', proximity:'Far', roll:'Spell Resist', cost:'1 Safe Cast', description:'A target you can see within reasonable Proximity must make a Spell Resist against your Magicks bonus. When they fail to resist the spell, they are cannot cast spells until they finish their action.' },
+  { name:'Dispel', tradition:'Arcanomancy', statLabel:'Damage', statValue:'—', proximity:'Near', roll:'—', cost:'1 Safe Cast', description:'You may remove one active magical effect on a creature or you can see within reasonable Proximity.' },
+  { name:'Magicks Sense', tradition:'Arcanomancy', statLabel:'Heal', statValue:'—', proximity:'Near', roll:'—', cost:'1 Safe Cast', description:'Until your next action, you sense the presence of magicks within Near Proximity. If you sense magicks in this way, you can use your action to see a faint aura around any visible creature or object in the area that bears magicks, and you learn the nature of its magicks.' },
+  { name:'Telekinesis', tradition:'Arcanomancy', statLabel:'Damage', statValue:'—', proximity:'Near', roll:'Spell Resist', cost:'1 Safe Cast', description:'A target you can see within reasonable Proximity must make a Spell Resist against your Magicks bonus. When they fail to resist the spell, you can move them one Proximity closer or farther. You can freely move unbound objects this way if they weigh less than 100 x your Magicks bonus in lbs.' },
+  { name:'Windstep', tradition:'Aeromancy', statLabel:'Damage', statValue:'—', proximity:'Self', roll:'—', cost:'1 Safe Cast', description:'Until your next action, you envelop yourself with wind magicks. You cannot be slowed by terrain and you can move an additional Proximity with your movement.' },
+  { name:'Illusion', tradition:'Glamomancy', statLabel:'Damage', statValue:'—', proximity:'Near', roll:'—', cost:'1 Safe Cast', description:'You conjure an exact mirror copy of an object, sound, or creature in an unoccupied space you can see within reasonable Proximity. It is a perfect copy that any scrutiny other than touch cannot expose the illusion. The illusion lasts until it is dispelled, or until you cast Illusion again.' },
+  { name:'Mend', tradition:'Geomancy', statLabel:'Heal', statValue:'—', proximity:'Melee', roll:'—', cost:'1 Safe Cast', description:'You touch one object or armor you can see within Melee Proximity fix any torn seam, punctured area, or any broken part.' },
+  { name:'Compel', tradition:'Phrenomancy', statLabel:'Heal', statValue:'—', proximity:'Melee', roll:'Spell Resist', cost:'1 Safe Cast', description:'You touch one creature you can see within Melee Proximity fix to compel them to speak the truth. The target makes a Spell Resist Roll against your Magicks bonus or be compelled to speak one truth. The target is aware of the spell and can thus avoid answering questions to which it would normally respond with a lie. Such a creature can be evasive in its answers as long as it remains within the boundaries of the truth.' },
+  { name:'Netherswap', tradition:'Arcanomancy', statLabel:'Damage', statValue:'—', proximity:'Near', roll:'Spell Resist', cost:'1 Safe Cast', description:'You choose two creatures within Near Proximity and they must make a Spell Resist Roll against your Magicks bonus. If both failed to resist against the spell, they swap positions. A willing creature can choose to not resist the spell and you can choose yourself as one of the targets.' },
+  { name:'Gravity Well', tradition:'Gravimancy', statLabel:'Damage', statValue:'—', proximity:'Near', roll:'Spell Resist', cost:'1 Safe Cast', description:'You choose a point within Near Proximity and condense its gravity. Creatures within Close Proximity of the point must make a Spell Resist against your Magicks bonus or be pulled to the nearest unoccupied space adjacent to it. A creature pulled this way falls Prone.' },
+  { name:'Slow', tradition:'Arcanomancy', statLabel:'Damage', statValue:'—', proximity:'Far', roll:'Spell Resist', cost:'1 Safe Cast', description:'A target you can see within reasonable Proximity must make a Spell Resist against your Magicks bonus. When they fail to resist the spell, they are slowed until they finish their next action. Their Evasion bonus and movement is halved (rounded down, minimum 1).' },
+  { name:'Last Breath', tradition:'Heiromancy', statLabel:'Damage', statValue:'—', proximity:'Near', roll:'Spell Resist', cost:'1 Safe Cast', description:'A target you can see within reasonable Proximity must make a Spell Resist against your Magicks bonus. The target must have died within a minute of the casting of the spell for this to work. When they succeed, they violently return to life and gain an action which they can use immediately. After resolving their action, they die. A target cannot be affected by this spell twice.' },
+  { name:'Vitality Drain', tradition:'Necromancy', statLabel:'Damage', statValue:'1', proximity:'Near', roll:'Spellcast', cost:'1 Safe Cast, 1 HP', description:'You make a Spellcast Roll against a target you can see within reasonable Proximity. On a hit, lash it with dark energy, healing yourself for 1 Hit Point. On a crit, heal an additional 1 Hit Point and the target falls Prone.' },
+  { name:'Torrent', tradition:'Hydromancy', statLabel:'Damage', statValue:'2', proximity:'Near', roll:'Spellcast', cost:'1 Safe Cast', description:'You make a Spellcast Roll against a target you can see within reasonable Proximity. On a hit, the target is hit with a barrage of water. On a crit, the target is pushed one Proximity away.' },
+  { name:'Purify', tradition:'Hydromancy', statLabel:'Damage', statValue:'—', proximity:'Near', roll:'—', cost:'1 Safe Cast', description:'You touch a water inside a container and remove any poison, disease or blight that affects it.' },
+  { name:'Rewind', tradition:'Chronomancy', statLabel:'Damage', statValue:'—', proximity:'Near', roll:'Spell Resist', cost:'1 Safe Cast', description:'Time briefly folds back around a creature within Near Proximity and it must make a Spell Resist Roll. If that creature just rolled a die and it fails to resist the spell, it must reroll that die and use the new result. A willing creature can choose to not resist the spell.' },
+  { name:'Foresight', tradition:'Chronomancy', statLabel:'Damage', statValue:'—', proximity:'Near', roll:'—', cost:'1 Safe Cast', description:'You touch a willing creature and grant it foresight. It gains a +1 die bonus to their next roll.' },
+  { name:'Glamour', tradition:'Glamomancy', statLabel:'Damage', statValue:'—', proximity:'Self', roll:'—', cost:'1 Safe Cast', description:'You alter your own appearance to resemble a specific person you have seen, until you dismiss the spell or it is dispelled. This alteration is not an illusion but you do not gain any specific traits, features, or abilities the person may possess.' },
+  { name:'Binding Word', tradition:'Desmomancy', statLabel:'Damage', statValue:'—', proximity:'Near', roll:'—', cost:'1 Safe Cast', description:'A target you can see within reasonable Proximity must make a Spell Resist Roll against your Magicks bonus. If it fails to resist the spell, the target loses its strength to raise its hand to harm another creature as their next action.' },
+  { name:'Mirror Step', tradition:'Glamomancy', statLabel:'Damage', statValue:'—', proximity:'Self', roll:'—', cost:'1 Safe Cast', description:'You conjure a flickering illusory duplicate of yourself. The next attack made against you automatically targets the duplicate instead. The duplicate then dissolves.' },
+  { name:'Anchor', tradition:'Gravimancy', statLabel:'Damage', statValue:'—', proximity:'Self', roll:'—', cost:'1 Safe Cast', description:'You alter the gravity around you. Until your next action, you cannot be moved, pushed, or knocked Prone against your will. Your movement becomes 0 and you take a -1 penalty to Evasion (cannot go below 0).' },
+  { name:'Crush', tradition:'Gravimancy', statLabel:'Damage', statValue:'—', proximity:'Near', roll:'—', cost:'1 Safe Cast', description:'You alter the gravity around a creature or object you can see within reasonable Proximity. The creature makes a Spell Resist against your Magicks bonus. Any creature within Melee Proximity of the target must make the same Spell Resist. On a failure, the affected creature takes 3 damage and is slowed until their next action.' },
+  { name:'Incinerate', tradition:'Pyromancy', statLabel:'Damage', statValue:'3', proximity:'Close', roll:'Spellcast', cost:'2 Safe Casts', description:'You unleash a cone of fire in front of you, striking all creatures within Close Proximity. You must make a separate Spellcast Roll for each affected creature. On a crit, the affected creature is Burning.' },
+  { name:'Immolate', tradition:'Pyromancy', statLabel:'Damage', statValue:'—', proximity:'Self', roll:'—', cost:'1 Safe Cast', description:'You set yourself ablaze and are now Burning. For each of your actions while Burning, you gain +1 Armor, up to a maximum equal to your Magicks bonus. You can smother the flames yourself at any given time. The Armor bonus dissipates the moment Burning ends, by any means. You cannot cast this spell while under the effects of Stoneguard.' },
+  { name:'Quicksand', tradition:'Geomancy', statLabel:'Damage', statValue:'—', proximity:'Near', roll:'—', cost:'1 Safe Cast', description:'You choose a point within Near Proximity and conjure a patch of quicksand covering the area within Close Proximity of that point. The terrain becomes unstable and whenever a creature enters or ends its movement within the quicksand, it makes a Might Ability Roll against your Magicks bonus. On a failure, the creature becomes Restrained. You and others that resisted the spell may move across the terrain as if you were slowed. This spell permanently alters the terrain.' },
+  { name:'Lightning Spear', tradition:'Aeromancy', statLabel:'Damage', statValue:'5', proximity:'Far', roll:'Spellcast', cost:'3 Safe Casts', description:'You hurl a piercing bolt of Lightning at a target within Far Proximity. The bolt drives through any other creatures standing between you and the target. Make a separate Spellcast Roll against each creature in the line. Creatures other than the main target receive a reduced 3 base damage. On a crit, the affected creature is momentarily stunned, unable to act until struck.' },
+  { name:'Warform', tradition:'Biomancy', statLabel:'Damage', statValue:'—', proximity:'Self', roll:'—', cost:'1 Safe Cast', description:'Your body hardens and your mind sharpens with battlemagicks. Until you end the effect or the scene ends, you may use your Magicks bonus in place of Grace or Might when making melee weapon attacks. While Warform is active, you cannot cast any other spell. When the effect ends, by any means, you take 2 damage as the magicks tear free of you. This damage cannot be reduced by Armor or any other mitigation, and can kill you.' },
+  { name:'Wither', tradition:'Necromancy', statLabel:'Damage', statValue:'3', proximity:'Near', roll:'Spellcast', cost:'1 Safe Cast, 1 HP', description:'You make a Spellcast Roll against a target you can see within reasonable Proximity. On a hit, the target cannot regain Hit Points until they finish their action. On a crit, deal an additional 1 Hit Point of damage.' },
+  { name:'Grave Ward', tradition:'Necromancy', statLabel:'Heal', statValue:'—', proximity:'Near', roll:'Spellcast', cost:'Variable (HP)', description:'You borrow against your own vitality. Gain Armor equal to Hit Points you are willing to expend. Every time you are struck, 1 Armor is deducted from this bonus. This spell persists until there is at least 1 Armor bonus, dismissed, dispelled, or until you cast this spell again.' },
+  { name:'Whispers of the Dead', tradition:'Necromancy', statLabel:'Heal', statValue:'—', proximity:'Melee', roll:'Spellcast', cost:'Variable (HP)', description:'You touch a corpse that died within the last century and ask it one question it knew the answer to in life. It answers honestly to the best of its ability and then falls silent again. You can ask another question by expending another Hit Point. The corpse must have a mouth for this spell to work.' },
+  { name:'Raise Thrall', tradition:'Necromancy', statLabel:'Damage', statValue:'—', proximity:'Near', roll:'Spellcast', cost:'1 Safe Cast, 1 HP', description:'You reanimate a corpse within Near Proximity as a thrall. It has Hit Points equal to your Magicks bonus. It has no intelligence and will only attempt to attack enemies unarmed. It follows one simple command from you. It collapses immediately when it reaches 0 Hit Points or when the scene ends. This spell only works on a creature once. If you use this spell to raise the same creature again, it fails.' },
+  { name:'Cinder Burst', tradition:'Pyromancy', statLabel:'Damage', statValue:'2', proximity:'Close', roll:'Spellcast', cost:'2 Safe Casts', description:'You target a point within Close Proximity and molten lava bursts out of it. You make a Spellcast Roll for each creature within Melee Proximity of this point. On a crit, affected creatures are Burning.' },
+  { name:'Knockout', tradition:'Phrenomancy', statLabel:'Damage', statValue:'—', proximity:'Close', roll:'Spell Resist', cost:'2 Safe Casts', description:'You target an area within Close Proximity and invoke a power drowsiness to all creatures within that area. Creatures within that area must make a Spell Resist Roll against your Magicks bonus. On a failure, they fall asleep until they are struck or shaken awake.' },
+  { name:'Tongues', tradition:'Arcanomancy', statLabel:'Heal', statValue:'—', proximity:'Self', roll:'—', cost:'1 Safe Casts', description:'You open a hidden compartment in your mind. Until the end of the scene, you can understand any spoken or written language.' },
+  { name:'Featherfoot', tradition:'Aeromancy', statLabel:'Heal', statValue:'—', proximity:'Melee', roll:'—', cost:'2 Safe Casts', description:'You touch a number of creatures equal to your Magicks bonus and give them a temporary boon. They grow spectral wings on their ankles, allowing them to hover instead of fall. These creatures suffer no fall damage until the end of scene.' },
+];
+
+const STAT_ARRAY = ["+2","+1","-1"];
+let stats = { Grace:"+2", Might:"+1", Magicks:"-1" };
+let chosenSpells = [];
+
+const character = {};
+
+/*****************************************************************
+ * HELPERS
+ *****************************************************************/
+
+function randomItem(arr){ return arr[Math.floor(Math.random()*arr.length)]; }
+
+function shuffle(arr){
+  const copy=[...arr];
+  for(let i=copy.length-1;i>0;i--){
+    const j=Math.floor(Math.random()*(i+1));
+    [copy[i],copy[j]]=[copy[j],copy[i]];
+  }
+  return copy;
+}
+
+function bonusOf(sign){ return parseInt(sign,10); }
+
+function findBy(list,name){ return list.find(x=>x.name===name); }
+
+function populateSelect(id, list, key){
+  const select=document.getElementById(id);
+  select.innerHTML="";
+  list.forEach(item=>{
+    const option=document.createElement("option");
+    const val = key ? item[key] : item;
+    option.value=val;
+    option.text=val;
+    select.appendChild(option);
+  });
+}
+
+/*****************************************************************
+ * FIELD RENDERING
+ *****************************************************************/
+
+function renderFeatureBox(elId, entry){
+  document.getElementById(elId).innerHTML =
+    `<span class="fname">${entry.featureName}</span>${entry.featureText}<br>` +
+    (entry.hpTag ? `<span class="badge">${entry.hpTag} · ${entry.hp} Max HP</span>` : "") +
+    (entry.bonusTag ? `<span class="badge">${entry.bonusTag} · ${entry.hpBonus ? "+"+entry.hpBonus+" Max HP" : "+"+entry.evasionBonus+" Evasion"}</span>` : "");
+}
+
+function renderWeaponTable(selected){
+  const weapon = findBy(WEAPONS, selected);
+  const box = document.getElementById("weapon-feature");
+
+  const statLine = `<span class="badge">Damage: ${weapon.damage}</span><span class="badge">Bonus: ${weapon.bonus}</span><span class="badge">Tag: ${weapon.tag}</span>`;
+
+  if(weapon.tag === "—"){
+    box.innerHTML = `<span class="fname">${weapon.name}</span>${statLine}`;
+    return;
+  }
+  const tagNames = weapon.tag.split(",").map(t=>t.trim());
+  const tagDefs = tagNames.map(tag => `
+    <div style="margin-top:8px;">
+      <span class="fname">${tag}</span>${WEAPON_TAGS[tag] || ""}
+    </div>
+  `).join("");
+  box.innerHTML = `<span class="fname">${weapon.name}</span>${statLine}${tagDefs}`;
+}
+
+function renderArmorTable(selected){
+  const armor = findBy(ARMORS, selected);
+  const box = document.getElementById("armor-feature");
+  const statLine = `<span class="badge">Armor Rating: ${armor.rating}</span><span class="badge">Evasion Bonus: ${armor.evasion}</span>`;
+  const special = armor.special !== "—" ? `<div style="margin-top:8px;">${armor.special}</div>` : "";
+  box.innerHTML = `<span class="fname">${armor.name}</span>${statLine}${special}`;
+}
+
+function renderEquipmentSetBox(selected){
+  const set = findBy(EQUIPMENT_SETS, selected);
+  document.getElementById("equipmentSet-feature").innerHTML =
+    `<span class="fname">Contents</span>${set.items.join(", ")}`;
+}
+
+function renderSpells(){
+  const magicksBonus = bonusOf(stats.Magicks);
+  const known = Math.max(0, magicksBonus);
+  const note = document.getElementById("magicks-note");
+  const rerollField = document.getElementById("spell-reroll-field");
+  const list = document.getElementById("spell-list");
+
+  if(known === 0){
+    note.innerHTML = `Magicks bonus is <strong>${stats.Magicks}</strong>. A Magicks bonus of +1 or higher is required to wield magicks — this character has no spells.`;
+    rerollField.style.display="none";
+    list.innerHTML="";
+    chosenSpells=[];
+    return;
+  }
+
+  rerollField.style.display="flex";
+  note.innerHTML = `Magicks bonus is <strong>+${magicksBonus}</strong>. Spells known: <strong>${known}</strong>. Safe casts: <strong>${known}</strong> per Long Downtime.`;
+
+  // trim or fill chosenSpells to match "known" count without unnecessary rerolls
+  if(chosenSpells.length > known){
+    chosenSpells = chosenSpells.slice(0, known);
+  } else if(chosenSpells.length < known){
+    const available = SPELLS.filter(s => !chosenSpells.find(c=>c.name===s.name));
+    const shuffled = shuffle(available);
+    while(chosenSpells.length < known && shuffled.length){
+      chosenSpells.push(shuffled.pop());
+    }
+  }
+
+  list.innerHTML = chosenSpells.map((s,i) => `
+    <div class="spell-slot">
+      <select onchange="changeSpell(${i}, this.value)">
+        ${SPELLS.map(sp => `<option value="${sp.name}" ${sp.name===s.name?'selected':''}>${sp.name} — ${sp.tradition}</option>`).join("")}
+      </select>
+      <div class="feature-box" style="margin-left:0;margin-top:8px;margin-bottom:0;">
+        <span class="fname" style="margin-bottom:0px">${s.name} · ${s.tradition}</span>
+        <span class="badge">${s.statLabel}: ${s.statValue}</span>
+        <span class="badge">Proximity: ${s.proximity}</span>
+        <span class="badge">Roll: ${s.roll}</span>
+        <span class="badge" style="margin-bottom:16px">Cost: ${s.cost}</span><br>
+		${s.description}
+      </div>
+    </div>
+  `).join("");
+}
+
+function changeSpell(index, newName){
+  const newSpell = SPELLS.find(sp => sp.name === newName);
+  const oldSpell = chosenSpells[index];
+
+  // spells known must stay unique — if the new pick is already held in
+  // another slot, that slot takes the old spell instead (same pattern as stats)
+  const dupIndex = chosenSpells.findIndex((s,i2) => i2!==index && s.name===newName);
+  if(dupIndex !== -1){
+    chosenSpells[dupIndex] = oldSpell;
+  }
+  chosenSpells[index] = newSpell;
+
+  renderSpells();
+  updateCharacter();
+}
+
+function rerollSpells(){
+  const magicksBonus = bonusOf(stats.Magicks);
+  const known = Math.max(0, magicksBonus);
+  chosenSpells = shuffle(SPELLS).slice(0, known);
+  renderSpells();
+  updateCharacter();
+}
+
+/*****************************************************************
+ * STAT SWAPPING (standard array, no duplicates)
+ *****************************************************************/
+
+function buildStatDropdowns(){
+  Object.keys(stats).forEach(stat=>{
+    const select=document.getElementById("stat_"+stat);
+    select.innerHTML="";
+    STAT_ARRAY.forEach(value=>{
+      const option=document.createElement("option");
+      option.value=value;
+      option.text=value;
+      select.appendChild(option);
+    });
+    select.value=stats[stat];
+  });
+}
+
+function changeStat(changedStat){
+  const select=document.getElementById("stat_"+changedStat);
+  const newValue=select.value;
+  const oldValue=stats[changedStat];
+
+  Object.keys(stats).forEach(stat=>{
+    if(stat!==changedStat && stats[stat]===newValue){
+      stats[stat]=oldValue;
+      document.getElementById("stat_"+stat).value=oldValue;
+    }
+  });
+
+  stats[changedStat]=newValue;
+  renderSpells();
+  updateCharacter();
+}
+
+function assignStats(){
+  const shuffled=shuffle(STAT_ARRAY);
+  stats={ Grace:shuffled[0], Might:shuffled[1], Magicks:shuffled[2] };
+  Object.keys(stats).forEach(stat=>{
+    document.getElementById("stat_"+stat).value=stats[stat];
+  });
+}
+
+/*****************************************************************
+ * FIELD CHANGE / REROLL HANDLERS
+ *****************************************************************/
+
+function onFieldChange(field){
+  const value = document.getElementById(field).value;
+
+  if(field==="ancestry") renderFeatureBox("ancestry-feature", findBy(ANCESTRIES,value));
+  if(field==="background") renderFeatureBox("background-feature", findBy(BACKGROUNDS,value));
+  if(field==="occupation") renderFeatureBox("occupation-feature", findBy(OCCUPATIONS,value));
+  if(field==="archetype") renderFeatureBox("archetype-feature", findBy(ARCHETYPES,value));
+  if(field==="weapon") renderWeaponTable(value);
+  if(field==="armor") renderArmorTable(value);
+  if(field==="equipmentSet") renderEquipmentSetBox(value);
+
+  updateCharacter();
+}
+
+const FIELD_DATA = {
+  ancestry:ANCESTRIES, background:BACKGROUNDS, occupation:OCCUPATIONS,
+  archetype:ARCHETYPES, weapon:WEAPONS, armor:ARMORS, equipmentSet:EQUIPMENT_SETS
+};
+
+function rerollField(field){
+  if(field === "expertise"){
+    document.getElementById("expertise").value = randomItem(EXPERTISE_EXAMPLES);
+    onExpertiseChange();
+    return;
+  }
+  const picked = randomItem(FIELD_DATA[field]);
+  document.getElementById(field).value = picked.name;
+  onFieldChange(field);
+}
+
+function rerollName(){
+  const firstName = randomItem(NAMES);
+  const surName = randomItem(SURNAMES);
+  
+  document.getElementById("name").value = `${firstName} ${surName}`;
+  updateCharacter();
+}
+
+function onExpertiseChange(){
+  const value = document.getElementById("expertise").value;
+  const customField = document.getElementById("expertise-custom-field");
+  customField.style.display = (value === "Custom…") ? "flex" : "none";
+  updateCharacter();
+}
+
+function currentExpertise(){
+  const select = document.getElementById("expertise").value;
+  if(select === "Custom…"){
+    return document.getElementById("expertise-custom").value;
+  }
+  return select;
+}
+
+/*****************************************************************
+ * DERIVED STATS
+ *****************************************************************/
+
+function computeDerived(){
+  const ancestry = findBy(ANCESTRIES, document.getElementById("ancestry").value);
+  const archetype = findBy(ARCHETYPES, document.getElementById("archetype").value);
+  const armor = findBy(ARMORS, document.getElementById("armor").value);
+  const graceBonus = bonusOf(stats.Grace);
+  const magicksBonus = bonusOf(stats.Magicks);
+
+  const hp = ancestry.hp + archetype.hpBonus;
+
+  // Evasion = Grace bonus + Archetype bonus + Armor modifier.
+  // Medium Armor caps the Grace-bonus portion at +2 (applied before the
+  // archetype bonus is added). Heavy Armor drops total Evasion to 0,
+  // overriding everything else, including archetype bonuses.
+  let graceContribution = graceBonus;
+  if(armor.name === "Medium Armor") graceContribution = Math.min(graceContribution, 2);
+  const armorFlatBonus = armor.name === "Clothing" ? 1 : 0;
+  let evasion = graceContribution + archetype.evasionBonus + armorFlatBonus;
+  if(armor.name === "Heavy Armor") evasion = 0;
+
+  const safeCasts = Math.max(0, magicksBonus);
+
+  return { hp, evasion, safeCasts };
+}
+
+/*****************************************************************
+ * GENERATE / UPDATE / EXPORT
+ *****************************************************************/
+
+function generateCharacter(){
+  rerollName();
+
+  ["ancestry","background","occupation","archetype","weapon","armor","equipmentSet"].forEach(field=>{
+    document.getElementById(field).value = randomItem(FIELD_DATA[field]).name;
+    onFieldChange(field);
+  });
+
+  rerollField("expertise");
+  assignStats();
+  renderSpells();
+
+  chosenSpells = [];
+  const magicksBonus = bonusOf(stats.Magicks);
+  chosenSpells = shuffle(SPELLS).slice(0, Math.max(0, magicksBonus));
+  renderSpells();
+
+  updateCharacter();
+}
+
+function updateCharacter(){
+  const derived = computeDerived();
+
+  character.name = document.getElementById("name").value;
+  character.level = 1;
+  character.ancestry = document.getElementById("ancestry").value;
+  character.background = document.getElementById("background").value;
+  character.occupation = document.getElementById("occupation").value;
+  character.archetype = document.getElementById("archetype").value;
+  character.expertise = currentExpertise();
+
+  character.abilityScores = { ...stats };
+
+  character.spellsKnown = chosenSpells.map(s => `${s.name} (${s.tradition})`);
+  character.safeCasts = derived.safeCasts;
+
+  character.equipment = {
+    weapon: document.getElementById("weapon").value,
+    armor: document.getElementById("armor").value,
+    equipmentSet: document.getElementById("equipmentSet").value
+  };
+
+  character.derived = {
+    maxHitPoints: derived.hp,
+    evasion: derived.evasion
+  };
+
+  document.getElementById("output").value = JSON.stringify(character, null, 4);
+
+  renderDossier(derived);
+}
+
+function makeCircleTrack(count){
+  const active = Math.max(0, Math.min(count, 6));
+  let circles = "";
+  for(let i=0;i<6;i++){
+    const stateClass = i < active ? "active" : "inactive";
+    circles += `<span class="circle ${stateClass}" onclick="this.classList.toggle('filled')"></span>`;
+  }
+  return `<div class="circle-track">${circles}</div>`;
+}
+
+function renderDossier(derived){
+  const ancestry = findBy(ANCESTRIES, document.getElementById("ancestry").value);
+  const background = findBy(BACKGROUNDS, document.getElementById("background").value);
+  const occupation = findBy(OCCUPATIONS, document.getElementById("occupation").value);
+  const archetype = findBy(ARCHETYPES, document.getElementById("archetype").value);
+  const weapon = findBy(WEAPONS, document.getElementById("weapon").value);
+  const armor = findBy(ARMORS, document.getElementById("armor").value);
+  const equipmentSet = findBy(EQUIPMENT_SETS, document.getElementById("equipmentSet").value);
+  const expertise = currentExpertise();
+
+  document.getElementById("d-name").textContent = document.getElementById("name").value || "Unnamed";
+  document.getElementById("d-level").textContent = document.getElementById("level").value;
+  document.getElementById("d-subline").textContent =
+    `${ancestry.name} · ${background.name} · ${occupation.name} · ${archetype.name}`;
+
+  document.getElementById("d-abilities-row").innerHTML = `
+    <div class="dossier-stat"><div class="v">${stats.Grace}</div><div class="l">Grace</div></div>
+    <div class="dossier-stat"><div class="v">${stats.Might}</div><div class="l">Might</div></div>
+    <div class="dossier-stat"><div class="v">${stats.Magicks}</div><div class="l">Magicks</div></div>
+  `;
+
+  document.getElementById("d-resources-row").innerHTML = `
+    <div class="dossier-stat">
+      <div class="v">${derived.hp}</div><div class="l">Max HP</div>
+      ${makeCircleTrack(derived.hp)}
+    </div>
+    <div class="dossier-stat"><div class="v">${derived.evasion}</div><div class="l">Evasion</div></div>
+    <div class="dossier-stat">
+      <div class="v">${armor.rating}</div><div class="l">Armor</div>
+      ${makeCircleTrack(armor.rating)}
+    </div>
+    <div class="dossier-stat">
+      <div class="v">${derived.safeCasts}</div><div class="l">Safe Casts</div>
+      ${makeCircleTrack(derived.safeCasts)}
+    </div>
+  `;
+
+  document.getElementById("d-origin").innerHTML = `
+    <div class="dossier-entry">
+      <span class="fname">${ancestry.name} — ${ancestry.featureName}</span>${ancestry.featureText}<br>
+      <span class="badge">${ancestry.hpTag} · ${ancestry.hp} Max HP</span>
+    </div>
+    <div class="dossier-entry">
+      <span class="fname">${background.name} — ${background.featureName}</span>${background.featureText}<br>
+    </div>
+    <div class="dossier-entry">
+      <span class="fname">${occupation.name} — ${occupation.featureName}</span>${occupation.featureText}<br>
+    </div>
+  `;
+
+  document.getElementById("d-archetype").innerHTML = `
+    <div class="dossier-entry">
+      <span class="fname">${archetype.name} — ${archetype.featureName}</span>${archetype.featureText}<br>
+      <span class="badge">${archetype.bonusTag} · ${archetype.hpBonus ? "+"+archetype.hpBonus+" Max HP" : "+"+archetype.evasionBonus+" Evasion"}</span>
+    </div>
+  `;
+
+  document.getElementById("d-expertise").innerHTML = `
+    <div class="dossier-entry"><span class="fname">${expertise || "—"}</span>Grants +1 die when this narrow field of training applies.</div>
+  `;
+
+  const magicksBlock = document.getElementById("d-magicks-block");
+  const magicksBonus = bonusOf(stats.Magicks);
+  if(magicksBonus <= 0 || chosenSpells.length === 0){
+    magicksBlock.style.display = "none";
+  } else {
+    magicksBlock.style.display = "";
+    document.getElementById("d-magicks").innerHTML = chosenSpells.map(s => `
+      <div class="dossier-entry">
+        <span class="fname"style="margin-bottom:0px">${s.name} — ${s.tradition}</span>
+        <span class="badge">${s.statLabel}: ${s.statValue}</span>
+        <span class="badge">Proximity: ${s.proximity}</span>
+        <span class="badge">Roll: ${s.roll}</span>
+        <span class="badge"style="margin-bottom:16px">Cost: ${s.cost}</span><br>
+		${s.description}
+      </div>
+    `).join("");
+  }
+
+  const weaponTagDefs = weapon.tag === "—" ? "" :
+    weapon.tag.split(",").map(t=>t.trim()).map(tag => `${tag}: ${WEAPON_TAGS[tag]||""}`).join(" ");
+
+  document.getElementById("d-equipment").innerHTML = `
+    <div class="dossier-entry">
+      <span class="fname">Weapon — ${weapon.name}</span>
+      <span class="badge">Damage: ${weapon.damage}</span><span class="badge">Bonus: ${weapon.bonus}</span><span class="badge">Tag: ${weapon.tag}</span>
+      <br>${weaponTagDefs}
+    </div>
+    <div class="dossier-entry">
+      <span class="fname">Armor — ${armor.name}</span>
+      <span class="badge">Armor Rating: ${armor.rating}</span><span class="badge">Evasion Bonus: ${armor.evasion}</span><br>
+      ${armor.special !== "—" ? armor.special : ""}
+    </div>
+    <div class="dossier-entry">
+      <span class="fname">${equipmentSet.name}</span>${equipmentSet.items.join(", ")}
+    </div>
+  `;
+}
+
+function exportJSON(){
+  navigator.clipboard.writeText(JSON.stringify(character, null, 4));
+  const btn = event.target;
+  const original = btn.textContent;
+  btn.textContent = "Copied!";
+  setTimeout(()=>{ btn.textContent = original; }, 1200);
+}
+
+/*****************************************************************
+ * INIT
+ *****************************************************************/
+
+populateSelect("ancestry", ANCESTRIES, "name");
+populateSelect("background", BACKGROUNDS, "name");
+populateSelect("occupation", OCCUPATIONS, "name");
+populateSelect("archetype", ARCHETYPES, "name");
+populateSelect("weapon", WEAPONS, "name");
+populateSelect("armor", ARMORS, "name");
+populateSelect("equipmentSet", EQUIPMENT_SETS, "name");
+populateSelect("expertise", [...EXPERTISE_EXAMPLES, "Custom…"]);
+
+buildStatDropdowns();
+toggleJsonVisibility();
+
+generateCharacter();
+
+</script>
+</body>
+</html>
