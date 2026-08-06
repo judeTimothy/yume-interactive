@@ -392,6 +392,72 @@
     border-radius:2px;
   }
 
+  /* ---------- Level Up Tracker ---------- */
+  .tier-columns{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:18px;
+  }
+  .tier-column h4{
+    font-family:'Cormorant SC', serif;
+    font-size:14px;
+    text-transform:uppercase;
+    letter-spacing:0.05em;
+    color:var(--gold);
+    margin:0 0 10px;
+    text-align:center;
+    border-bottom:1px solid var(--line);
+    padding-bottom:6px;
+  }
+  .tier-block{margin-bottom:12px;}
+  .tier-label{
+    font-family:'JetBrains Mono', monospace;
+    font-size:10px;
+    text-transform:uppercase;
+    letter-spacing:0.08em;
+    color:var(--bone-dim);
+    margin-bottom:4px;
+  }
+  .tier-feature{
+    display:flex;
+    align-items:flex-start;
+    gap:6px;
+    font-size:11px;
+    color:var(--bone-dim);
+    margin-bottom:5px;
+    line-height:1.35;
+  }
+  .tier-feature .circle{
+    flex:0 0 auto;
+    width:11px;
+    height:11px;
+    margin-top:2px;
+    border-width:1.5px;
+  }
+  .tier-feature .tfname{
+    color:var(--bone);
+    font-weight:600;
+  }
+
+  /* ---------- Inventory ---------- */
+  .inventory-list{
+    display:grid;
+    grid-template-columns:repeat(2,1fr);
+    gap:8px 20px;
+  }
+  .inventory-item{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    font-size:13px;
+    color:var(--bone-dim);
+    padding-bottom:4px;
+    border-bottom:1px dashed var(--line);
+  }
+  .inventory-item .circle{
+    flex:0 0 auto;
+  }
+
   textarea{
     width:100%;
     min-height:220px;
@@ -417,6 +483,8 @@
     .feature-box,.mini-table,.spell-note,.spell-list{margin-left:0;width:100%;}
     .stats{grid-template-columns:1fr;}
     .dossier-resources-row{grid-template-columns:repeat(2,1fr);}
+    .tier-columns{grid-template-columns:1fr;}
+    .inventory-list{grid-template-columns:1fr;}
   }
 
   /* ---------- Resource circle tracks ---------- */
@@ -458,9 +526,32 @@
   }
 
   @media print{
+    #d-equipment-block{
+      break-before:page;
+      page-break-before:always;
+    }
+    #d-inventory-block{
+      break-before:page;
+      page-break-before:always;
+    }
     #d-magicks-block{
       break-before:page;
       page-break-before:always;
+    }
+    #d-levelup-block{
+      break-before:page;
+      page-break-before:always;
+    }
+    #dossier-sheet .dossier-entry,
+    #dossier-sheet .tier-block,
+    #dossier-sheet .inventory-item,
+    #dossier-sheet .dossier-stat{
+      break-inside:avoid;
+      page-break-inside:avoid;
+    }
+    #dossier-sheet h3{
+      break-after:avoid;
+      page-break-after:avoid;
     }
     body{background:#fff !important;padding:0;margin:0;}
     .no-print{display:none !important;}
@@ -485,6 +576,11 @@
     #dossier-sheet .circle.active{border-color:#111;}
     #dossier-sheet .circle.inactive{border-color:#ccc;}
     #dossier-sheet .circle.filled{background:#111;border-color:#111;}
+    #dossier-sheet .tier-column h4{color:#111;}
+    #dossier-sheet .tier-label{color:#444;}
+    #dossier-sheet .tier-feature{color:#333;}
+    #dossier-sheet .tier-feature .tfname{color:#111;}
+    #dossier-sheet .inventory-item{color:#333;border-bottom-color:#ccc;}
   }
 </style>
 </head>
@@ -501,6 +597,11 @@
       <div class="subtitle">Quick Character Generator · Public Playtest v0.3.5</div>
     </div>
   </header>
+
+  <div class="field no-print" style="margin-bottom:20px;">
+    <label>Setting</label>
+    <select id="setting" onchange="applySetting(this.value)"></select>
+  </div>
 
   <div class="toolbar no-print">
     <button class="primary" onclick="generateCharacter()">🎲 Generate Full Character</button>
@@ -669,17 +770,28 @@
         <div id="d-expertise"></div>
       </div>
 	  
-	  <div class="dossier-block">
+	  <div class="dossier-block" id="d-equipment-block">
         <h3>Equipment</h3>
         <div id="d-equipment"></div>
       </div>
 	  
+      <div class="dossier-block">
+        <h3>Inventory</h3>
+        <div id="d-inventory"></div>
+      </div>
+
       <div class="dossier-block" id="d-magicks-block">
         <h3>Magicks</h3>
         <div id="d-magicks"></div>
       </div>
 
-      
+      <div class="dossier-block" id="d-levelup-block">
+        <h3>Character Progression — Level Up Tracker</h3>
+        <p class="fine" style="margin:0 0 14px;">
+          Maximum level is 6. Each level-up advances one Tier in an Ability of your choice — pick one feature from that Tier; the rest can't be taken again for that Tier. Ability Score Improvement is available at Tier II and Tier V. Shade a circle to mark your plan.
+        </p>
+        <div class="tier-columns" id="d-levelup"></div>
+      </div>
     </div>
 
     <div id="json-block" class="no-print">
@@ -712,7 +824,7 @@ function toggleJsonVisibility(){
  * DATA — transcribed from Grace, Might & Magicks, Public Playtest v0.3.5
  *****************************************************************/
 
-const NAMES = [
+const SRD_NAMES = [
   "Aldric","Bren","Cassia","Dorian","Elara","Fen","Mara","Riven",
   "Ysolde","Corin","Petra","Halric","Sena","Otho","Wren","Ilka",
   "Doran","Maeve","Threk","Anwen","Bastian","Coralie","Gareth","Sable",
@@ -729,7 +841,7 @@ const NAMES = [
 "Ansel","Pippa","Tilda","Garrick","Willa","Bram","Etta","Jonas","Lina","Faris"
 ];
 
-const SURNAMES = [
+const SRD_SURNAMES = [
   "Ashford","Blackthorn","Brightwood","Crowe","Duskmere","Emberfall",
   "Fairholt","Frost","Grimward","Hawthorne","Ironvale","Kestrel",
   "Larkspur","Mournwood","Nightbrook","Oakheart","Ravencrest","Redwyne",
@@ -744,7 +856,7 @@ const SURNAMES = [
 "Harper","Hearth","Miller","Pike","Reed","Shepherd","Tanner","Wells","the Dusty","the Bent","Beck","Clay","Dyer","Fenn","Graves","Holt","Moss","Parker","Rooke","the Weathered"
 ];
 
-const ANCESTRIES = [
+const SRD_ANCESTRIES = [
   { name:"Human", featureName:"Human Spirit", featureText:"When you go down to 0 Hit Points, you gain an action which you can use immediately. After resolving your action, you die.", hpTag:"Sturdy", hp:3 },
   { name:"Dwarf", featureName:"Unshaken Foundation", featureText:"Once per session, when a roll draws on your foundation of stone and metalwork, you can consider one fail a success.", hpTag:"Sturdy", hp:3 },
   { name:"Elf", featureName:"Long Memory", featureText:"Once per session, when a roll draws on long memory, you can consider one fail a success.", hpTag:"Lean", hp:2 },
@@ -755,7 +867,7 @@ const ANCESTRIES = [
   { name:"Beastkin", featureName:"Wild Instinct", featureText:"Once per scene, you are forewarned when conflict breaks out. You can move to reposition before everyone has made their move. This doesn't count against your movement.", hpTag:"Sturdy", hp:3 }
 ];
 
-const BACKGROUNDS = [
+const SRD_BACKGROUNDS = [
   { name:"Noble", featureName:"Inherited Favor", featureText:"Once per session, call in a favor from your family name. In scenes where this matters, you gain an additional die. The GM decides if this has complications later on." },
   { name:"Commoner", featureName:"One of the People", featureText:"Laborers, farmers, and servants speak freely around you and trust you with information they wouldn't give someone dressed finer or more official. You lose this bonus when you deliberately wear fine clothes." },
   { name:"Outcast", featureName:"No Home to Return To", featureText:"Being exiled or banished from a town or settlement doesn't affect you. Being unwelcome has always been your thing." },
@@ -766,7 +878,7 @@ const BACKGROUNDS = [
   { name:"Orphan", featureName:"Raised by Circumstance", featureText:"You always know how to find food, shelter, or safety for one night in any settlement, no matter how hostile." }
 ];
 
-const OCCUPATIONS = [
+const SRD_OCCUPATIONS = [
   { name:"Blacksmith", featureName:"Trained Eye", featureText:"You can always tell how a weapon or piece of armor was made, roughly how old it is, and how well it was crafted, just by examining it. You can also determine if the equipment is counterfeit or fraudulent." },
   { name:"Hunter", featureName:"Expert Tracker", featureText:"You always know whether a stretch of wilderness has been recently traveled, hunted, or disturbed, and roughly what kind of creature did it. You can track its footsteps or scent if it leaves any." },
   { name:"Farmer", featureName:"Green Thumb", featureText:"You always have a fair read on tomorrow's weather just from observing the sky, wind, and land. You always know whether nearby soil, water, or livestock is healthy or blighted." },
@@ -777,7 +889,7 @@ const OCCUPATIONS = [
   { name:"Merchant", featureName:"Knows the Price", featureText:"You always know the fair market value of any mundane item, and can tell when someone is lying to you about price, quality, or origin. You immediately know if someone is ripping you off." }
 ];
 
-const ARCHETYPES = [
+const SRD_ARCHETYPES = [
   { name:"Strongman", featureName:"Immovable Force", featureText:"You have the ability to shove an adjacent enemy back one Proximity band with no roll required.", bonusTag:"Durable", hpBonus:3, evasionBonus:0 },
   { name:"Scout", featureName:"Vanguard's Eye", featureText:"When you spot danger before it spots you, your allies act as though they are forewarned too. You and your allies can move to reposition before everyone has made their move. This doesn't count against your movement.", bonusTag:"Slick", hpBonus:0, evasionBonus:1 },
   { name:"Duelist", featureName:"Measured Strike", featureText:"Fighting a single opponent one-on-one, the first successful hit you land against them this scene adds 1 more damage.", bonusTag:"Tough", hpBonus:2, evasionBonus:0 },
@@ -788,13 +900,13 @@ const ARCHETYPES = [
   { name:"Adept", featureName:"Attuned Mind", featureText:"Once per Long Downtime, you can safely cast a spell without counting it against your safe casts.", bonusTag:"Tough", hpBonus:2, evasionBonus:0 }
 ];
 
-const EXPERTISE_EXAMPLES = [
+const SRD_EXPERTISE_EXAMPLES = [
   "Locksmith","Swashbuckler","Ancient Magicka","Mountain Guide","Assassination",
   "Espionage","Falconry","Cartography","Poisoncraft","Siege Engineering",
   "Riverboat Navigation","Beast Taming","Forgery","Court Etiquette","Bell-Diving"
 ];
 
-const WEAPONS = [
+const SRD_WEAPONS = [
   { name:"Unarmed", damage:"+0", bonus:"Might", tag:"—" },
   { name:"Improvised", damage:"+1", bonus:"Might", tag:"Improvised" },
   { name:"Dagger", damage:"+2", bonus:"Grace", tag:"Concealable" },
@@ -807,7 +919,7 @@ const WEAPONS = [
   { name:"Firearm", damage:"+6", bonus:"Grace", tag:"Ranged, Reload, Sundering, Misfire" }
 ];
 
-const WEAPON_TAGS = {
+const SRD_WEAPON_TAGS = {
   "Improvised": "After you successfully land a hit with this weapon, if there are any 1s on the dice roll, this weapon breaks.",
   "Concealable": "You can easily hide this weapon and bring it to places where weapons are otherwise forbidden.",
   "Versatile": "You can choose to one-hand (Grace) or two-hand (Might) this weapon.",
@@ -819,19 +931,19 @@ const WEAPON_TAGS = {
   "Misfire": "Rolling a 1 counts against your successes. If this makes you miss your attack, the weapon misfires and you receive 1 HP damage. The weapon is now broken and cannot be used until repaired during Downtime."
 };
 
-const ARMORS = [
+const SRD_ARMORS = [
   { name:"Clothing", rating:0, evasion:"+1", special:"—" },
   { name:"Light Armor", rating:1, evasion:"0", special:"—" },
   { name:"Medium Armor", rating:2, evasion:"0", special:"Evasion from Grace bonus capped at +2" },
   { name:"Heavy Armor", rating:3, evasion:"0", special:"Disadvantage on Stealth; Evasion becomes 0" }
 ];
 
-const EQUIPMENT_SETS = [
+const SRD_EQUIPMENT_SETS = [
   { name:"Set A", items:["Backpack","Bedroll","Mess kit","Tinderbox","Torch","5 rations","Waterskin","Healing potion (2 HP)","5 gold pieces"] },
   { name:"Set B", items:["Backpack","Crowbar","Hammer","10 pitons","Torch","5 rations","Waterskin","50 feet of hempen rope","5 gold pieces"] }
 ];
 
-const SPELLS = [
+const SRD_SPELLS = [
   { name:'Arc Bolt', tradition:'Lumomancy', statLabel:'Damage', statValue:'3', proximity:'Far', roll:'Spellcast', cost:'1 Safe Cast', description:'You make a Spellcast Roll to manifest an arc of light against a target you can see within reasonable Proximity. On a crit, the target also is pushed one Proximity away.' },
   { name:'Ember Lance', tradition:'Pyromancy', statLabel:'Damage', statValue:'3', proximity:'Far', roll:'Spellcast', cost:'1 Safe Cast', description:'You make a Spellcast Roll to hurl a burning lance against a target you can see within reasonable Proximity. On a crit, the target also suffers Burning.' },
   { name:'Heal', tradition:'Biomancy', statLabel:'Heal', statValue:'1 HP per Safe Cast', proximity:'Far', roll:'—', cost:'Variable (SC)', description:'You heal one creature you can see within reasonable Proximity. It gains 1 Hit Point for each safe cast you expend.' },
@@ -883,6 +995,248 @@ const SPELLS = [
   { name:'Tongues', tradition:'Arcanomancy', statLabel:'Heal', statValue:'—', proximity:'Self', roll:'—', cost:'1 Safe Casts', description:'You open a hidden compartment in your mind. Until the end of the scene, you can understand any spoken or written language.' },
   { name:'Featherfoot', tradition:'Aeromancy', statLabel:'Heal', statValue:'—', proximity:'Melee', roll:'—', cost:'2 Safe Casts', description:'You touch a number of creatures equal to your Magicks bonus and give them a temporary boon. They grow spectral wings on their ankles, allowing them to hover instead of fall. These creatures suffer no fall damage until the end of scene.' },
 ];
+
+/*****************************************************************
+ * SETTINGS SYSTEM
+ *
+ * Everything above is the SRD (System Reference Document) — the
+ * game's default baseline. A Setting layers changes on top of the
+ * SRD for one or more categories, without touching the SRD arrays
+ * themselves. Three operations, per category:
+ *
+ *   add:      brand-new entries with no SRD counterpart
+ *   override: replace an SRD entry by matching `name`
+ *             (falls back to an add if no SRD entry has that name)
+ *   remove:   drop an SRD entry by `name`
+ *
+ * Categories that take add/override/remove (array-of-objects,
+ * matched by `name`): ancestries, backgrounds, occupations,
+ * archetypes, weapons, armors, equipmentSets, spells
+ *
+ * Categories that take add/remove only (plain string lists):
+ * expertiseExamples, names, surnames
+ *
+ * weaponTags is a map (tag -> definition text), so it takes
+ * add/override (both merged as key overwrites) and remove (by key).
+ *
+ * The SRD setting itself has an empty overlay — it IS the baseline.
+ * Add new settings to the SETTINGS object below; nothing else in
+ * the file needs to change to pick them up.
+ *****************************************************************/
+
+const SETTINGS = {
+  SRD: {
+    label: "System Reference Document (SRD)",
+    overlays: {}
+  }
+  // Example shape for a future setting:
+  // GraceMightTech: {
+  //   label: "Grace, Might & Tech (Cyberpunk)",
+  //   overlays: {
+  //     ancestries: { remove:["Dwarf","Elf"], override:[{...}], add:[{...}] },
+  //     weapons:    { add:[{...}] },
+  //     weaponTags: { add:{ "Overheat": "..." } },
+  //     spells:     { remove:["Raise Thrall"] },
+  //     names:      { add:["Zeke","Nyx"] }
+  //   }
+  // }
+};
+
+function mergeList(base, overlay){
+  let result = [...base];
+  if(!overlay) return result;
+  if(overlay.remove){
+    result = result.filter(item => !overlay.remove.includes(item.name));
+  }
+  if(overlay.override){
+    overlay.override.forEach(entry => {
+      const idx = result.findIndex(item => item.name === entry.name);
+      if(idx !== -1) result[idx] = entry;
+      else result.push(entry);
+    });
+  }
+  if(overlay.add){
+    result = result.concat(overlay.add);
+  }
+  return result;
+}
+
+function mergeMap(base, overlay){
+  const result = { ...base };
+  if(!overlay) return result;
+  if(overlay.remove){
+    overlay.remove.forEach(key => delete result[key]);
+  }
+  if(overlay.override) Object.assign(result, overlay.override);
+  if(overlay.add) Object.assign(result, overlay.add);
+  return result;
+}
+
+function mergeStrings(base, overlay){
+  let result = [...base];
+  if(!overlay) return result;
+  if(overlay.remove){
+    result = result.filter(s => !overlay.remove.includes(s));
+  }
+  if(overlay.add){
+    result = result.concat(overlay.add);
+  }
+  return result;
+}
+
+// Active (currently selected setting's) data — every render function
+// in this file reads from these, never from the SRD_* arrays directly.
+let NAMES, SURNAMES, ANCESTRIES, BACKGROUNDS, OCCUPATIONS, ARCHETYPES,
+    EXPERTISE_EXAMPLES, WEAPONS, WEAPON_TAGS, ARMORS, EQUIPMENT_SETS,
+    SPELLS, FIELD_DATA;
+
+let currentSettingKey = "SRD";
+
+function applySetting(key){
+  const setting = SETTINGS[key] || SETTINGS.SRD;
+  const ov = setting.overlays || {};
+  currentSettingKey = SETTINGS[key] ? key : "SRD";
+
+  NAMES = mergeStrings(SRD_NAMES, ov.names);
+  SURNAMES = mergeStrings(SRD_SURNAMES, ov.surnames);
+  ANCESTRIES = mergeList(SRD_ANCESTRIES, ov.ancestries);
+  BACKGROUNDS = mergeList(SRD_BACKGROUNDS, ov.backgrounds);
+  OCCUPATIONS = mergeList(SRD_OCCUPATIONS, ov.occupations);
+  ARCHETYPES = mergeList(SRD_ARCHETYPES, ov.archetypes);
+  EXPERTISE_EXAMPLES = mergeStrings(SRD_EXPERTISE_EXAMPLES, ov.expertiseExamples);
+  WEAPONS = mergeList(SRD_WEAPONS, ov.weapons);
+  WEAPON_TAGS = mergeMap(SRD_WEAPON_TAGS, ov.weaponTags);
+  ARMORS = mergeList(SRD_ARMORS, ov.armors);
+  EQUIPMENT_SETS = mergeList(SRD_EQUIPMENT_SETS, ov.equipmentSets);
+  SPELLS = mergeList(SRD_SPELLS, ov.spells);
+
+  FIELD_DATA = {
+    ancestry:ANCESTRIES, background:BACKGROUNDS, occupation:OCCUPATIONS,
+    archetype:ARCHETYPES, weapon:WEAPONS, armor:ARMORS, equipmentSet:EQUIPMENT_SETS
+  };
+
+  populateSelect("ancestry", ANCESTRIES, "name");
+  populateSelect("background", BACKGROUNDS, "name");
+  populateSelect("occupation", OCCUPATIONS, "name");
+  populateSelect("archetype", ARCHETYPES, "name");
+  populateSelect("weapon", WEAPONS, "name");
+  populateSelect("armor", ARMORS, "name");
+  populateSelect("equipmentSet", EQUIPMENT_SETS, "name");
+  populateSelect("expertise", [...EXPERTISE_EXAMPLES, "Custom…"]);
+
+  generateCharacter();
+}
+
+function populateSettingSelect(){
+  const select = document.getElementById("setting");
+  select.innerHTML = "";
+  Object.entries(SETTINGS).forEach(([key, setting]) => {
+    const option = document.createElement("option");
+    option.value = key;
+    option.text = setting.label;
+    select.appendChild(option);
+  });
+  select.value = "SRD";
+}
+
+const TIER_TREE = {
+  Grace: [
+    { tier:'I', features:[
+      { name:'Light Fingers', text:'You gain +1 die to Sinister and Thievery Challenges.' },
+      { name:'Swift Strike', text:'You gain +1 die to weapon attacks made with Sidearms.' },
+      { name:'Deft Hands', text:'You may use your Grace bonus instead of Might for Mainhand weapon attacks.' },
+      { name:'Graceful Act', text:'You gain +1 die to Persuasion and Deception Challenges.' },
+    ]},
+    { tier:'II', features:[
+      { name:'Ability Score Improvement', text:'You gain +1 to your Grace bonus.' },
+      { name:'Nimble Escape', text:'Once per scene, immediately move one Proximity after succeeding on a Grace action without provoking Attack of Opportunity.' },
+      { name:'Quick Draw', text:'Drawing, stowing, or retrieving an item no longer requires your Action.' },
+      { name:'Refined Technique', text:'Once per Long Downtime, reroll any number of failed dice once from a single Grace roll.' },
+    ]},
+    { tier:'III', features:[
+      { name:'True Strike', text:'You may ignore 1 point of Evasion when attacking an enemy.' },
+      { name:'Combat Reflexes', text:'When a creature willingly leaves your Melee Proximity, you may immediately make an Attack of Opportunity against it. This does not trigger if the creature is forcibly moved.' },
+      { name:'Improviser', text:'Once per scene, reveal that you prepared or acquired one simple mundane item that would reasonably help.' },
+      { name:'Silver Tongue', text:'When you first meet an NPC, ask the GM what first impression they have of you.' },
+    ]},
+    { tier:'IV', features:[
+      { name:'Cat\'s Reflexes', text:'Once per scene, reduce the number of attack dice rolled against you by 1.' },
+      { name:'Perfect Timing', text:'Once per scene, immediately take your Action after another creature finishes theirs.' },
+      { name:'Shadowstep', text:'If nobody is actively watching you, you may immediately become hidden.' },
+      { name:'Master Negotiator', text:'Once per scene, after a failed social Challenge, immediately ask a different question or offer another angle before consequences occur.' },
+    ]},
+    { tier:'V', features:[
+      { name:'Ability Score Improvement', text:'You gain +1 to your Grace bonus.' },
+      { name:'Precision', text:'For you, Attack Rolls of 4-6 are counted as successes.' },
+      { name:'Legendary Performer', text:'Once per scene, when you succeed on a social Challenge, you and one ally who witnessed your performance each regain 1 HP.' },
+      { name:'Intoxicating Presence', text:'Whenever you are in the same room with an ally doing a social action, you can use the Help action without interacting with the target.' },
+    ]},
+  ],
+  Might: [
+    { tier:'I', features:[
+      { name:'Unshakable Composure', text:'You may remove the Poisoned condition from yourself by spending an Action once per Long Downtime.' },
+      { name:'Guardian', text:'Whenever you use the Help action to aid an ally in combat, that ally also gains +1 Armor against the next attack that hits them.' },
+      { name:'Iron Grip', text:'You have Advantage on Challenges made to shove, lift, break, grapple, or force open objects.' },
+      { name:'Hardy', text:'Increase your maximum HP by 1.' },
+    ]},
+    { tier:'II', features:[
+      { name:'Ability Score Improvement', text:'You gain +1 to your Might bonus.' },
+      { name:'Cleave', text:'When you defeat an enemy with a Great Weapon or Polearm, immediately make a free attack against another enemy in the same Proximity.' },
+      { name:'Indomitable', text:'Once per Long Downtime, reroll any number of failed dice once from a single Might roll.' },
+      { name:'Living Bulwark', text:'Whenever you are adjacent to an ally, you can force enemies to target you instead.' },
+    ]},
+    { tier:'III', features:[
+      { name:'Shoulder Through', text:'You ignore difficult terrain and obstacles that would normally slow movement.' },
+      { name:'Breaker', text:'Your attacks with Heavy weapons gain the Sundering tag.' },
+      { name:'Veteran', text:'When you remove Bleeding or Burning, regain 1 HP.' },
+      { name:'Combat Reflexes', text:'When a creature willingly leaves your Melee Proximity, you may immediately make an Attack of Opportunity against it. This does not trigger if the creature is forcibly moved.' },
+    ]},
+    { tier:'IV', features:[
+      { name:'Natural Affinity', text:'You may use your Might bonus instead of Normal Rolls when rolling Spell Resist.' },
+      { name:'Relentless', text:'Once per scene, after removing a condition from yourself, immediately move one Proximity without provoking Attack of Opportunity.' },
+      { name:'Shield Wall', text:'While wearing Medium or Heavy Armor, adjacent allies gain +1 Armor.' },
+      { name:'Intimidating Build', text:'Add your Might bonus to Intimidation Challenges.' },
+    ]},
+    { tier:'V', features:[
+      { name:'Ability Score Improvement', text:'You gain +1 to your Might bonus.' },
+      { name:'Juggernaut', text:'Increase your maximum HP by 1.' },
+      { name:'Unbreakable', text:'Whenever your armor is reduced by Sundering, ignore the first point of Armor loss each scene.' },
+      { name:'Titan', text:'When you succeed on a Might Challenge, one adjacent ally may immediately move one Proximity without provoking Attack of Opportunity or stand from Prone.' },
+    ]},
+  ],
+  Magicks: [
+    { tier:'I', features:[
+      { name:'Spellblade', text:'When you make a weapon attack immediately after casting a spell on your previous action, gain +1 on that attack.' },
+      { name:'Ritualist', text:'Spells that would normally require a Spellcast Roll outside combat automatically succeed if you have sufficient time and there is no immediate danger.' },
+      { name:'Efficient Casting', text:'The first spell you cast each scene does not count against your safe casting limit.' },
+      { name:'Arcane Insight', text:'You can now add your Magicks bonus to Knowledge and Investigation Challenges.' },
+    ]},
+    { tier:'II', features:[
+      { name:'Ability Score Improvement', text:'You gain +1 to your Magicks bonus.' },
+      { name:'Arcane Memory', text:'Once per Long Downtime, reroll any number of failed dice once from a single Magicks roll.' },
+      { name:'Flexible Mind', text:'During a Long Downtime, you may replace one spell you know with another.' },
+      { name:'Magicks Resistance', text:'You may use your Magicks bonus instead of Normal Rolls when rolling Spell Resist.' },
+    ]},
+    { tier:'III', features:[
+      { name:'Combat Reflexes', text:'When a creature willingly leaves your Melee Proximity, you may immediately make an Attack of Opportunity against it. This does not trigger if the creature is forcibly moved.' },
+      { name:'Arcane Reservoir', text:'You may safely cast one additional spell before needing to recover.' },
+      { name:'Mystic Accuracy', text:'Your spells that require a Spellcast Roll may ignore 1 point of Evasion when attacking an enemy.' },
+      { name:'Font of Magic', text:'During a Short Downtime, you can recover one safe spell cast instead of recovering HP.' },
+    ]},
+    { tier:'IV', features:[
+      { name:'Leywalker', text:'Magical terrain, barriers, and environmental hazards do not impede your movement.' },
+      { name:'Spellweaver', text:'Your spells no longer affect allies unless you choose to include them.' },
+      { name:'Mage Hunter', text:'When a creature within Close Proximity casts a spell, your next attack or spell against it gains +1 die.' },
+      { name:'Shared Focus', text:'When you use the Help action on an ally casting a spell, your Help die counts as a success on 4-6 instead of a 5-6.' },
+    ]},
+    { tier:'V', features:[
+      { name:'Ability Score Improvement', text:'You gain +1 to your Magicks bonus.' },
+      { name:'Archmage', text:'Increase your safe casting limit by 2.' },
+      { name:'Sorcerer', text:'Your damaging spells deal an additional +1 damage.' },
+      { name:'Arcane Conduit', text:'Whenever an ally within Close Proximity casts a spell, you may immediately provide a Help Die without spending your action, provided you are free to assist.' },
+    ]},
+  ],
+};
 
 const STAT_ARRAY = ["+2","+1","-1"];
 let stats = { Grace:"+2", Might:"+1", Magicks:"-1" };
@@ -1096,11 +1450,6 @@ function onFieldChange(field){
   updateCharacter();
 }
 
-const FIELD_DATA = {
-  ancestry:ANCESTRIES, background:BACKGROUNDS, occupation:OCCUPATIONS,
-  archetype:ARCHETYPES, weapon:WEAPONS, armor:ARMORS, equipmentSet:EQUIPMENT_SETS
-};
-
 function rerollField(field){
   if(field === "expertise"){
     document.getElementById("expertise").value = randomItem(EXPERTISE_EXAMPLES);
@@ -1229,6 +1578,38 @@ function makeCircleTrack(count){
   return `<div class="circle-track">${circles}</div>`;
 }
 
+function toggleTierCircle(el, group){
+  const wasFilled = el.classList.contains("filled");
+  document.querySelectorAll(`.circle[data-group="${group}"]`).forEach(c => c.classList.remove("filled"));
+  if(!wasFilled){
+    el.classList.add("filled");
+  }
+}
+
+function renderLevelUpTracker(){
+  const container = document.getElementById("d-levelup");
+  const abilities = ["Grace","Might","Magicks"];
+  container.innerHTML = abilities.map(ability => `
+    <div class="tier-column">
+      <h4>${ability}</h4>
+      ${TIER_TREE[ability].map(tierObj => {
+        const group = `${ability}-${tierObj.tier}`;
+        return `
+        <div class="tier-block">
+          <div class="tier-label">Tier ${tierObj.tier} <span style="opacity:0.6;">(choose one)</span></div>
+          ${tierObj.features.map(f => `
+            <div class="tier-feature">
+              <span class="circle" data-group="${group}" onclick="toggleTierCircle(this, '${group}')"></span>
+              <span><span class="tfname">${f.name}.</span> ${f.text}</span>
+            </div>
+          `).join("")}
+        </div>
+      `;
+      }).join("")}
+    </div>
+  `).join("");
+}
+
 function renderDossier(derived){
   const ancestry = findBy(ANCESTRIES, document.getElementById("ancestry").value);
   const background = findBy(BACKGROUNDS, document.getElementById("background").value);
@@ -1322,8 +1703,17 @@ function renderDossier(derived){
       <span class="badge">Armor Rating: ${armor.rating}</span><span class="badge">Evasion Bonus: ${armor.evasion}</span><br>
       ${armor.special !== "—" ? armor.special : ""}
     </div>
-    <div class="dossier-entry">
-      <span class="fname">${equipmentSet.name}</span>${equipmentSet.items.join(", ")}
+  `;
+
+  document.getElementById("d-inventory").innerHTML = `
+    <div class="fine" style="margin:0 0 12px;">${equipmentSet.name}</div>
+    <div class="inventory-list">
+      ${equipmentSet.items.map(item => `
+        <div class="inventory-item">
+          <span class="circle" onclick="this.classList.toggle('filled')"></span>
+          <span>${item}</span>
+        </div>
+      `).join("")}
     </div>
   `;
 }
@@ -1340,19 +1730,11 @@ function exportJSON(){
  * INIT
  *****************************************************************/
 
-populateSelect("ancestry", ANCESTRIES, "name");
-populateSelect("background", BACKGROUNDS, "name");
-populateSelect("occupation", OCCUPATIONS, "name");
-populateSelect("archetype", ARCHETYPES, "name");
-populateSelect("weapon", WEAPONS, "name");
-populateSelect("armor", ARMORS, "name");
-populateSelect("equipmentSet", EQUIPMENT_SETS, "name");
-populateSelect("expertise", [...EXPERTISE_EXAMPLES, "Custom…"]);
-
+populateSettingSelect();
 buildStatDropdowns();
 toggleJsonVisibility();
-
-generateCharacter();
+renderLevelUpTracker();
+applySetting("SRD");
 
 </script>
 </body>
