@@ -438,6 +438,99 @@
     color:var(--bone);
     font-weight:600;
   }
+  .tier-feature.locked{
+    opacity:0.32;
+  }
+  .tier-feature.locked .circle{
+    cursor:not-allowed;
+  }
+  .tier-feature.no-points .circle{
+    cursor:not-allowed;
+  }
+  .points-badge{
+    display:inline-block;
+    font-family:'JetBrains Mono', monospace;
+    font-size:11px;
+    letter-spacing:0.05em;
+    color:var(--gold);
+    border:1px solid var(--gold-dim);
+    border-radius:3px;
+    padding:4px 10px;
+    margin-bottom:14px;
+  }
+  .points-badge.full{
+    color:var(--ok);
+    border-color:var(--ok);
+  }
+
+  /* ---------- Account / Cloud Save ---------- */
+  .account-bar{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    flex-wrap:wrap;
+    margin-bottom:18px;
+    padding:12px 14px;
+    background:var(--panel-2);
+    border:1px solid var(--line);
+    border-radius:4px;
+  }
+  .account-status{
+    font-family:'JetBrains Mono', monospace;
+    font-size:11px;
+    color:var(--bone-dim);
+    flex:1;
+    min-width:160px;
+  }
+  .account-status .user{
+    color:var(--gold);
+  }
+  .modal-backdrop{
+    display:none;
+    position:fixed;
+    inset:0;
+    background:rgba(0,0,0,0.6);
+    z-index:50;
+    align-items:flex-start;
+    justify-content:center;
+    padding:60px 16px;
+    overflow-y:auto;
+  }
+  .modal-backdrop.open{display:flex;}
+  .modal{
+    background:var(--panel);
+    border:1px solid var(--line);
+    border-radius:4px;
+    max-width:520px;
+    width:100%;
+    padding:22px 24px;
+  }
+  .modal h3{
+    font-family:'Cormorant SC', serif;
+    color:var(--gold);
+    margin:0 0 14px;
+    text-transform:uppercase;
+    letter-spacing:0.05em;
+    border-bottom:1px solid var(--line);
+    padding-bottom:10px;
+  }
+  .saved-char-row{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    padding:8px 0;
+    border-bottom:1px dashed var(--line);
+    font-size:13px;
+  }
+  .saved-char-row .scr-name{flex:1;min-width:0;color:var(--bone);}
+  .saved-char-row .scr-meta{
+    font-family:'JetBrains Mono', monospace;
+    font-size:10px;
+    color:var(--bone-dim);
+    display:block;
+  }
+  .saved-char-row button{padding:5px 9px;font-size:10.5px;}
+  .modal-close{margin-top:14px;}
 
   /* ---------- Inventory ---------- */
   .inventory-list{
@@ -608,6 +701,24 @@
     <button onclick="exportJSON()">Copy JSON</button>
   </div>
 
+  <!-- ============ ACCOUNT / CLOUD SAVE ============ -->
+  <div class="account-bar no-print" id="account-bar">
+    <div class="account-status" id="account-status">Not signed in — characters stay in this browser tab only.</div>
+    <button id="btn-sign-in" onclick="signInWithGoogle()">Sign in with Google</button>
+    <button id="btn-sign-out" onclick="signOutOfGoogle()" style="display:none;">Sign out</button>
+    <button id="btn-my-characters" onclick="openCharacterModal()" style="display:none;">My Characters</button>
+    <button id="btn-save-cloud" onclick="saveCurrentCharacter()" style="display:none;">Save Character</button>
+  </div>
+
+  <!-- ============ SAVED CHARACTERS MODAL ============ -->
+  <div class="modal-backdrop no-print" id="char-modal-backdrop">
+    <div class="modal">
+      <h3>My Characters</h3>
+      <div id="char-modal-list"><p class="fine">Loading…</p></div>
+      <button class="modal-close" onclick="closeCharacterModal()">Close</button>
+    </div>
+  </div>
+
   <!-- ============ IDENTITY ============ -->
   <section data-step="Identity" class="no-print">
     <h2>Identity</h2>
@@ -618,7 +729,14 @@
     </div>
     <div class="field">
       <label>Level</label>
-      <input type="text" id="level" value="1" readonly>
+      <select id="level" onchange="onLevelChange()">
+        <option value="1">1</option>
+        <option value="2">2</option>
+        <option value="3">3</option>
+        <option value="4">4</option>
+        <option value="5">5</option>
+        <option value="6">6</option>
+      </select>
     </div>
   </section>
 
@@ -788,8 +906,9 @@
       <div class="dossier-block" id="d-levelup-block">
         <h3>Character Progression — Level Up Tracker</h3>
         <p class="fine" style="margin:0 0 14px;">
-          Maximum level is 6. Each level-up advances one Tier in an Ability of your choice — pick one feature from that Tier; the rest can't be taken again for that Tier. Ability Score Improvement is available at Tier II and Tier V. Shade a circle to mark your plan.
+          Maximum level is 6. Each level-up grants one point to spend on a Tier feature in any Ability — Tiers must be taken in order within an ability (Tier II requires Tier I already taken, and so on). Ability Score Improvement is available at Tier II and Tier V.
         </p>
+        <div class="points-badge no-print" id="d-levelup-points"></div>
         <div class="tier-columns" id="d-levelup"></div>
       </div>
     </div>
@@ -803,6 +922,13 @@
   </section>
 
 </div>
+
+<!-- Firebase (Google Sign-In + Firestore cloud save). Safe to load even
+     before FIREBASE_CONFIG below is filled in — see the CLOUD SAVE
+     section further down for setup instructions. -->
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 
 <script>
 
@@ -914,7 +1040,7 @@ const SRD_WEAPONS = [
   { name:"Mainhand", damage:"+3/+4", bonus:"Grace or Might", tag:"Versatile" },
   { name:"Great Weapon", damage:"+5", bonus:"Might", tag:"Heavy" },
   { name:"Polearm", damage:"+3", bonus:"Might", tag:"Reach" },
-  { name:"Bow", damage:"+3", bonus:"Grace", tag:"Ranged" },
+  { name:"Shortbow", damage:"+3", bonus:"Grace", tag:"Ranged" },
   { name:"Longbow", damage:"+5", bonus:"Might", tag:"Heavy" },
   { name:"Crossbow", damage:"+4", bonus:"Grace", tag:"Ranged, Reload" },
   { name:"Firearm", damage:"+6", bonus:"Grace", tag:"Ranged, Reload, Sundering, Misfire" }
@@ -1093,7 +1219,7 @@ let NAMES, SURNAMES, ANCESTRIES, BACKGROUNDS, OCCUPATIONS, ARCHETYPES,
 
 let currentSettingKey = "SRD";
 
-function applySetting(key){
+function applySetting(key, skipGenerate){
   const setting = SETTINGS[key] || SETTINGS.SRD;
   const ov = setting.overlays || {};
   currentSettingKey = SETTINGS[key] ? key : "SRD";
@@ -1125,7 +1251,7 @@ function applySetting(key){
   populateSelect("equipmentSet", EQUIPMENT_SETS, "name");
   populateSelect("expertise", [...EXPERTISE_EXAMPLES, "Custom…"]);
 
-  generateCharacter();
+  if(!skipGenerate) generateCharacter();
 }
 
 function populateSettingSelect(){
@@ -1207,7 +1333,7 @@ const TIER_TREE = {
   ],
   Magicks: [
     { tier:'I', features:[
-      { name:'Spellblade', text:'When you make a weapon attack immediately after casting a spell on your previous action, gain +1 on that attack.' },
+      { name:'Spellblade', text:'When you make a weapon attack immediately after casting a spell on your previous action, gain +1 die on that attack.' },
       { name:'Ritualist', text:'Spells that would normally require a Spellcast Roll outside combat automatically succeed if you have sufficient time and there is no immediate danger.' },
       { name:'Efficient Casting', text:'The first spell you cast each scene does not count against your safe casting limit.' },
       { name:'Arcane Insight', text:'You can now add your Magicks bonus to Knowledge and Investigation Challenges.' },
@@ -1242,6 +1368,19 @@ const TIER_TREE = {
 const STAT_ARRAY = ["+2","+1","-1"];
 let stats = { Grace:"+2", Might:"+1", Magicks:"-1" };
 let chosenSpells = [];
+
+const TIER_ORDER = ["I","II","III","IV","V"];
+
+// levelUpPicks[Ability][Tier] = feature index chosen at that tier, or null
+function freshLevelUpPicks(){
+  const picks = {};
+  ["Grace","Might","Magicks"].forEach(ability=>{
+    picks[ability] = {};
+    TIER_ORDER.forEach(t => picks[ability][t] = null);
+  });
+  return picks;
+}
+let levelUpPicks = freshLevelUpPicks();
 
 const character = {};
 
@@ -1520,6 +1659,10 @@ function computeDerived(){
 function generateCharacter(){
   rerollName();
 
+  document.getElementById("level").value = "1";
+  levelUpPicks = freshLevelUpPicks();
+  currentCharId = null; // A freshly generated character is a new, unsaved one.
+
   ["ancestry","background","occupation","archetype","weapon","armor","equipmentSet"].forEach(field=>{
     document.getElementById(field).value = randomItem(FIELD_DATA[field]).name;
     onFieldChange(field);
@@ -1541,7 +1684,8 @@ function updateCharacter(){
   const derived = computeDerived();
 
   character.name = document.getElementById("name").value;
-  character.level = 1;
+  character.level = parseInt(document.getElementById("level").value, 10) || 1;
+  character.levelUp = levelUpPicksAsNames();
   character.ancestry = document.getElementById("ancestry").value;
   character.background = document.getElementById("background").value;
   character.occupation = document.getElementById("occupation").value;
@@ -1567,6 +1711,7 @@ function updateCharacter(){
   document.getElementById("output").value = JSON.stringify(character, null, 4);
 
   renderDossier(derived);
+  renderLevelUpTracker();
 }
 
 function makeCircleTrack(count){
@@ -1579,31 +1724,142 @@ function makeCircleTrack(count){
   return `<div class="circle-track">${circles}</div>`;
 }
 
-function toggleTierCircle(el, group){
-  const wasFilled = el.classList.contains("filled");
-  document.querySelectorAll(`.circle[data-group="${group}"]`).forEach(c => c.classList.remove("filled"));
-  if(!wasFilled){
-    el.classList.add("filled");
+// Converts the internal {Ability:{Tier:featureIndex}} picks into
+// {Ability:{Tier:featureName}} for JSON export / cloud save, so saved
+// characters stay readable and stable even if TIER_TREE ordering changes.
+function levelUpPicksAsNames(){
+  const out = {};
+  Object.keys(levelUpPicks).forEach(ability=>{
+    out[ability] = {};
+    Object.keys(levelUpPicks[ability]).forEach(tier=>{
+      const idx = levelUpPicks[ability][tier];
+      const tierObj = TIER_TREE[ability].find(t => t.tier === tier);
+      out[ability][tier] = (idx !== null && tierObj) ? tierObj.features[idx].name : null;
+    });
+  });
+  return out;
+}
+
+// Reverse of levelUpPicksAsNames() — used when loading a saved character.
+function levelUpPicksFromNames(namedPicks){
+  const picks = freshLevelUpPicks();
+  if(!namedPicks) return picks;
+  Object.keys(picks).forEach(ability=>{
+    TIER_ORDER.forEach(tier=>{
+      const name = namedPicks[ability] && namedPicks[ability][tier];
+      if(!name) return;
+      const tierObj = TIER_TREE[ability].find(t => t.tier === tier);
+      if(!tierObj) return;
+      const idx = tierObj.features.findIndex(f => f.name === name);
+      if(idx !== -1) picks[ability][tier] = idx;
+    });
+  });
+  return picks;
+}
+
+function availableLevelUpPoints(){
+  const level = parseInt(document.getElementById("level").value, 10) || 1;
+  return Math.max(0, level - 1);
+}
+
+function spentLevelUpPoints(){
+  let spent = 0;
+  Object.values(levelUpPicks).forEach(abilityPicks=>{
+    Object.values(abilityPicks).forEach(v=>{ if(v !== null) spent++; });
+  });
+  return spent;
+}
+
+function isTierUnlocked(ability, tier){
+  const idx = TIER_ORDER.indexOf(tier);
+  if(idx === 0) return true;
+  const prevTier = TIER_ORDER[idx-1];
+  return levelUpPicks[ability][prevTier] !== null;
+}
+
+function handleTierPick(ability, tier, featureIndex){
+  const current = levelUpPicks[ability][tier];
+
+  if(current === featureIndex){
+    // Deselecting — also clear any higher Tiers in this Ability, since their
+    // prerequisite (this Tier) is being removed.
+    const idx = TIER_ORDER.indexOf(tier);
+    levelUpPicks[ability][tier] = null;
+    for(let i = idx+1; i < TIER_ORDER.length; i++){
+      levelUpPicks[ability][TIER_ORDER[i]] = null;
+    }
+  } else {
+    if(!isTierUnlocked(ability, tier)) return; // Tier locked, ignore.
+    const spendingNewPoint = current === null;
+    if(spendingNewPoint && spentLevelUpPoints() >= availableLevelUpPoints()) return; // No points left.
+    levelUpPicks[ability][tier] = featureIndex;
   }
+
+  renderLevelUpTracker();
+  updateCharacter();
+}
+
+function trimLevelUpPicksToFit(){
+  // If the level was lowered and picks now exceed available points,
+  // trim from the highest Tier down until it fits.
+  let guard = 0;
+  while(spentLevelUpPoints() > availableLevelUpPoints() && guard < 100){
+    guard++;
+    let trimmed = false;
+    for(const ability of ["Grace","Might","Magicks"]){
+      for(let i = TIER_ORDER.length-1; i >= 0; i--){
+        const t = TIER_ORDER[i];
+        if(levelUpPicks[ability][t] !== null){
+          levelUpPicks[ability][t] = null;
+          trimmed = true;
+          break;
+        }
+      }
+      if(trimmed) break;
+    }
+    if(!trimmed) break;
+  }
+}
+
+function onLevelChange(){
+  trimLevelUpPicksToFit();
+  renderLevelUpTracker();
+  updateCharacter();
 }
 
 function renderLevelUpTracker(){
   const container = document.getElementById("d-levelup");
   const abilities = ["Grace","Might","Magicks"];
+  const spent = spentLevelUpPoints();
+  const available = availableLevelUpPoints();
+
+  const badge = document.getElementById("d-levelup-points");
+  badge.textContent = `Points: ${spent} / ${available}`;
+  badge.classList.toggle("full", spent >= available);
+
   container.innerHTML = abilities.map(ability => `
     <div class="tier-column">
       <h4>${ability}</h4>
       ${TIER_TREE[ability].map(tierObj => {
-        const group = `${ability}-${tierObj.tier}`;
+        const unlocked = isTierUnlocked(ability, tierObj.tier);
+        const picked = levelUpPicks[ability][tierObj.tier];
         return `
         <div class="tier-block">
-          <div class="tier-label">Tier ${tierObj.tier} <span style="opacity:0.6;">(choose one)</span></div>
-          ${tierObj.features.map(f => `
-            <div class="tier-feature">
-              <span class="circle" data-group="${group}" onclick="toggleTierCircle(this, '${group}')"></span>
+          <div class="tier-label">Tier ${tierObj.tier} <span style="opacity:0.6;">(choose one)</span>${!unlocked ? ' <span style="opacity:0.6;">— locked</span>' : ''}</div>
+          ${tierObj.features.map((f, idx) => {
+            const isFilled = picked === idx;
+            const noPointsLeft = picked === null && spent >= available;
+            const featureLocked = !unlocked;
+            const classes = ["tier-feature"];
+            if(featureLocked) classes.push("locked");
+            if(noPointsLeft && !featureLocked) classes.push("no-points");
+            return `
+            <div class="${classes.join(" ")}">
+              <span class="circle ${isFilled ? "filled" : ""}" onclick="handleTierPick('${ability}', '${tierObj.tier}', ${idx})"></span>
               <span><span class="tfname">${f.name}.</span> ${f.text}</span>
             </div>
-          `).join("")}
+          `;
+          }).join("")}
         </div>
       `;
       }).join("")}
@@ -1728,6 +1984,253 @@ function exportJSON(){
 }
 
 /*****************************************************************
+ * CLOUD SAVE — Google Sign-In + Firestore
+ *
+ * SETUP (one-time, do this before deploying):
+ *   1. Go to https://console.firebase.google.com, create a project
+ *      (free "Spark" plan is enough).
+ *   2. Project Settings → General → "Your apps" → Add app → Web (</>).
+ *      Copy the firebaseConfig object it gives you into FIREBASE_CONFIG
+ *      below. This config is safe to leave public in client-side code —
+ *      it's not a secret, access is controlled by the security rules
+ *      in step 4.
+ *   3. Authentication → Sign-in method → enable "Google".
+ *      Authentication → Settings → Authorized domains → add your GitHub
+ *      Pages domain (e.g. yourname.github.io) if it isn't there already.
+ *   4. Firestore Database → Create database → start in production mode.
+ *      Then go to the Rules tab and paste:
+ *
+ *        rules_version = '2';
+ *        service cloud.firestore {
+ *          match /databases/{database}/documents {
+ *            match /users/{uid}/characters/{charId} {
+ *              allow read, write: if request.auth != null && request.auth.uid == uid;
+ *            }
+ *          }
+ *        }
+ *
+ *      This makes sure a signed-in player can only ever read or write
+ *      their own saved characters.
+ *
+ *   Until FIREBASE_CONFIG is filled in, the Sign In button will just
+ *   explain that cloud save isn't configured yet — everything else on
+ *   the page works exactly as before (local-only, Copy JSON to keep a
+ *   backup).
+ *****************************************************************/
+
+const FIREBASE_CONFIG = {
+  apiKey: "AIzaSyCY0tkVIUqGjO_6ayWJWLHNcRUpDls5VZ8",
+  authDomain: "grace-might-and-magicks.firebaseapp.com",
+  projectId: "grace-might-and-magicks",
+  storageBucket: "grace-might-and-magicks.firebasestorage.app",
+  messagingSenderId: "449279853302",
+  appId: "1:449279853302:web:fdef6375c84605bcf5a2d7",
+  measurementId: "G-693S1QT7MC"
+};
+
+const CLOUD_SAVE_CONFIGURED = FIREBASE_CONFIG.apiKey !== "YOUR_API_KEY";
+
+let auth = null;
+let db = null;
+let currentUser = null;
+let currentCharId = null; // Firestore doc id of the loaded/saved character, or null if unsaved.
+
+if(CLOUD_SAVE_CONFIGURED){
+  firebase.initializeApp(FIREBASE_CONFIG);
+  auth = firebase.auth();
+  db = firebase.firestore();
+  auth.onAuthStateChanged(user => {
+    currentUser = user;
+    refreshAccountBar();
+    if(user) loadCharacterListIntoModal();
+  });
+}
+
+function refreshAccountBar(){
+  const status = document.getElementById("account-status");
+  const btnIn = document.getElementById("btn-sign-in");
+  const btnOut = document.getElementById("btn-sign-out");
+  const btnMine = document.getElementById("btn-my-characters");
+  const btnSave = document.getElementById("btn-save-cloud");
+
+  if(currentUser){
+    status.innerHTML = `Signed in as <span class="user">${currentUser.displayName || currentUser.email}</span>`;
+    btnIn.style.display = "none";
+    btnOut.style.display = "";
+    btnMine.style.display = "";
+    btnSave.style.display = "";
+  } else {
+    status.textContent = CLOUD_SAVE_CONFIGURED
+      ? "Not signed in — characters stay in this browser tab only."
+      : "Cloud save isn't configured on this deployment yet.";
+    btnIn.style.display = "";
+    btnOut.style.display = "none";
+    btnMine.style.display = "none";
+    btnSave.style.display = "none";
+  }
+}
+
+function signInWithGoogle(){
+  if(!CLOUD_SAVE_CONFIGURED){
+    alert("Cloud save isn't configured yet. See the CLOUD SAVE setup comment near the top of the script for the one-time Firebase steps.");
+    return;
+  }
+  auth.signInWithPopup(new firebase.auth.GoogleAuthProvider())
+    .catch(err => alert("Sign-in failed: " + err.message));
+}
+
+function signOutOfGoogle(){
+  if(!auth) return;
+  auth.signOut();
+  currentCharId = null;
+  closeCharacterModal();
+}
+
+// Gathers everything needed to fully reconstruct the character later —
+// deliberately separate from the display-oriented `character` object,
+// so cloud save stays reliable even if the dossier's JSON shape changes.
+function collectSaveState(){
+  return {
+    settingKey: currentSettingKey,
+    name: document.getElementById("name").value,
+    level: document.getElementById("level").value,
+    ancestry: document.getElementById("ancestry").value,
+    background: document.getElementById("background").value,
+    occupation: document.getElementById("occupation").value,
+    archetype: document.getElementById("archetype").value,
+    stats: { ...stats },
+    expertiseSelect: document.getElementById("expertise").value,
+    expertiseCustom: document.getElementById("expertise-custom").value,
+    weapon: document.getElementById("weapon").value,
+    armor: document.getElementById("armor").value,
+    equipmentSet: document.getElementById("equipmentSet").value,
+    spellNames: chosenSpells.map(s => s.name),
+    levelUp: levelUpPicksAsNames(),
+    updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+  };
+}
+
+function restoreSaveState(data){
+  if(data.settingKey && data.settingKey !== currentSettingKey){
+    document.getElementById("setting").value = data.settingKey;
+    applySetting(data.settingKey, true); // true = don't auto-generate a random character
+  }
+
+  document.getElementById("name").value = data.name || "";
+  document.getElementById("level").value = data.level || "1";
+
+  ["ancestry","background","occupation","archetype","weapon","armor","equipmentSet"].forEach(field=>{
+    if(data[field]) document.getElementById(field).value = data[field];
+    onFieldChange(field);
+  });
+
+  stats = data.stats ? { ...data.stats } : { Grace:"+2", Might:"+1", Magicks:"-1" };
+  buildStatDropdowns();
+
+  document.getElementById("expertise").value = data.expertiseSelect || "";
+  document.getElementById("expertise-custom").value = data.expertiseCustom || "";
+  onExpertiseChange();
+
+  const magicksBonus = bonusOf(stats.Magicks);
+  chosenSpells = (data.spellNames || [])
+    .map(n => SPELLS.find(s => s.name === n))
+    .filter(Boolean)
+    .slice(0, Math.max(0, magicksBonus));
+  renderSpells();
+
+  levelUpPicks = levelUpPicksFromNames(data.levelUp);
+
+  updateCharacter();
+}
+
+function saveCurrentCharacter(){
+  if(!currentUser){ alert("Sign in with Google first to save a character."); return; }
+  const state = collectSaveState();
+  const charsRef = db.collection("users").doc(currentUser.uid).collection("characters");
+
+  const ref = currentCharId ? charsRef.doc(currentCharId) : charsRef.doc();
+  currentCharId = ref.id;
+
+  ref.set(state)
+    .then(() => { if(document.getElementById("char-modal-backdrop").classList.contains("open")) loadCharacterListIntoModal(); })
+    .catch(err => alert("Save failed: " + err.message));
+}
+
+function openCharacterModal(){
+  document.getElementById("char-modal-backdrop").classList.add("open");
+  loadCharacterListIntoModal();
+}
+
+function closeCharacterModal(){
+  document.getElementById("char-modal-backdrop").classList.remove("open");
+}
+
+function loadCharacterListIntoModal(){
+  const list = document.getElementById("char-modal-list");
+  if(!currentUser){ list.innerHTML = `<p class="fine">Sign in to see your saved characters.</p>`; return; }
+
+  list.innerHTML = `<p class="fine">Loading…</p>`;
+  db.collection("users").doc(currentUser.uid).collection("characters")
+    .get()
+    .then(snapshot => {
+      if(snapshot.empty){
+        list.innerHTML = `<p class="fine">No saved characters yet. Build one, then click "Save Character".</p>`;
+        return;
+      }
+      list.innerHTML = snapshot.docs.map(doc => {
+        const d = doc.data();
+        const when = d.updatedAt && d.updatedAt.toDate ? d.updatedAt.toDate().toLocaleString() : "";
+        return `
+        <div class="saved-char-row">
+          <div class="scr-name">
+            ${d.name || "Unnamed"}
+            <span class="scr-meta">Level ${d.level || 1} · ${d.ancestry || ""} ${d.archetype || ""} ${when ? "· saved " + when : ""}</span>
+          </div>
+          <button onclick="loadCharacterFromCloud('${doc.id}')">Load</button>
+          <button onclick="duplicateCharacterInCloud('${doc.id}')">Duplicate</button>
+          <button onclick="deleteCharacterFromCloud('${doc.id}')">Delete</button>
+        </div>`;
+      }).join("");
+    })
+    .catch(err => { list.innerHTML = `<p class="fine">Couldn't load characters: ${err.message}</p>`; });
+}
+
+function loadCharacterFromCloud(id){
+  db.collection("users").doc(currentUser.uid).collection("characters").doc(id).get()
+    .then(doc => {
+      if(!doc.exists) return;
+      restoreSaveState(doc.data());
+      currentCharId = id;
+      closeCharacterModal();
+    })
+    .catch(err => alert("Load failed: " + err.message));
+}
+
+function duplicateCharacterInCloud(id){
+  const charsRef = db.collection("users").doc(currentUser.uid).collection("characters");
+  charsRef.doc(id).get()
+    .then(doc => {
+      if(!doc.exists) return;
+      const data = doc.data();
+      data.name = (data.name || "Unnamed") + " (copy)";
+      data.updatedAt = firebase.firestore.FieldValue.serverTimestamp();
+      return charsRef.doc().set(data);
+    })
+    .then(() => loadCharacterListIntoModal())
+    .catch(err => alert("Duplicate failed: " + err.message));
+}
+
+function deleteCharacterFromCloud(id){
+  if(!confirm("Delete this character permanently? This can't be undone.")) return;
+  db.collection("users").doc(currentUser.uid).collection("characters").doc(id).delete()
+    .then(() => {
+      if(currentCharId === id) currentCharId = null;
+      loadCharacterListIntoModal();
+    })
+    .catch(err => alert("Delete failed: " + err.message));
+}
+
+/*****************************************************************
  * INIT
  *****************************************************************/
 
@@ -1735,6 +2238,7 @@ populateSettingSelect();
 buildStatDropdowns();
 toggleJsonVisibility();
 renderLevelUpTracker();
+refreshAccountBar();
 applySetting("SRD");
 
 </script>
