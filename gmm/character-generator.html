@@ -351,6 +351,12 @@
     color:var(--bone-dim);
     margin-top:4px;
   }
+  .dossier-stat .asi-note{
+    font-family:'JetBrains Mono', monospace;
+    font-size:9px;
+    color:var(--gold-dim);
+    margin-top:2px;
+  }
   .dossier-block{margin-bottom:20px;}
   .dossier-block:last-child{margin-bottom:0;}
   .dossier-block h3{
@@ -443,6 +449,9 @@
   }
   .tier-feature.locked .circle{
     cursor:not-allowed;
+  }
+  .tier-feature.no-points{
+    opacity:0.45;
   }
   .tier-feature.no-points .circle{
     cursor:not-allowed;
@@ -549,6 +558,59 @@
   }
   .inventory-item .circle{
     flex:0 0 auto;
+  }
+  .inventory-item input[type="text"]{
+    flex:1;
+    min-width:0;
+    background:transparent;
+    border:none;
+    border-bottom:1px dashed transparent;
+    color:var(--bone-dim);
+    font-family:inherit;
+    font-size:13px;
+    padding:0 0 2px;
+  }
+  .inventory-item input[type="text"]:focus{
+    outline:none;
+    border-bottom-color:var(--gold-dim);
+  }
+  .inventory-item .remove-item{
+    flex:0 0 auto;
+    background:transparent;
+    border:1px solid var(--line);
+    color:var(--bone-dim);
+    border-radius:3px;
+    width:20px;
+    height:20px;
+    line-height:1;
+    padding:0;
+    cursor:pointer;
+    font-size:12px;
+  }
+  .inventory-item .remove-item:hover{
+    border-color:#c0524a;
+    color:#c0524a;
+  }
+  .inventory-add-row{
+    display:flex;
+    gap:8px;
+    margin-top:12px;
+    grid-column:1 / -1;
+  }
+  .inventory-add-row input[type="text"]{
+    flex:1;
+    background:#0f0c09;
+    border:1px solid var(--line);
+    border-radius:3px;
+    color:var(--bone);
+    font-family:inherit;
+    font-size:13px;
+    padding:6px 10px;
+  }
+  .inventory-locked-note{
+    font-size:11px;
+    color:var(--bone-dim);
+    font-style:italic;
   }
 
   textarea{
@@ -674,6 +736,11 @@
     #dossier-sheet .tier-feature{color:#333;}
     #dossier-sheet .tier-feature .tfname{color:#111;}
     #dossier-sheet .inventory-item{color:#333;border-bottom-color:#ccc;}
+    #dossier-sheet .inventory-item input[type="text"]{
+      color:#333;
+      border-bottom-color:transparent;
+    }
+    #dossier-sheet .dossier-stat .asi-note{color:#666;}
   }
 </style>
 </head>
@@ -1326,7 +1393,7 @@ const TIER_TREE = {
     ]},
     { tier:'V', features:[
       { name:'Ability Score Improvement', text:'You gain +1 to your Might bonus.' },
-      { name:'Juggernaut', text:'Increase your maximum HP by 1.' },
+      { name:'Juggernaut', text:'Increase your maximum HP by 2.' },
       { name:'Unbreakable', text:'Whenever your armor is reduced by Sundering, ignore the first point of Armor loss each scene.' },
       { name:'Titan', text:'When you succeed on a Might Challenge, one adjacent ally may immediately move one Proximity without provoking Attack of Opportunity or stand from Prone.' },
     ]},
@@ -1368,6 +1435,8 @@ const TIER_TREE = {
 const STAT_ARRAY = ["+2","+1","-1"];
 let stats = { Grace:"+2", Might:"+1", Magicks:"-1" };
 let chosenSpells = [];
+let inventoryItems = [];        // mutable per-character list, seeded from the chosen Equipment Set
+let inventoryUnlocked = false;  // true once an Equipment Set (Set A/B) has actually been chosen
 
 const TIER_ORDER = ["I","II","III","IV","V"];
 
@@ -1400,6 +1469,64 @@ function shuffle(arr){
 }
 
 function bonusOf(sign){ return parseInt(sign,10); }
+
+function escapeAttr(str){
+  return String(str)
+    .replace(/&/g, "&amp;")
+    .replace(/"/g, "&quot;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;");
+}
+
+// Counts "Ability Score Improvement" picks taken for a given ability
+// (only Tier II and Tier V offer it, so this is 0, 1, or 2).
+function asiCount(ability){
+  let count = 0;
+  TIER_ORDER.forEach(tier=>{
+    const idx = levelUpPicks[ability][tier];
+    if(idx === null) return;
+    const tierObj = TIER_TREE[ability].find(t => t.tier === tier);
+    if(tierObj && tierObj.features[idx] && tierObj.features[idx].name === "Ability Score Improvement"){
+      count++;
+    }
+  });
+  return count;
+}
+
+// The number that actually matters at the table: base stat + any
+// Ability Score Improvement picks for that ability.
+function effectiveBonus(ability){
+  return bonusOf(stats[ability]) + asiCount(ability);
+}
+
+function formatBonus(n){
+  return n >= 0 ? "+"+n : ""+n;
+}
+
+// Returns the feature name picked at a given Ability/Tier, or null if none.
+function featurePickedAt(ability, tier){
+  const idx = levelUpPicks[ability][tier];
+  if(idx === null) return null;
+  const tierObj = TIER_TREE[ability].find(t => t.tier === tier);
+  return (tierObj && tierObj.features[idx]) ? tierObj.features[idx].name : null;
+}
+
+// Flat HP bonus from specific Might Tier features (Hardy +1, Juggernaut +2).
+function hpBonusFromLevelUp(){
+  let bonus = 0;
+  if(featurePickedAt("Might","I") === "Hardy") bonus += 1;
+  if(featurePickedAt("Might","V") === "Juggernaut") bonus += 2;
+  return bonus;
+}
+
+// Flat Safe Cast bonus from specific Magicks Tier features
+// (Arcane Reservoir +1, Archmage +2) — on top of the Magicks-bonus-based total.
+function safeCastBonusFromLevelUp(){
+  let bonus = 0;
+  if(featurePickedAt("Magicks","III") === "Arcane Reservoir") bonus += 1;
+  if(featurePickedAt("Magicks","V") === "Archmage") bonus += 2;
+  return bonus;
+}
 
 function findBy(list,name){ return list.find(x=>x.name===name); }
 
@@ -1459,15 +1586,62 @@ function renderEquipmentSetBox(selected){
     `<span class="fname">Contents</span>${set.items.join(", ")}`;
 }
 
+/*****************************************************************
+ * INVENTORY (editable) — items start as a copy of the chosen
+ * Equipment Set's contents, then the player can freely rename,
+ * add, or remove items from there. Editing is only exposed once
+ * an Equipment Set (Set A/B) has actually been selected.
+ *****************************************************************/
+
+function resetInventoryFromSet(selected){
+  const set = findBy(EQUIPMENT_SETS, selected);
+  inventoryItems = set ? [...set.items] : [];
+  inventoryUnlocked = !!set;
+}
+
+function updateInventoryItem(index, value){
+  if(index < 0 || index >= inventoryItems.length) return;
+  const trimmed = value.trim();
+  if(trimmed === ""){
+    inventoryItems.splice(index, 1);
+  } else {
+    inventoryItems[index] = trimmed;
+  }
+  updateCharacter();
+}
+
+function removeInventoryItem(index){
+  if(index < 0 || index >= inventoryItems.length) return;
+  inventoryItems.splice(index, 1);
+  updateCharacter();
+}
+
+function addInventoryItem(){
+  const input = document.getElementById("inventory-new-item");
+  const value = input.value.trim();
+  if(value === "") return;
+  inventoryItems.push(value);
+  input.value = "";
+  updateCharacter();
+  document.getElementById("inventory-new-item").focus();
+}
+
+function addInventoryItemOnEnter(event){
+  if(event.key === "Enter"){
+    event.preventDefault();
+    addInventoryItem();
+  }
+}
+
 function renderSpells(){
-  const magicksBonus = bonusOf(stats.Magicks);
+  const magicksBonus = effectiveBonus("Magicks");
   const known = Math.max(0, magicksBonus);
   const note = document.getElementById("magicks-note");
   const rerollField = document.getElementById("spell-reroll-field");
   const list = document.getElementById("spell-list");
 
   if(known === 0){
-    note.innerHTML = `Magicks bonus is <strong>${stats.Magicks}</strong>. A Magicks bonus of +1 or higher is required to wield magicks — this character has no spells.`;
+    note.innerHTML = `Magicks bonus is <strong>${formatBonus(magicksBonus)}</strong>. A Magicks bonus of +1 or higher is required to wield magicks — this character has no spells.`;
     rerollField.style.display="none";
     list.innerHTML="";
     chosenSpells=[];
@@ -1475,7 +1649,11 @@ function renderSpells(){
   }
 
   rerollField.style.display="flex";
-  note.innerHTML = `Magicks bonus is <strong>+${magicksBonus}</strong>. Spells known: <strong>${known}</strong>. Safe casts: <strong>${known}</strong> per Long Downtime.`;
+  const safeCasts = known + safeCastBonusFromLevelUp();
+  const safeCastNote = safeCastBonusFromLevelUp()
+    ? ` (${known} from Magicks bonus + ${safeCastBonusFromLevelUp()} from Tier features)`
+    : "";
+  note.innerHTML = `Magicks bonus is <strong>${formatBonus(magicksBonus)}</strong>${asiCount("Magicks") ? " (base "+stats.Magicks+" + "+asiCount("Magicks")+" ASI)" : ""}. Spells known: <strong>${known}</strong>. Safe casts: <strong>${safeCasts}</strong> per Long Downtime${safeCastNote}.`;
 
   // trim or fill chosenSpells to match "known" count without unnecessary rerolls
   if(chosenSpells.length > known){
@@ -1522,7 +1700,7 @@ function changeSpell(index, newName){
 }
 
 function rerollSpells(){
-  const magicksBonus = bonusOf(stats.Magicks);
+  const magicksBonus = effectiveBonus("Magicks");
   const known = Math.max(0, magicksBonus);
   chosenSpells = shuffle(SPELLS).slice(0, known);
   renderSpells();
@@ -1585,7 +1763,7 @@ function onFieldChange(field){
   if(field==="archetype") renderFeatureBox("archetype-feature", findBy(ARCHETYPES,value));
   if(field==="weapon") renderWeaponTable(value);
   if(field==="armor") renderArmorTable(value);
-  if(field==="equipmentSet") renderEquipmentSetBox(value);
+  if(field==="equipmentSet") { renderEquipmentSetBox(value); resetInventoryFromSet(value); }
 
   updateCharacter();
 }
@@ -1632,10 +1810,10 @@ function computeDerived(){
   const ancestry = findBy(ANCESTRIES, document.getElementById("ancestry").value);
   const archetype = findBy(ARCHETYPES, document.getElementById("archetype").value);
   const armor = findBy(ARMORS, document.getElementById("armor").value);
-  const graceBonus = bonusOf(stats.Grace);
-  const magicksBonus = bonusOf(stats.Magicks);
+  const graceBonus = effectiveBonus("Grace");
+  const magicksBonus = effectiveBonus("Magicks");
 
-  const hp = ancestry.hp + archetype.hpBonus;
+  const hp = ancestry.hp + archetype.hpBonus + hpBonusFromLevelUp();
 
   // Evasion = Grace bonus + Archetype bonus + Armor modifier.
   // Medium Armor caps the Grace-bonus portion at +2 (applied before the
@@ -1647,7 +1825,9 @@ function computeDerived(){
   let evasion = graceContribution + archetype.evasionBonus + armorFlatBonus;
   if(armor.name === "Heavy Armor") evasion = 0;
 
-  const safeCasts = Math.max(0, magicksBonus);
+  // Safe Casts = spells-known baseline (Magicks bonus) + any flat
+  // bonuses from Arcane Reservoir (+1) / Archmage (+2).
+  const safeCasts = Math.max(0, magicksBonus) + safeCastBonusFromLevelUp();
 
   return { hp, evasion, safeCasts };
 }
@@ -1682,6 +1862,7 @@ function generateCharacter(){
 
 function updateCharacter(){
   const derived = computeDerived();
+  renderSpells(); // keep spells known / safe casts in sync with any ASI changes before building the JSON below
 
   character.name = document.getElementById("name").value;
   character.level = parseInt(document.getElementById("level").value, 10) || 1;
@@ -1700,7 +1881,8 @@ function updateCharacter(){
   character.equipment = {
     weapon: document.getElementById("weapon").value,
     armor: document.getElementById("armor").value,
-    equipmentSet: document.getElementById("equipmentSet").value
+    equipmentSet: document.getElementById("equipmentSet").value,
+    items: [...inventoryItems]
   };
 
   character.derived = {
@@ -1714,10 +1896,17 @@ function updateCharacter(){
   renderLevelUpTracker();
 }
 
-function makeCircleTrack(count){
-  const active = Math.max(0, Math.min(count, 6));
+// The highest Max HP a character can ever reach: best Ancestry (3) +
+// best Archetype bonus (3) + Hardy (+1, Might Tier I) + Juggernaut
+// (+2, Might Tier V) = 9. Used so the HP circle track never runs out
+// of circles for a fully built-out character.
+const MAX_HP_CIRCLES = 9;
+
+function makeCircleTrack(count, max){
+  max = max || 6;
+  const active = Math.max(0, Math.min(count, max));
   let circles = "";
-  for(let i=0;i<6;i++){
+  for(let i=0;i<max;i++){
     const stateClass = i < active ? "active" : "inactive";
     circles += `<span class="circle ${stateClass}" onclick="this.classList.toggle('filled')"></span>`;
   }
@@ -1843,9 +2032,16 @@ function renderLevelUpTracker(){
       ${TIER_TREE[ability].map(tierObj => {
         const unlocked = isTierUnlocked(ability, tierObj.tier);
         const picked = levelUpPicks[ability][tierObj.tier];
+        const prevTier = TIER_ORDER[TIER_ORDER.indexOf(tierObj.tier)-1];
+        let statusNote = "";
+        if(!unlocked){
+          statusNote = ` <span class="no-print" style="opacity:0.6;">— locked (take Tier ${prevTier} first)</span>`;
+        } else if(picked === null && spent >= available){
+          statusNote = ` <span class="no-print" style="opacity:0.6;">— no points to spend</span>`;
+        }
         return `
         <div class="tier-block">
-          <div class="tier-label">Tier ${tierObj.tier} <span style="opacity:0.6;">(choose one)</span>${!unlocked ? ' <span style="opacity:0.6;">— locked</span>' : ''}</div>
+          <div class="tier-label">Tier ${tierObj.tier} <span style="opacity:0.6;">(choose one)</span>${statusNote}</div>
           ${tierObj.features.map((f, idx) => {
             const isFilled = picked === idx;
             const noPointsLeft = picked === null && spent >= available;
@@ -1882,16 +2078,32 @@ function renderDossier(derived){
   document.getElementById("d-subline").textContent =
     `${ancestry.name} · ${background.name} · ${occupation.name} · ${archetype.name}`;
 
+  const graceEff = effectiveBonus("Grace");
+  const mightEff = effectiveBonus("Might");
+  const magicksEff = effectiveBonus("Magicks");
+  const graceASI = asiCount("Grace");
+  const mightASI = asiCount("Might");
+  const magicksASI = asiCount("Magicks");
+
   document.getElementById("d-abilities-row").innerHTML = `
-    <div class="dossier-stat"><div class="v">${stats.Grace}</div><div class="l">Grace</div></div>
-    <div class="dossier-stat"><div class="v">${stats.Might}</div><div class="l">Might</div></div>
-    <div class="dossier-stat"><div class="v">${stats.Magicks}</div><div class="l">Magicks</div></div>
+    <div class="dossier-stat">
+      <div class="v">${formatBonus(graceEff)}</div><div class="l">Grace</div>
+      ${graceASI ? `<div class="asi-note no-print">base ${stats.Grace} +${graceASI} ASI</div>` : ""}
+    </div>
+    <div class="dossier-stat">
+      <div class="v">${formatBonus(mightEff)}</div><div class="l">Might</div>
+      ${mightASI ? `<div class="asi-note no-print">base ${stats.Might} +${mightASI} ASI</div>` : ""}
+    </div>
+    <div class="dossier-stat">
+      <div class="v">${formatBonus(magicksEff)}</div><div class="l">Magicks</div>
+      ${magicksASI ? `<div class="asi-note no-print">base ${stats.Magicks} +${magicksASI} ASI</div>` : ""}
+    </div>
   `;
 
   document.getElementById("d-resources-row").innerHTML = `
     <div class="dossier-stat">
       <div class="v">${derived.hp}</div><div class="l">Max HP</div>
-      ${makeCircleTrack(derived.hp)}
+      ${makeCircleTrack(derived.hp, MAX_HP_CIRCLES)}
     </div>
     <div class="dossier-stat"><div class="v">${derived.evasion}</div><div class="l">Evasion</div></div>
     <div class="dossier-stat">
@@ -1929,7 +2141,7 @@ function renderDossier(derived){
   `;
 
   const magicksBlock = document.getElementById("d-magicks-block");
-  const magicksBonus = bonusOf(stats.Magicks);
+  const magicksBonus = effectiveBonus("Magicks");
   if(magicksBonus <= 0 || chosenSpells.length === 0){
     magicksBlock.style.display = "none";
   } else {
@@ -1964,14 +2176,24 @@ function renderDossier(derived){
 
   document.getElementById("d-inventory").innerHTML = `
     <div class="fine" style="margin:0 0 12px;">${equipmentSet.name}</div>
-    <div class="inventory-list">
-      ${equipmentSet.items.map(item => `
-        <div class="inventory-item">
-          <span class="circle" onclick="this.classList.toggle('filled')"></span>
-          <span>${item}</span>
+    ${!inventoryUnlocked ? `
+      <div class="inventory-locked-note">Choose an Equipment Set above to unlock inventory editing.</div>
+    ` : `
+      <div class="inventory-list">
+        ${inventoryItems.map((item, i) => `
+          <div class="inventory-item">
+            <span class="circle" onclick="this.classList.toggle('filled')"></span>
+            <input type="text" value="${escapeAttr(item)}"
+              onchange="updateInventoryItem(${i}, this.value)">
+            <button type="button" class="remove-item no-print" title="Remove item" onclick="removeInventoryItem(${i})">✕</button>
+          </div>
+        `).join("")}
+        <div class="inventory-add-row no-print">
+          <input type="text" id="inventory-new-item" placeholder="Add item…" onkeydown="addInventoryItemOnEnter(event)">
+          <button type="button" onclick="addInventoryItem()">+ Add</button>
         </div>
-      `).join("")}
-    </div>
+      </div>
+    `}
   `;
 }
 
@@ -2106,6 +2328,7 @@ function collectSaveState(){
     equipmentSet: document.getElementById("equipmentSet").value,
     spellNames: chosenSpells.map(s => s.name),
     levelUp: levelUpPicksAsNames(),
+    inventoryItems: [...inventoryItems],
     updatedAt: firebase.firestore.FieldValue.serverTimestamp()
   };
 }
@@ -2126,19 +2349,20 @@ function restoreSaveState(data){
 
   stats = data.stats ? { ...data.stats } : { Grace:"+2", Might:"+1", Magicks:"-1" };
   buildStatDropdowns();
+  levelUpPicks = levelUpPicksFromNames(data.levelUp);
 
   document.getElementById("expertise").value = data.expertiseSelect || "";
   document.getElementById("expertise-custom").value = data.expertiseCustom || "";
   onExpertiseChange();
 
-  const magicksBonus = bonusOf(stats.Magicks);
+  const magicksBonus = effectiveBonus("Magicks");
   chosenSpells = (data.spellNames || [])
     .map(n => SPELLS.find(s => s.name === n))
     .filter(Boolean)
     .slice(0, Math.max(0, magicksBonus));
   renderSpells();
 
-  levelUpPicks = levelUpPicksFromNames(data.levelUp);
+  inventoryItems = Array.isArray(data.inventoryItems) ? [...data.inventoryItems] : inventoryItems;
 
   updateCharacter();
 }
