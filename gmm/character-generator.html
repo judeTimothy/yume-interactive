@@ -615,7 +615,7 @@
 
   textarea{
     width:100%;
-    min-height:220px;
+    min-height:20px;
     background:#0f0c09;
     border:1px solid var(--line);
     border-radius:3px;
@@ -625,6 +625,29 @@
     padding:14px;
     resize:vertical;
   }
+  .backstory-box{
+    display:block;
+    width:100%;
+    box-sizing:border-box;
+    font-family:'Spectral', serif;
+    font-size:13px;
+    line-height:1.55;
+    color:var(--bone-dim);
+    background:#0f0c09;
+    border:1px solid var(--line);
+    border-radius:3px;
+    padding:12px 14px;
+    white-space:pre-wrap;
+    word-wrap:break-word;
+    resize:vertical;
+
+    /* ---- TUNE THIS ----
+       Screen-editing height. Change freely; it has no effect on the
+       printed page (the print-only mirror below controls that). */
+    height:126px;
+  }
+  .print-only{display:none;}
+
   .fine{
     font-size:11px;
     color:var(--bone-dim);
@@ -700,6 +723,7 @@
     #dossier-sheet .dossier-entry,
     #dossier-sheet .tier-block,
     #dossier-sheet .inventory-item,
+    #dossier-sheet .backstory-box,
     #dossier-sheet .dossier-stat{
       break-inside:avoid;
       page-break-inside:avoid;
@@ -710,6 +734,21 @@
     }
     body{background:#fff !important;padding:0;margin:0;}
     .no-print{display:none !important;}
+    .print-only{display:block !important;}
+    #dossier-sheet .backstory-box{
+      color:#333;
+      background:#fff;
+      border-color:#999;
+
+      /* ---- TUNE THIS ----
+         Printed box height. Lower it if the sheet is spilling onto a
+         second page; raise it if there's empty space below the text.
+         Pairs with BACKSTORY_CHAR_CAP in the JS below — shrink
+         that too if you lower this, so players can't type more than
+         visibly fits. */
+      height:1.55in;
+      overflow:hidden;
+    }
     .wrap{max-width:100%;}
     section{padding:0 !important;border:none !important;background:transparent !important;margin:0 !important;}
     section::before{display:none !important;}
@@ -927,7 +966,7 @@
     <h2 class="no-print">Character Summary</h2>
 
     <div class="toolbar no-print" style="margin-bottom:18px;">
-      <button class="primary" onclick="window.print()">🖨️ Print Character Sheet</button>
+      <button class="primary" onclick="printCharacterSheet()">🖨️ Print Character Sheet</button>
     </div>
 
     <div id="dossier-sheet">
@@ -953,6 +992,19 @@
       <div class="dossier-block">
         <h3>Expertise</h3>
         <div id="d-expertise"></div>
+      </div>
+
+      <div class="dossier-block" id="d-backstory-block">
+        <h3>Backstory &amp; Details</h3>
+        <div class="fine no-print" id="backstory-counter" style="margin-bottom:6px;"></div>
+        <!-- Editable on screen; hidden when printing. -->
+        <textarea id="d-backstory" class="backstory-box no-print"
+          placeholder="Backstory, personality, bonds, notes…"
+          oninput="onBackstoryInput()" onchange="updateCharacter()"></textarea>
+        <!-- Static mirror shown only when printing, so the box's fixed
+             size (see .backstory-box CSS) reliably clips instead of
+             pushing the sheet onto a second page. -->
+        <div id="d-backstory-print" class="backstory-box print-only"></div>
       </div>
 	  
 	  <div class="dossier-block" id="d-equipment-block">
@@ -1843,6 +1895,9 @@ function generateCharacter(){
   levelUpPicks = freshLevelUpPicks();
   currentCharId = null; // A freshly generated character is a new, unsaved one.
 
+  document.getElementById("d-backstory").value = "";
+  syncBackstoryDisplay();
+
   ["ancestry","background","occupation","archetype","weapon","armor","equipmentSet"].forEach(field=>{
     document.getElementById(field).value = randomItem(FIELD_DATA[field]).name;
     onFieldChange(field);
@@ -1885,6 +1940,8 @@ function updateCharacter(){
     items: [...inventoryItems]
   };
 
+  character.backstory = document.getElementById("d-backstory").value;
+
   character.derived = {
     maxHitPoints: derived.hp,
     evasion: derived.evasion
@@ -1901,6 +1958,28 @@ function updateCharacter(){
 // (+2, Might Tier V) = 9. Used so the HP circle track never runs out
 // of circles for a fully built-out character.
 const MAX_HP_CIRCLES = 9;
+
+// ---- TUNE THIS ----
+// Max characters allowed in the Backstory & Details box. Pairs with the
+// printed box's height (see .backstory-box in the print media query in
+// <style> above) — if text is getting clipped on the printed sheet,
+// lower this number (or raise that height) until a full box of text
+// fits without pushing onto a second page.
+const BACKSTORY_CHAR_CAP = 700;
+
+// Keeps the print-only mirror and the live character counter in sync
+// with whatever's currently typed in the backstory textarea.
+function syncBackstoryDisplay(){
+  const textarea = document.getElementById("d-backstory");
+  const value = textarea.value;
+  document.getElementById("d-backstory-print").textContent = value;
+  const counter = document.getElementById("backstory-counter");
+  if(counter) counter.textContent = `${value.length} / ${BACKSTORY_CHAR_CAP} characters`;
+}
+
+function onBackstoryInput(){
+  syncBackstoryDisplay();
+}
 
 function makeCircleTrack(count, max){
   max = max || 6;
@@ -2205,6 +2284,31 @@ function exportJSON(){
   setTimeout(()=>{ btn.textContent = original; }, 1200);
 }
 
+// Browsers pull the default filename for "Print → Save as PDF" from
+// document.title at the moment window.print() is called. We swap the
+// title in just for that moment, then put it back afterward so the
+// tab/header UI is unaffected.
+function printCharacterSheet(){
+  const rawName = document.getElementById("name").value.trim() || "Character";
+  const safeName = rawName.replace(/[\\/:*?"<>|]/g, "").trim() || "Character";
+  const originalTitle = document.title;
+  document.title = `${safeName} - Grace, Might & Magicks`;
+
+  let restored = false;
+  const restore = () => {
+    if(restored) return;
+    restored = true;
+    document.title = originalTitle;
+    window.removeEventListener("afterprint", restore);
+  };
+  window.addEventListener("afterprint", restore);
+
+  window.print();
+
+  // Safety net for browsers/flows that don't reliably fire 'afterprint'.
+  setTimeout(restore, 1500);
+}
+
 /*****************************************************************
  * CLOUD SAVE — Google Sign-In + Firestore
  *
@@ -2241,13 +2345,12 @@ function exportJSON(){
  *****************************************************************/
 
 const FIREBASE_CONFIG = {
-  apiKey: "AIzaSyCY0tkVIUqGjO_6ayWJWLHNcRUpDls5VZ8",
-  authDomain: "grace-might-and-magicks.firebaseapp.com",
-  projectId: "grace-might-and-magicks",
-  storageBucket: "grace-might-and-magicks.firebasestorage.app",
-  messagingSenderId: "449279853302",
-  appId: "1:449279853302:web:fdef6375c84605bcf5a2d7",
-  measurementId: "G-693S1QT7MC"
+  apiKey: "YOUR_API_KEY",
+  authDomain: "YOUR_PROJECT.firebaseapp.com",
+  projectId: "YOUR_PROJECT",
+  storageBucket: "YOUR_PROJECT.appspot.com",
+  messagingSenderId: "YOUR_SENDER_ID",
+  appId: "YOUR_APP_ID"
 };
 
 const CLOUD_SAVE_CONFIGURED = FIREBASE_CONFIG.apiKey !== "YOUR_API_KEY";
@@ -2329,6 +2432,7 @@ function collectSaveState(){
     spellNames: chosenSpells.map(s => s.name),
     levelUp: levelUpPicksAsNames(),
     inventoryItems: [...inventoryItems],
+    backstory: document.getElementById("d-backstory").value,
     updatedAt: firebase.firestore.FieldValue.serverTimestamp()
   };
 }
@@ -2363,6 +2467,9 @@ function restoreSaveState(data){
   renderSpells();
 
   inventoryItems = Array.isArray(data.inventoryItems) ? [...data.inventoryItems] : inventoryItems;
+
+  document.getElementById("d-backstory").value = data.backstory || "";
+  syncBackstoryDisplay();
 
   updateCharacter();
 }
@@ -2463,6 +2570,8 @@ buildStatDropdowns();
 toggleJsonVisibility();
 renderLevelUpTracker();
 refreshAccountBar();
+document.getElementById("d-backstory").setAttribute("maxlength", BACKSTORY_CHAR_CAP);
+syncBackstoryDisplay();
 applySetting("SRD");
 
 </script>
