@@ -6,8 +6,28 @@
 <title>Grace, Might &amp; Magicks — Quick Character Generator</title>
 <link rel="icon" type="image/x-icon" href="favicon.ico">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+SC:wght@600;700&family=Spectral:ital,wght@0,400;0,500;0,600;1,400&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700&family=Vollkorn:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
 <style>
+  /* ---- LORDISH SETUP ----
+     Lordish (Creative Media Lab) is used for the game title only — it's
+     free for personal use but requires a paid commercial license for
+     public/web use: https://creativemarket.com/creativemedialab/3746233-Lordish
+     Once licensed, drop the webfont files (woff2 preferred) in a
+     ./fonts/ folder next to this HTML file, named to match below, and
+     this will pick them up automatically. Until then, the fallback
+     stack (Cinzel, serif) is used so the title still looks intentional
+     rather than broken.
+  */
+  @font-face{
+    font-family:'Lordish';
+    src: url('./fonts/Lordish-Regular.woff2') format('woff2'),
+         url('./fonts/Lordish-Regular.woff') format('woff'),
+         url('./fonts/Lordish-Regular.ttf') format('truetype');
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+  }
+
   :root{
     --ink:#0f0d0b;
     --panel:#181410;
@@ -20,6 +40,13 @@
     --gold:#b8974f;
     --gold-dim:#8a7440;
     --ok:#5c7a52;
+
+    /* ---- Typography — driven per-Setting by applyTheme() in <script>.
+         A Setting can override any of these via its `theme` block;
+         SRD's values (medieval-fantasy grit) are the defaults below. ---- */
+    --font-display:'Lordish', 'Cinzel', serif;   /* Game title only */
+    --font-header:'Cinzel', serif;                /* Section headers, labels, badges, stat values */
+    --font-body:'Vollkorn', serif;                 /* Prose, descriptions, feature text */
   }
   *{box-sizing:border-box;}
   html,body{margin:0;padding:0;}
@@ -29,7 +56,7 @@
       radial-gradient(900px 600px at 110% 10%, #1a1410 0%, transparent 55%),
       var(--ink);
     color:var(--bone);
-    font-family:'Spectral', serif;
+    font-family:var(--font-body);
     padding:28px 18px 80px;
     line-height:1.5;
   }
@@ -59,17 +86,16 @@
   }
   .title-block{flex:1;min-width:0;}
   h1{
-    font-family:'Cormorant SC', serif;
+    font-family:var(--font-display);
     font-weight:700;
-    letter-spacing:0.06em;
-    font-size:30px;
+    letter-spacing:0.01em;
+    font-size:34px;
     margin:0;
     color:var(--bone);
-    text-transform:uppercase;
   }
   .subtitle{
     color:var(--gold);
-    font-family:'JetBrains Mono', monospace;
+    font-family:var(--font-header);
     font-size:11px;
     letter-spacing:0.14em;
     text-transform:uppercase;
@@ -84,7 +110,7 @@
     margin-bottom:26px;
   }
   button{
-    font-family:'JetBrains Mono', monospace;
+    font-family:var(--font-header);
     font-size:12px;
     letter-spacing:0.06em;
     text-transform:uppercase;
@@ -125,14 +151,14 @@
     left:20px;
     background:var(--ink);
     padding:0 8px;
-    font-family:'JetBrains Mono', monospace;
+    font-family:var(--font-header);
     font-size:10px;
     letter-spacing:0.12em;
     color:var(--gold-dim);
     text-transform:uppercase;
   }
   h2{
-    font-family:'Cormorant SC', serif;
+    font-family:var(--font-header);
     font-size:20px;
     letter-spacing:0.04em;
     text-transform:uppercase;
@@ -151,7 +177,7 @@
   .field label{
     width:120px;
     flex:0 0 120px;
-    font-family:'JetBrains Mono', monospace;
+    font-family:var(--font-header);
     font-size:11px;
     text-transform:uppercase;
     letter-spacing:0.06em;
@@ -164,7 +190,7 @@
     border:1px solid var(--line);
     border-radius:3px;
     color:var(--bone);
-    font-family:'Spectral', serif;
+    font-family:var(--font-body);
     font-size:14px;
   }
   select:focus,input:focus{outline:1px solid var(--gold-dim);}
@@ -179,8 +205,8 @@
   }
   .feature-box .fname{
     color:var(--gold);
-    font-weight:600;
-    font-family:'JetBrains Mono', monospace;
+    font-weight:700;
+    font-family:var(--font-header);
     font-size:11px;
     text-transform:uppercase;
     letter-spacing:0.05em;
@@ -191,7 +217,8 @@
     display:inline-block;
     margin-top:8px;
     padding:2px 8px;
-    font-family:'JetBrains Mono', monospace;
+    font-family:var(--font-header);
+    font-weight:700;
     font-size:10.5px;
     color:var(--ok);
     border:1px solid var(--ok);
@@ -213,7 +240,7 @@
   }
   .stat label{
     display:block;
-    font-family:'JetBrains Mono', monospace;
+    font-family:var(--font-header);
     font-size:11px;
     letter-spacing:0.1em;
     text-transform:uppercase;
@@ -222,7 +249,7 @@
   }
   .stat select{
     text-align:center;
-    font-family:'JetBrains Mono', monospace;
+    font-family:var(--font-header);
     font-size:20px;
     font-weight:600;
     color:var(--gold);
@@ -250,7 +277,7 @@
   .mini-table th{
     background:#120f0c;
     color:var(--gold);
-    font-family:'JetBrains Mono', monospace;
+    font-family:var(--font-header);
     font-size:10.5px;
     text-transform:uppercase;
     letter-spacing:0.04em;
@@ -303,21 +330,22 @@
     margin-bottom:6px;
   }
   .dossier-name{
-    font-family:'Cormorant SC', serif;
+    font-family:var(--font-header);
+    font-weight:700;
     font-size:28px;
     letter-spacing:0.03em;
     text-transform:uppercase;
     color:var(--bone);
   }
   .dossier-level{
-    font-family:'JetBrains Mono', monospace;
+    font-family:var(--font-header);
     font-size:13px;
     color:var(--gold);
     text-transform:uppercase;
     letter-spacing:0.06em;
   }
   .dossier-subline{
-    font-family:'JetBrains Mono', monospace;
+    font-family:var(--font-header);
     font-size:11px;
     letter-spacing:0.05em;
     text-transform:uppercase;
@@ -338,13 +366,13 @@
     border-radius:3px;
   }
   .dossier-stat .v{
-    font-family:'JetBrains Mono', monospace;
+    font-family:var(--font-header);
     font-size:18px;
     font-weight:600;
     color:var(--gold);
   }
   .dossier-stat .l{
-    font-family:'JetBrains Mono', monospace;
+    font-family:var(--font-header);
     font-size:9px;
     text-transform:uppercase;
     letter-spacing:0.06em;
@@ -352,7 +380,7 @@
     margin-top:4px;
   }
   .dossier-stat .asi-note{
-    font-family:'JetBrains Mono', monospace;
+    font-family:var(--font-header);
     font-size:9px;
     color:var(--gold-dim);
     margin-top:2px;
@@ -360,7 +388,7 @@
   .dossier-block{margin-bottom:20px;}
   .dossier-block:last-child{margin-bottom:0;}
   .dossier-block h3{
-    font-family:'Cormorant SC', serif;
+    font-family:var(--font-header);
     font-size:15px;
     text-transform:uppercase;
     letter-spacing:0.06em;
@@ -379,7 +407,8 @@
   .dossier-entry:last-child{margin-bottom:0;}
   .dossier-entry .fname{
     display:block;
-    font-family:'JetBrains Mono', monospace;
+    font-family:var(--font-header);
+    font-weight:700;
     font-size:11px;
     text-transform:uppercase;
     letter-spacing:0.04em;
@@ -391,7 +420,8 @@
     margin-top:6px;
     margin-right:4px;
     padding:2px 8px;
-    font-family:'JetBrains Mono', monospace;
+    font-family:var(--font-header);
+    font-weight:700;
     font-size:10px;
     color:var(--ok);
     border:1px solid var(--ok);
@@ -405,7 +435,7 @@
     gap:18px;
   }
   .tier-column h4{
-    font-family:'Cormorant SC', serif;
+    font-family:var(--font-header);
     font-size:14px;
     text-transform:uppercase;
     letter-spacing:0.05em;
@@ -417,7 +447,7 @@
   }
   .tier-block{margin-bottom:12px;}
   .tier-label{
-    font-family:'JetBrains Mono', monospace;
+    font-family:var(--font-header);
     font-size:10px;
     text-transform:uppercase;
     letter-spacing:0.08em;
@@ -442,7 +472,7 @@
   }
   .tier-feature .tfname{
     color:var(--bone);
-    font-weight:600;
+    font-weight:700;
   }
   .tier-feature.locked{
     opacity:0.32;
@@ -458,7 +488,7 @@
   }
   .points-badge{
     display:inline-block;
-    font-family:'JetBrains Mono', monospace;
+    font-family:var(--font-header);
     font-size:11px;
     letter-spacing:0.05em;
     color:var(--gold);
@@ -485,7 +515,7 @@
     border-radius:4px;
   }
   .account-status{
-    font-family:'JetBrains Mono', monospace;
+    font-family:var(--font-header);
     font-size:11px;
     color:var(--bone-dim);
     flex:1;
@@ -515,7 +545,7 @@
     padding:22px 24px;
   }
   .modal h3{
-    font-family:'Cormorant SC', serif;
+    font-family:var(--font-header);
     color:var(--gold);
     margin:0 0 14px;
     text-transform:uppercase;
@@ -533,7 +563,7 @@
   }
   .saved-char-row .scr-name{flex:1;min-width:0;color:var(--bone);}
   .saved-char-row .scr-meta{
-    font-family:'JetBrains Mono', monospace;
+    font-family:var(--font-header);
     font-size:10px;
     color:var(--bone-dim);
     display:block;
@@ -620,7 +650,7 @@
     border:1px solid var(--line);
     border-radius:3px;
     color:var(--bone-dim);
-    font-family:'JetBrains Mono', monospace;
+    font-family:var(--font-header);
     font-size:12px;
     padding:14px;
     resize:vertical;
@@ -629,7 +659,7 @@
     display:block;
     width:100%;
     box-sizing:border-box;
-    font-family:'Spectral', serif;
+    font-family:var(--font-body);
     font-size:13px;
     line-height:1.55;
     color:var(--bone-dim);
@@ -1151,18 +1181,69 @@ const SRD_EXPERTISE_EXAMPLES = [
   "Riverboat Navigation","Beast Taming","Forgery","Court Etiquette","Bell-Diving"
 ];
 
+// Weapon TYPES are the mechanical templates (damage, ability bonus, tag) —
+// unchanged from prior versions. SRD_WEAPONS below is the actual pick list
+// shown to players: real, named weapons, each tagged with the type it
+// inherits its stats from. This mirrors the book's own stated design
+// (a "Sidearm" is explicitly a template that could just as easily be a
+// dao, arming sword, or kriegsmesser with identical stats) — we're just
+// pre-filling that reflavoring step instead of leaving it to the player.
+const SRD_WEAPON_TYPES = {
+  "Unarmed": { damage:"+0", bonus:"Might", tag:"—", damageType:"Physical" },
+  "Improvised": { damage:"+1", bonus:"Might", tag:"Improvised", damageType:"Physical" },
+  "Dagger": { damage:"+2", bonus:"Grace", tag:"Concealable", damageType:"Physical" },
+  "Sidearm": { damage:"+3", bonus:"Grace", tag:"—", damageType:"Physical" },
+  "Mainhand": { damage:"+3/+4", bonus:"Grace or Might", tag:"Versatile", damageType:"Physical" },
+  "Great Weapon": { damage:"+5", bonus:"Might", tag:"Heavy", damageType:"Physical" },
+  "Polearm": { damage:"+3", bonus:"Might", tag:"Reach", damageType:"Physical" },
+  "Shortbow": { damage:"+3", bonus:"Grace", tag:"Ranged", damageType:"Physical" },
+  "Longbow": { damage:"+5", bonus:"Might", tag:"Heavy", damageType:"Physical" },
+  "Crossbow": { damage:"+4", bonus:"Grace", tag:"Ranged, Reload", damageType:"Physical" },
+  "Firearm": { damage:"+6", bonus:"Grace", tag:"Ranged, Reload, Sundering, Misfire", damageType:"Physical" }
+};
+
 const SRD_WEAPONS = [
-  { name:"Unarmed", damage:"+0", bonus:"Might", tag:"—" },
-  { name:"Improvised", damage:"+1", bonus:"Might", tag:"Improvised" },
-  { name:"Dagger", damage:"+2", bonus:"Grace", tag:"Concealable" },
-  { name:"Sidearm", damage:"+3", bonus:"Grace", tag:"—" },
-  { name:"Mainhand", damage:"+3/+4", bonus:"Grace or Might", tag:"Versatile" },
-  { name:"Great Weapon", damage:"+5", bonus:"Might", tag:"Heavy" },
-  { name:"Polearm", damage:"+3", bonus:"Might", tag:"Reach" },
-  { name:"Shortbow", damage:"+3", bonus:"Grace", tag:"Ranged" },
-  { name:"Longbow", damage:"+5", bonus:"Might", tag:"Heavy" },
-  { name:"Crossbow", damage:"+4", bonus:"Grace", tag:"Ranged, Reload" },
-  { name:"Firearm", damage:"+6", bonus:"Grace", tag:"Ranged, Reload, Sundering, Misfire" }
+  // Unarmed / Improvised aren't real gear choices — they're fallback
+  // states (your fists, or whatever's lying around) — so each stays a
+  // single generic entry rather than a curated list.
+  { name:"Bare Fists", type:"Unarmed" },
+  { name:"Improvised Weapon", type:"Improvised" },
+
+  { name:"Boot Knife", type:"Dagger" },
+  { name:"Stiletto", type:"Dagger" },
+  { name:"Seax", type:"Dagger" },
+
+  { name:"Arming Sword", type:"Sidearm" },
+  { name:"Cutlass", type:"Sidearm" },
+  { name:"Falchion", type:"Sidearm" },
+
+  { name:"Longsword", type:"Mainhand" },
+  { name:"Kriegsmesser", type:"Mainhand" },
+  { name:"Hand-and-a-Half Sword", type:"Mainhand" },
+
+  { name:"Zweihänder", type:"Great Weapon" },
+  { name:"War Maul", type:"Great Weapon" },
+  { name:"Battleaxe", type:"Great Weapon" },
+
+  { name:"Spear", type:"Polearm" },
+  { name:"Halberd", type:"Polearm" },
+  { name:"Glaive", type:"Polearm" },
+
+  { name:"Hunting Bow", type:"Shortbow" },
+  { name:"Recurve Bow", type:"Shortbow" },
+  { name:"Horsebow", type:"Shortbow" },
+
+  { name:"Warbow", type:"Longbow" },
+  { name:"Yew Longbow", type:"Longbow" },
+  { name:"Great Bow", type:"Longbow" },
+
+  { name:"Arbalest", type:"Crossbow" },
+  { name:"Latch Crossbow", type:"Crossbow" },
+  { name:"Stirrup Crossbow", type:"Crossbow" },
+
+  { name:"Matchlock Pistol", type:"Firearm" },
+  { name:"Wheellock Pistol", type:"Firearm" },
+  { name:"Hand Cannon", type:"Firearm" }
 ];
 
 const SRD_WEAPON_TAGS = {
@@ -1177,11 +1258,32 @@ const SRD_WEAPON_TAGS = {
   "Misfire": "Rolling a 1 counts against your successes. If this makes you miss your attack, the weapon misfires and you receive 1 HP damage. The weapon is now broken and cannot be used until repaired during Downtime."
 };
 
+// Armor CLASSES are the mechanical templates (rating, evasion, special) —
+// SRD_ARMORS below is the pick list of real, named armor, each tagged
+// with the class it inherits its stats from. Same reasoning as weapons.
+const SRD_ARMOR_CLASSES = {
+  "Clothing": { rating:0, evasion:"+1", special:"—" },
+  "Light Armor": { rating:1, evasion:"0", special:"—" },
+  "Medium Armor": { rating:2, evasion:"0", special:"Evasion from Grace bonus capped at +2" },
+  "Heavy Armor": { rating:3, evasion:"0", special:"Disadvantage on Stealth; Evasion becomes 0" }
+};
+
 const SRD_ARMORS = [
-  { name:"Clothing", rating:0, evasion:"+1", special:"—" },
-  { name:"Light Armor", rating:1, evasion:"0", special:"—" },
-  { name:"Medium Armor", rating:2, evasion:"0", special:"Evasion from Grace bonus capped at +2" },
-  { name:"Heavy Armor", rating:3, evasion:"0", special:"Disadvantage on Stealth; Evasion becomes 0" }
+  { name:"Traveler's Garb", type:"Clothing" },
+  { name:"Common Clothes", type:"Clothing" },
+  { name:"Padded Doublet", type:"Clothing" },
+
+  { name:"Boiled Leather", type:"Light Armor" },
+  { name:"Studded Leather", type:"Light Armor" },
+  { name:"Gambeson", type:"Light Armor" },
+
+  { name:"Brigandine", type:"Medium Armor" },
+  { name:"Chainmail", type:"Medium Armor" },
+  { name:"Scale Mail", type:"Medium Armor" },
+
+  { name:"Plate Armor", type:"Heavy Armor" },
+  { name:"Banded Mail", type:"Heavy Armor" },
+  { name:"Full Harness", type:"Heavy Armor" }
 ];
 
 const SRD_EQUIPMENT_SETS = [
@@ -1190,56 +1292,58 @@ const SRD_EQUIPMENT_SETS = [
 ];
 
 const SRD_SPELLS = [
-  { name:'Arc Bolt', tradition:'Lumomancy', statLabel:'Damage', statValue:'3', proximity:'Far', roll:'Spellcast', cost:'1 Safe Cast', description:'You make a Spellcast Roll to manifest an arc of light against a target you can see within reasonable Proximity. On a crit, the target also is pushed one Proximity away.' },
-  { name:'Ember Lance', tradition:'Pyromancy', statLabel:'Damage', statValue:'3', proximity:'Far', roll:'Spellcast', cost:'1 Safe Cast', description:'You make a Spellcast Roll to hurl a burning lance against a target you can see within reasonable Proximity. On a crit, the target also suffers Burning.' },
-  { name:'Heal', tradition:'Biomancy', statLabel:'Heal', statValue:'1 HP per Safe Cast', proximity:'Far', roll:'—', cost:'Variable (SC)', description:'You heal one creature you can see within reasonable Proximity. It gains 1 Hit Point for each safe cast you expend.' },
-  { name:'Restore', tradition:'Biomancy', statLabel:'Heal', statValue:'—', proximity:'Far', roll:'—', cost:'1 Safe Cast', description:'You remove Bleeding, Burning, Poisoned, slowed and stunned from one creature you can see within reasonable Proximity.' },
-  { name:'Surge', tradition:'Biomancy', statLabel:'Heal', statValue:'—', proximity:'Melee', roll:'—', cost:'1 Safe Cast', description:'You touch one creature you can see within Melee Proximity and give them a surge in strength and speed. They gain a +1 die bonus to their next Grace or Might action.' },
-  { name:'Lightning Strike', tradition:'Aeromancy', statLabel:'Damage', statValue:'4', proximity:'Extreme', roll:'Spellcast', cost:'1 Safe Cast', description:'You make a Spellcast Roll to summon a lightning strike against a target you can see within reasonable Proximity. On a crit, the target also suffers Sundering.' },
-  { name:'Stoneguard', tradition:'Geomancy', statLabel:'Heal', statValue:'—', proximity:'Melee', roll:'—', cost:'1 Safe Cast', description:'You touch one creature you can see within Melee Proximity and cover them with a temporary stone armor. They gain a +1 armor bonus until they are struck or until you cast Stoneguard on a different target.' },
-  { name:'Shadowspear', tradition:'Necromancy', statLabel:'Damage', statValue:'2', proximity:'Near', roll:'Spellcast', cost:'1 Safe Cast, 1 HP', description:'You make a Spellcast Roll to hurl a spear of dark energy against a target you can see within reasonable Proximity. Whenever you roll a 6 on the dice, you ignore 1 point of Armor.' },
-  { name:'Rimefrost', tradition:'Hydromancy', statLabel:'Damage', statValue:'—', proximity:'Near', roll:'Spell Resist', cost:'1 Safe Cast', description:'A target you can see within reasonable Proximity must make a Spell Resist against your Magicks bonus. Additionally, targets within Melee Range must also make the same Spell Resist. Whenever they fail, they are Restrained by magical ice.' },
-  { name:'Timewalk', tradition:'Chronomancy', statLabel:'Heal', statValue:'—', proximity:'Near', roll:'—', cost:'1 Safe Cast', description:'You can move to any unoccupied space within Near Proximity in a blink of an eye. This does not trigger any traps and features like Attack of Opportunity. This also does not count against your movement.' },
-  { name:'Gust', tradition:'Aeromancy', statLabel:'Damage', statValue:'—', proximity:'Close', roll:'Spell Resist', cost:'1 Safe Cast', description:'You summon a strong gust of wind to blow any number of creatures equal to your Magicks bonus within Close Proximity in front of you. Affected creatures must make a Spell Resist against your Magicks bonus. Whenever they fail, they are pushed one Proximity away.' },
-  { name:'Grasping Roots', tradition:'Biomancy', statLabel:'Damage', statValue:'—', proximity:'Close', roll:'Spell Resist', cost:'1 Safe Cast', description:'You create a terrain of grasping roots within Close Proximity around you. The first time a creature enters or ends their turn on the roots, they must make a Might Ability Roll against your Magicks bonus or become Restrained. You and others that resisted the spell may move across the terrain as if you were slowed. This spell permanently alters terrain.' },
-  { name:'Smoke Cover', tradition:'Aeromancy', statLabel:'Heal', statValue:'—', proximity:'Melee', roll:'—', cost:'1 Safe Cast', description:'You touch one creature you can see within Melee Proximity and cover them with a temporary smoke cover. They are hidden until they act.' },
-  { name:'Light', tradition:'Lumomancy', statLabel:'Heal', statValue:'—', proximity:'Melee', roll:'—', cost:'1 Safe Cast', description:'You touch one object you can see within Melee Proximity. That object emits a bright light that extends up to Far Proximity and can be seen by creatures far out the Distant Proximity.' },
-  { name:'Darkness', tradition:'Lumomancy', statLabel:'Damage', statValue:'—', proximity:'Melee', roll:'—', cost:'1 Safe Cast', description:'You create an area of pure magical darkness in an area around you snuffing out any non-magical light. Magical light effects are temporarily suspended within the area. snuf Creatures inside the darkness have Disadvantage in melee attacks and cannot perform features like Attack of Opportunity. s Additionally, they cannot make Ranged attacks beyond Melee Proximity. They are also hidden from other creatures outside the darkness.' },
-  { name:'Silence', tradition:'Desmomancy', statLabel:'Damage', statValue:'—', proximity:'Far', roll:'Spell Resist', cost:'1 Safe Cast', description:'A target you can see within reasonable Proximity must make a Spell Resist against your Magicks bonus. When they fail to resist the spell, they are cannot cast spells until they finish their action.' },
-  { name:'Dispel', tradition:'Arcanomancy', statLabel:'Damage', statValue:'—', proximity:'Near', roll:'—', cost:'1 Safe Cast', description:'You may remove one active magical effect on a creature or you can see within reasonable Proximity.' },
-  { name:'Magicks Sense', tradition:'Arcanomancy', statLabel:'Heal', statValue:'—', proximity:'Near', roll:'—', cost:'1 Safe Cast', description:'Until your next action, you sense the presence of magicks within Near Proximity. If you sense magicks in this way, you can use your action to see a faint aura around any visible creature or object in the area that bears magicks, and you learn the nature of its magicks.' },
-  { name:'Telekinesis', tradition:'Arcanomancy', statLabel:'Damage', statValue:'—', proximity:'Near', roll:'Spell Resist', cost:'1 Safe Cast', description:'A target you can see within reasonable Proximity must make a Spell Resist against your Magicks bonus. When they fail to resist the spell, you can move them one Proximity closer or farther. You can freely move unbound objects this way if they weigh less than 100 x your Magicks bonus in lbs.' },
-  { name:'Windstep', tradition:'Aeromancy', statLabel:'Damage', statValue:'—', proximity:'Self', roll:'—', cost:'1 Safe Cast', description:'Until your next action, you envelop yourself with wind magicks. You cannot be slowed by terrain and you can move an additional Proximity with your movement.' },
-  { name:'Illusion', tradition:'Glamomancy', statLabel:'Damage', statValue:'—', proximity:'Near', roll:'—', cost:'1 Safe Cast', description:'You conjure an exact mirror copy of an object, sound, or creature in an unoccupied space you can see within reasonable Proximity. It is a perfect copy that any scrutiny other than touch cannot expose the illusion. The illusion lasts until it is dispelled, or until you cast Illusion again.' },
-  { name:'Mend', tradition:'Geomancy', statLabel:'Heal', statValue:'—', proximity:'Melee', roll:'—', cost:'1 Safe Cast', description:'You touch one object or armor you can see within Melee Proximity fix any torn seam, punctured area, or any broken part.' },
-  { name:'Compel', tradition:'Phrenomancy', statLabel:'Heal', statValue:'—', proximity:'Melee', roll:'Spell Resist', cost:'1 Safe Cast', description:'You touch one creature you can see within Melee Proximity fix to compel them to speak the truth. The target makes a Spell Resist Roll against your Magicks bonus or be compelled to speak one truth. The target is aware of the spell and can thus avoid answering questions to which it would normally respond with a lie. Such a creature can be evasive in its answers as long as it remains within the boundaries of the truth.' },
-  { name:'Netherswap', tradition:'Arcanomancy', statLabel:'Damage', statValue:'—', proximity:'Near', roll:'Spell Resist', cost:'1 Safe Cast', description:'You choose two creatures within Near Proximity and they must make a Spell Resist Roll against your Magicks bonus. If both failed to resist against the spell, they swap positions. A willing creature can choose to not resist the spell and you can choose yourself as one of the targets.' },
-  { name:'Gravity Well', tradition:'Gravimancy', statLabel:'Damage', statValue:'—', proximity:'Near', roll:'Spell Resist', cost:'1 Safe Cast', description:'You choose a point within Near Proximity and condense its gravity. Creatures within Close Proximity of the point must make a Spell Resist against your Magicks bonus or be pulled to the nearest unoccupied space adjacent to it. A creature pulled this way falls Prone.' },
-  { name:'Slow', tradition:'Arcanomancy', statLabel:'Damage', statValue:'—', proximity:'Far', roll:'Spell Resist', cost:'1 Safe Cast', description:'A target you can see within reasonable Proximity must make a Spell Resist against your Magicks bonus. When they fail to resist the spell, they are slowed until they finish their next action. Their Evasion bonus and movement is halved (rounded down, minimum 1).' },
-  { name:'Last Breath', tradition:'Heiromancy', statLabel:'Damage', statValue:'—', proximity:'Near', roll:'Spell Resist', cost:'1 Safe Cast', description:'A target you can see within reasonable Proximity must make a Spell Resist against your Magicks bonus. The target must have died within a minute of the casting of the spell for this to work. When they succeed, they violently return to life and gain an action which they can use immediately. After resolving their action, they die. A target cannot be affected by this spell twice.' },
-  { name:'Vitality Drain', tradition:'Necromancy', statLabel:'Damage', statValue:'1', proximity:'Near', roll:'Spellcast', cost:'1 Safe Cast, 1 HP', description:'You make a Spellcast Roll against a target you can see within reasonable Proximity. On a hit, lash it with dark energy, healing yourself for 1 Hit Point. On a crit, heal an additional 1 Hit Point and the target falls Prone.' },
-  { name:'Torrent', tradition:'Hydromancy', statLabel:'Damage', statValue:'2', proximity:'Near', roll:'Spellcast', cost:'1 Safe Cast', description:'You make a Spellcast Roll against a target you can see within reasonable Proximity. On a hit, the target is hit with a barrage of water. On a crit, the target is pushed one Proximity away.' },
-  { name:'Purify', tradition:'Hydromancy', statLabel:'Damage', statValue:'—', proximity:'Near', roll:'—', cost:'1 Safe Cast', description:'You touch a water inside a container and remove any poison, disease or blight that affects it.' },
-  { name:'Rewind', tradition:'Chronomancy', statLabel:'Damage', statValue:'—', proximity:'Near', roll:'Spell Resist', cost:'1 Safe Cast', description:'Time briefly folds back around a creature within Near Proximity and it must make a Spell Resist Roll. If that creature just rolled a die and it fails to resist the spell, it must reroll that die and use the new result. A willing creature can choose to not resist the spell.' },
-  { name:'Foresight', tradition:'Chronomancy', statLabel:'Damage', statValue:'—', proximity:'Near', roll:'—', cost:'1 Safe Cast', description:'You touch a willing creature and grant it foresight. It gains a +1 die bonus to their next roll.' },
-  { name:'Glamour', tradition:'Glamomancy', statLabel:'Damage', statValue:'—', proximity:'Self', roll:'—', cost:'1 Safe Cast', description:'You alter your own appearance to resemble a specific person you have seen, until you dismiss the spell or it is dispelled. This alteration is not an illusion but you do not gain any specific traits, features, or abilities the person may possess.' },
-  { name:'Binding Word', tradition:'Desmomancy', statLabel:'Damage', statValue:'—', proximity:'Near', roll:'—', cost:'1 Safe Cast', description:'A target you can see within reasonable Proximity must make a Spell Resist Roll against your Magicks bonus. If it fails to resist the spell, the target loses its strength to raise its hand to harm another creature as their next action.' },
-  { name:'Mirror Step', tradition:'Glamomancy', statLabel:'Damage', statValue:'—', proximity:'Self', roll:'—', cost:'1 Safe Cast', description:'You conjure a flickering illusory duplicate of yourself. The next attack made against you automatically targets the duplicate instead. The duplicate then dissolves.' },
-  { name:'Anchor', tradition:'Gravimancy', statLabel:'Damage', statValue:'—', proximity:'Self', roll:'—', cost:'1 Safe Cast', description:'You alter the gravity around you. Until your next action, you cannot be moved, pushed, or knocked Prone against your will. Your movement becomes 0 and you take a -1 penalty to Evasion (cannot go below 0).' },
-  { name:'Crush', tradition:'Gravimancy', statLabel:'Damage', statValue:'—', proximity:'Near', roll:'—', cost:'1 Safe Cast', description:'You alter the gravity around a creature or object you can see within reasonable Proximity. The creature makes a Spell Resist against your Magicks bonus. Any creature within Melee Proximity of the target must make the same Spell Resist. On a failure, the affected creature takes 3 damage and is slowed until their next action.' },
-  { name:'Incinerate', tradition:'Pyromancy', statLabel:'Damage', statValue:'3', proximity:'Close', roll:'Spellcast', cost:'2 Safe Casts', description:'You unleash a cone of fire in front of you, striking all creatures within Close Proximity. You must make a separate Spellcast Roll for each affected creature. On a crit, the affected creature is Burning.' },
-  { name:'Immolate', tradition:'Pyromancy', statLabel:'Damage', statValue:'—', proximity:'Self', roll:'—', cost:'1 Safe Cast', description:'You set yourself ablaze and are now Burning. For each of your actions while Burning, you gain +1 Armor, up to a maximum equal to your Magicks bonus. You can smother the flames yourself at any given time. The Armor bonus dissipates the moment Burning ends, by any means. You cannot cast this spell while under the effects of Stoneguard.' },
-  { name:'Quicksand', tradition:'Geomancy', statLabel:'Damage', statValue:'—', proximity:'Near', roll:'—', cost:'1 Safe Cast', description:'You choose a point within Near Proximity and conjure a patch of quicksand covering the area within Close Proximity of that point. The terrain becomes unstable and whenever a creature enters or ends its movement within the quicksand, it makes a Might Ability Roll against your Magicks bonus. On a failure, the creature becomes Restrained. You and others that resisted the spell may move across the terrain as if you were slowed. This spell permanently alters the terrain.' },
-  { name:'Lightning Spear', tradition:'Aeromancy', statLabel:'Damage', statValue:'5', proximity:'Far', roll:'Spellcast', cost:'3 Safe Casts', description:'You hurl a piercing bolt of Lightning at a target within Far Proximity. The bolt drives through any other creatures standing between you and the target. Make a separate Spellcast Roll against each creature in the line. Creatures other than the main target receive a reduced 3 base damage. On a crit, the affected creature is momentarily stunned, unable to act until struck.' },
-  { name:'Warform', tradition:'Biomancy', statLabel:'Damage', statValue:'—', proximity:'Self', roll:'—', cost:'1 Safe Cast', description:'Your body hardens and your mind sharpens with battlemagicks. Until you end the effect or the scene ends, you may use your Magicks bonus in place of Grace or Might when making melee weapon attacks. While Warform is active, you cannot cast any other spell. When the effect ends, by any means, you take 2 damage as the magicks tear free of you. This damage cannot be reduced by Armor or any other mitigation, and can kill you.' },
-  { name:'Wither', tradition:'Necromancy', statLabel:'Damage', statValue:'3', proximity:'Near', roll:'Spellcast', cost:'1 Safe Cast, 1 HP', description:'You make a Spellcast Roll against a target you can see within reasonable Proximity. On a hit, the target cannot regain Hit Points until they finish their action. On a crit, deal an additional 1 Hit Point of damage.' },
-  { name:'Grave Ward', tradition:'Necromancy', statLabel:'Heal', statValue:'—', proximity:'Near', roll:'Spellcast', cost:'Variable (HP)', description:'You borrow against your own vitality. Gain Armor equal to Hit Points you are willing to expend. Every time you are struck, 1 Armor is deducted from this bonus. This spell persists until there is at least 1 Armor bonus, dismissed, dispelled, or until you cast this spell again.' },
-  { name:'Whispers of the Dead', tradition:'Necromancy', statLabel:'Heal', statValue:'—', proximity:'Melee', roll:'Spellcast', cost:'Variable (HP)', description:'You touch a corpse that died within the last century and ask it one question it knew the answer to in life. It answers honestly to the best of its ability and then falls silent again. You can ask another question by expending another Hit Point. The corpse must have a mouth for this spell to work.' },
-  { name:'Raise Thrall', tradition:'Necromancy', statLabel:'Damage', statValue:'—', proximity:'Near', roll:'Spellcast', cost:'1 Safe Cast, 1 HP', description:'You reanimate a corpse within Near Proximity as a thrall. It has Hit Points equal to your Magicks bonus. It has no intelligence and will only attempt to attack enemies unarmed. It follows one simple command from you. It collapses immediately when it reaches 0 Hit Points or when the scene ends. This spell only works on a creature once. If you use this spell to raise the same creature again, it fails.' },
-  { name:'Cinder Burst', tradition:'Pyromancy', statLabel:'Damage', statValue:'2', proximity:'Close', roll:'Spellcast', cost:'2 Safe Casts', description:'You target a point within Close Proximity and molten lava bursts out of it. You make a Spellcast Roll for each creature within Melee Proximity of this point. On a crit, affected creatures are Burning.' },
-  { name:'Knockout', tradition:'Phrenomancy', statLabel:'Damage', statValue:'—', proximity:'Close', roll:'Spell Resist', cost:'2 Safe Casts', description:'You target an area within Close Proximity and invoke a power drowsiness to all creatures within that area. Creatures within that area must make a Spell Resist Roll against your Magicks bonus. On a failure, they fall asleep until they are struck or shaken awake.' },
-  { name:'Tongues', tradition:'Arcanomancy', statLabel:'Heal', statValue:'—', proximity:'Self', roll:'—', cost:'1 Safe Casts', description:'You open a hidden compartment in your mind. Until the end of the scene, you can understand any spoken or written language.' },
-  { name:'Featherfoot', tradition:'Aeromancy', statLabel:'Heal', statValue:'—', proximity:'Melee', roll:'—', cost:'2 Safe Casts', description:'You touch a number of creatures equal to your Magicks bonus and give them a temporary boon. They grow spectral wings on their ankles, allowing them to hover instead of fall. These creatures suffer no fall damage until the end of scene.' },
+  { name:'Arc Bolt', tradition:'Lumomancy', damageType:'Magical', statLabel:'Damage', statValue:'3', proximity:'Far', roll:'Spellcast', cost:'1 Safe Cast', description:'You make a Spellcast Roll to manifest an arc of light against a target you can see within reasonable Proximity. On a crit, the target also is pushed one Proximity away.' },
+  { name:'Ember Lance', tradition:'Pyromancy', damageType:'Magical', statLabel:'Damage', statValue:'3', proximity:'Far', roll:'Spellcast', cost:'1 Safe Cast', description:'You make a Spellcast Roll to hurl a burning lance against a target you can see within reasonable Proximity. On a crit, the target also suffers Burning.' },
+  { name:'Heal', tradition:'Biomancy', damageType:'Magical', statLabel:'Heal', statValue:'1 HP per Safe Cast', proximity:'Far', roll:'—', cost:'Variable (SC)', description:'You heal one creature you can see within reasonable Proximity. It gains 1 Hit Point for each safe cast you expend.' },
+  { name:'Restore', tradition:'Biomancy', damageType:'Magical', statLabel:'Heal', statValue:'—', proximity:'Far', roll:'—', cost:'1 Safe Cast', description:'You remove Bleeding, Burning, Poisoned, slowed and stunned from one creature you can see within reasonable Proximity.' },
+  { name:'Surge', tradition:'Biomancy', damageType:'Magical', statLabel:'Heal', statValue:'—', proximity:'Melee', roll:'—', cost:'1 Safe Cast', description:'You touch one creature you can see within Melee Proximity and give them a surge in strength and speed. They gain a +1 die bonus to their next Grace or Might action.' },
+  { name:'Lightning Strike', tradition:'Aeromancy', damageType:'Magical', statLabel:'Damage', statValue:'4', proximity:'Extreme', roll:'Spellcast', cost:'1 Safe Cast', description:'You make a Spellcast Roll to summon a lightning strike against a target you can see within reasonable Proximity. On a crit, the target also suffers Sundering.' },
+  { name:'Stoneguard', tradition:'Geomancy', damageType:'Magical', statLabel:'Heal', statValue:'—', proximity:'Melee', roll:'—', cost:'1 Safe Cast', description:'You touch one creature you can see within Melee Proximity and cover them with a temporary stone armor. They gain a +1 armor bonus until they are struck or until you cast Stoneguard on a different target.' },
+  { name:'Barrier', tradition:'Arcanomancy', damageType:'Magical', statLabel:'Heal', statValue:'1 Damage Reduced per Safe Cast', proximity:'Self', roll:'—', cost:'Variable (SC)', description:'You draw a ward of raw magicks tight around yourself. The next time you take damage, reduce it by 1 for each safe cast spent casting this spell, to a minimum of 0, and the ward unravels. This ward is not Armor and ignores effects that target Armor.' },
+  { name:'Arcane Barrage', tradition:'Arcanomancy', damageType:'Magical', statLabel:'Damage', statValue:'1 damage per Safe Cast', proximity:'Far', roll:'—', cost:'Variable (SC)', description:'You hurl a volley of unerring magic darts against a target you can see within reasonable Proximity. This attack requires no roll — it always strikes true, dealing 1 damage for each safe cast you expend. It ignores Evasion entirely, though Barrier can still blunt or stop it.' },
+  { name:'Shadowspear', tradition:'Necromancy', damageType:'Magical', statLabel:'Damage', statValue:'2', proximity:'Near', roll:'Spellcast', cost:'1 Safe Cast, 1 HP', description:'You make a Spellcast Roll to hurl a spear of dark energy against a target you can see within reasonable Proximity. Whenever you roll a 6 on the dice, you ignore 1 point of Armor.' },
+  { name:'Rimefrost', tradition:'Hydromancy', damageType:'Magical', statLabel:'Damage', statValue:'—', proximity:'Near', roll:'Spell Resist', cost:'1 Safe Cast', description:'A target you can see within reasonable Proximity must make a Spell Resist against your Magicks bonus. Additionally, targets within Melee Range must also make the same Spell Resist. Whenever they fail, they are Restrained by magical ice.' },
+  { name:'Timewalk', tradition:'Chronomancy', damageType:'Magical', statLabel:'Heal', statValue:'—', proximity:'Near', roll:'—', cost:'1 Safe Cast', description:'You can move to any unoccupied space within Near Proximity in a blink of an eye. This does not trigger any traps and features like Attack of Opportunity. This also does not count against your movement.' },
+  { name:'Gust', tradition:'Aeromancy', damageType:'Magical', statLabel:'Damage', statValue:'—', proximity:'Close', roll:'Spell Resist', cost:'1 Safe Cast', description:'You summon a strong gust of wind to blow any number of creatures equal to your Magicks bonus within Close Proximity in front of you. Affected creatures must make a Spell Resist against your Magicks bonus. Whenever they fail, they are pushed one Proximity away.' },
+  { name:'Grasping Roots', tradition:'Biomancy', damageType:'Magical', statLabel:'Damage', statValue:'—', proximity:'Close', roll:'Spell Resist', cost:'1 Safe Cast', description:'You create a terrain of grasping roots within Close Proximity around you. The first time a creature enters or ends their turn on the roots, they must make a Might Ability Roll against your Magicks bonus or become Restrained. You and others that resisted the spell may move across the terrain as if you were slowed. This spell permanently alters terrain.' },
+  { name:'Smoke Cover', tradition:'Aeromancy', damageType:'Magical', statLabel:'Heal', statValue:'—', proximity:'Melee', roll:'—', cost:'1 Safe Cast', description:'You touch one creature you can see within Melee Proximity and cover them with a temporary smoke cover. They are hidden until they act.' },
+  { name:'Light', tradition:'Lumomancy', damageType:'Magical', statLabel:'Heal', statValue:'—', proximity:'Melee', roll:'—', cost:'1 Safe Cast', description:'You touch one object you can see within Melee Proximity. That object emits a bright light that extends up to Far Proximity and can be seen by creatures far out the Distant Proximity.' },
+  { name:'Darkness', tradition:'Lumomancy', damageType:'Magical', statLabel:'Damage', statValue:'—', proximity:'Melee', roll:'—', cost:'1 Safe Cast', description:'You create an area of pure magical darkness in an area around you snuffing out any non-magical light. Magical light effects are temporarily suspended within the area. snuf Creatures inside the darkness have Disadvantage in melee attacks and cannot perform features like Attack of Opportunity. s Additionally, they cannot make Ranged attacks beyond Melee Proximity. They are also hidden from other creatures outside the darkness.' },
+  { name:'Silence', tradition:'Desmomancy', damageType:'Magical', statLabel:'Damage', statValue:'—', proximity:'Far', roll:'Spell Resist', cost:'1 Safe Cast', description:'A target you can see within reasonable Proximity must make a Spell Resist against your Magicks bonus. When they fail to resist the spell, they are cannot cast spells until they finish their action.' },
+  { name:'Dispel', tradition:'Arcanomancy', damageType:'Magical', statLabel:'Damage', statValue:'—', proximity:'Near', roll:'—', cost:'1 Safe Cast', description:'You may remove one active magical effect on a creature or you can see within reasonable Proximity.' },
+  { name:'Magicks Sense', tradition:'Arcanomancy', damageType:'Magical', statLabel:'Heal', statValue:'—', proximity:'Near', roll:'—', cost:'1 Safe Cast', description:'Until your next action, you sense the presence of magicks within Near Proximity. If you sense magicks in this way, you can use your action to see a faint aura around any visible creature or object in the area that bears magicks, and you learn the nature of its magicks.' },
+  { name:'Telekinesis', tradition:'Arcanomancy', damageType:'Magical', statLabel:'Damage', statValue:'—', proximity:'Near', roll:'Spell Resist', cost:'1 Safe Cast', description:'A target you can see within reasonable Proximity must make a Spell Resist against your Magicks bonus. When they fail to resist the spell, you can move them one Proximity closer or farther. You can freely move unbound objects this way if they weigh less than 100 x your Magicks bonus in lbs.' },
+  { name:'Windstep', tradition:'Aeromancy', damageType:'Magical', statLabel:'Damage', statValue:'—', proximity:'Self', roll:'—', cost:'1 Safe Cast', description:'Until your next action, you envelop yourself with wind magicks. You cannot be slowed by terrain and you can move an additional Proximity with your movement.' },
+  { name:'Illusion', tradition:'Glamomancy', damageType:'Magical', statLabel:'Damage', statValue:'—', proximity:'Near', roll:'—', cost:'1 Safe Cast', description:'You conjure an exact mirror copy of an object, sound, or creature in an unoccupied space you can see within reasonable Proximity. It is a perfect copy that any scrutiny other than touch cannot expose the illusion. The illusion lasts until it is dispelled, or until you cast Illusion again.' },
+  { name:'Mend', tradition:'Geomancy', damageType:'Magical', statLabel:'Heal', statValue:'—', proximity:'Melee', roll:'—', cost:'1 Safe Cast', description:'You touch one object or armor you can see within Melee Proximity fix any torn seam, punctured area, or any broken part.' },
+  { name:'Compel', tradition:'Phrenomancy', damageType:'Magical', statLabel:'Heal', statValue:'—', proximity:'Melee', roll:'Spell Resist', cost:'1 Safe Cast', description:'You touch one creature you can see within Melee Proximity fix to compel them to speak the truth. The target makes a Spell Resist Roll against your Magicks bonus or be compelled to speak one truth. The target is aware of the spell and can thus avoid answering questions to which it would normally respond with a lie. Such a creature can be evasive in its answers as long as it remains within the boundaries of the truth.' },
+  { name:'Netherswap', tradition:'Arcanomancy', damageType:'Magical', statLabel:'Damage', statValue:'—', proximity:'Near', roll:'Spell Resist', cost:'1 Safe Cast', description:'You choose two creatures within Near Proximity and they must make a Spell Resist Roll against your Magicks bonus. If both failed to resist against the spell, they swap positions. A willing creature can choose to not resist the spell and you can choose yourself as one of the targets.' },
+  { name:'Gravity Well', tradition:'Gravimancy', damageType:'Magical', statLabel:'Damage', statValue:'—', proximity:'Near', roll:'Spell Resist', cost:'1 Safe Cast', description:'You choose a point within Near Proximity and condense its gravity. Creatures within Close Proximity of the point must make a Spell Resist against your Magicks bonus or be pulled to the nearest unoccupied space adjacent to it. A creature pulled this way falls Prone.' },
+  { name:'Slow', tradition:'Arcanomancy', damageType:'Magical', statLabel:'Damage', statValue:'—', proximity:'Far', roll:'Spell Resist', cost:'1 Safe Cast', description:'A target you can see within reasonable Proximity must make a Spell Resist against your Magicks bonus. When they fail to resist the spell, they are slowed until they finish their next action. Their Evasion bonus and movement is halved (rounded down, minimum 1).' },
+  { name:'Last Breath', tradition:'Heiromancy', damageType:'Magical', statLabel:'Damage', statValue:'—', proximity:'Near', roll:'Spell Resist', cost:'1 Safe Cast', description:'A target you can see within reasonable Proximity must make a Spell Resist against your Magicks bonus. The target must have died within a minute of the casting of the spell for this to work. When they succeed, they violently return to life and gain an action which they can use immediately. After resolving their action, they die. A target cannot be affected by this spell twice.' },
+  { name:'Vitality Drain', tradition:'Necromancy', damageType:'Magical', statLabel:'Damage', statValue:'1', proximity:'Near', roll:'Spellcast', cost:'1 Safe Cast, 1 HP', description:'You make a Spellcast Roll against a target you can see within reasonable Proximity. On a hit, lash it with dark energy, healing yourself for 1 Hit Point. On a crit, heal an additional 1 Hit Point and the target falls Prone.' },
+  { name:'Torrent', tradition:'Hydromancy', damageType:'Magical', statLabel:'Damage', statValue:'2', proximity:'Near', roll:'Spellcast', cost:'1 Safe Cast', description:'You make a Spellcast Roll against a target you can see within reasonable Proximity. On a hit, the target is hit with a barrage of water. On a crit, the target is pushed one Proximity away.' },
+  { name:'Purify', tradition:'Hydromancy', damageType:'Magical', statLabel:'Damage', statValue:'—', proximity:'Near', roll:'—', cost:'1 Safe Cast', description:'You touch a water inside a container and remove any poison, disease or blight that affects it.' },
+  { name:'Rewind', tradition:'Chronomancy', damageType:'Magical', statLabel:'Damage', statValue:'—', proximity:'Near', roll:'Spell Resist', cost:'1 Safe Cast', description:'Time briefly folds back around a creature within Near Proximity and it must make a Spell Resist Roll. If that creature just rolled a die and it fails to resist the spell, it must reroll that die and use the new result. A willing creature can choose to not resist the spell.' },
+  { name:'Foresight', tradition:'Chronomancy', damageType:'Magical', statLabel:'Damage', statValue:'—', proximity:'Near', roll:'—', cost:'1 Safe Cast', description:'You touch a willing creature and grant it foresight. It gains a +1 die bonus to their next roll.' },
+  { name:'Glamour', tradition:'Glamomancy', damageType:'Magical', statLabel:'Damage', statValue:'—', proximity:'Self', roll:'—', cost:'1 Safe Cast', description:'You alter your own appearance to resemble a specific person you have seen, until you dismiss the spell or it is dispelled. This alteration is not an illusion but you do not gain any specific traits, features, or abilities the person may possess.' },
+  { name:'Binding Word', tradition:'Desmomancy', damageType:'Magical', statLabel:'Damage', statValue:'—', proximity:'Near', roll:'—', cost:'1 Safe Cast', description:'A target you can see within reasonable Proximity must make a Spell Resist Roll against your Magicks bonus. If it fails to resist the spell, the target loses its strength to raise its hand to harm another creature as their next action.' },
+  { name:'Mirror Step', tradition:'Glamomancy', damageType:'Magical', statLabel:'Damage', statValue:'—', proximity:'Self', roll:'—', cost:'1 Safe Cast', description:'You conjure a flickering illusory duplicate of yourself. The next attack made against you automatically targets the duplicate instead. The duplicate then dissolves.' },
+  { name:'Anchor', tradition:'Gravimancy', damageType:'Magical', statLabel:'Damage', statValue:'—', proximity:'Self', roll:'—', cost:'1 Safe Cast', description:'You alter the gravity around you. Until your next action, you cannot be moved, pushed, or knocked Prone against your will. Your movement becomes 0 and you take a -1 penalty to Evasion (cannot go below 0).' },
+  { name:'Crush', tradition:'Gravimancy', damageType:'Magical', statLabel:'Damage', statValue:'3', proximity:'Near', roll:'—', cost:'1 Safe Cast', description:'You alter the gravity around a creature or object you can see within reasonable Proximity. The creature makes a Spell Resist against your Magicks bonus. Any creature within Melee Proximity of the target must make the same Spell Resist. On a failure, the affected creature takes 3 damage and is slowed until their next action.' },
+  { name:'Incinerate', tradition:'Pyromancy', damageType:'Magical', statLabel:'Damage', statValue:'3', proximity:'Close', roll:'Spellcast', cost:'2 Safe Casts', description:'You unleash a cone of fire in front of you, striking all creatures within Close Proximity. You must make a separate Spellcast Roll for each affected creature. On a crit, the affected creature is Burning.' },
+  { name:'Immolate', tradition:'Pyromancy', damageType:'Magical', statLabel:'Damage', statValue:'—', proximity:'Self', roll:'—', cost:'1 Safe Cast', description:'You set yourself ablaze and are now Burning. For each of your actions while Burning, you gain +1 Armor, up to a maximum equal to your Magicks bonus. You can smother the flames yourself at any given time. The Armor bonus dissipates the moment Burning ends, by any means. You cannot cast this spell while under the effects of Stoneguard.' },
+  { name:'Quicksand', tradition:'Geomancy', damageType:'Magical', statLabel:'Damage', statValue:'—', proximity:'Near', roll:'—', cost:'1 Safe Cast', description:'You choose a point within Near Proximity and conjure a patch of quicksand covering the area within Close Proximity of that point. The terrain becomes unstable and whenever a creature enters or ends its movement within the quicksand, it makes a Might Ability Roll against your Magicks bonus. On a failure, the creature becomes Restrained. You and others that resisted the spell may move across the terrain as if you were slowed. This spell permanently alters the terrain.' },
+  { name:'Lightning Spear', tradition:'Aeromancy', damageType:'Magical', statLabel:'Damage', statValue:'5', proximity:'Far', roll:'Spellcast', cost:'3 Safe Casts', description:'You hurl a piercing bolt of Lightning at a target within Far Proximity. The bolt drives through any other creatures standing between you and the target. Make a separate Spellcast Roll against each creature in the line. Creatures other than the main target receive a reduced 3 base damage. On a crit, the affected creature is momentarily stunned, unable to act until struck.' },
+  { name:'Warform', tradition:'Biomancy', damageType:'Magical', statLabel:'Damage', statValue:'—', proximity:'Self', roll:'—', cost:'1 Safe Cast', description:'Your body hardens and your mind sharpens with battlemagicks. Until you end the effect or the scene ends, you may use your Magicks bonus in place of Grace or Might when making melee weapon attacks. While Warform is active, you cannot cast any other spell. When the effect ends, by any means, you take 2 damage as the magicks tear free of you. This damage cannot be reduced by Armor or any other mitigation, and can kill you.' },
+  { name:'Wither', tradition:'Necromancy', damageType:'Magical', statLabel:'Damage', statValue:'3', proximity:'Near', roll:'Spellcast', cost:'1 Safe Cast, 1 HP', description:'You make a Spellcast Roll against a target you can see within reasonable Proximity. On a hit, the target cannot regain Hit Points until they finish their action. On a crit, deal an additional 1 Hit Point of damage.' },
+  { name:'Grave Ward', tradition:'Necromancy', damageType:'Magical', statLabel:'Heal', statValue:'—', proximity:'Near', roll:'Spellcast', cost:'Variable (HP)', description:'You borrow against your own vitality. Gain Armor equal to Hit Points you are willing to expend. Every time you are struck, 1 Armor is deducted from this bonus. This spell persists until there is at least 1 Armor bonus, dismissed, dispelled, or until you cast this spell again.' },
+  { name:'Whispers of the Dead', tradition:'Necromancy', damageType:'Magical', statLabel:'Heal', statValue:'—', proximity:'Melee', roll:'Spellcast', cost:'Variable (HP)', description:'You touch a corpse that died within the last century and ask it one question it knew the answer to in life. It answers honestly to the best of its ability and then falls silent again. You can ask another question by expending another Hit Point. The corpse must have a mouth for this spell to work.' },
+  { name:'Raise Thrall', tradition:'Necromancy', damageType:'Magical', statLabel:'Damage', statValue:'—', proximity:'Near', roll:'Spellcast', cost:'1 Safe Cast, 1 HP', description:'You reanimate a corpse within Near Proximity as a thrall. It has Hit Points equal to your Magicks bonus. It has no intelligence and will only attempt to attack enemies unarmed. It follows one simple command from you. It collapses immediately when it reaches 0 Hit Points or when the scene ends. This spell only works on a creature once. If you use this spell to raise the same creature again, it fails.' },
+  { name:'Cinder Burst', tradition:'Pyromancy', damageType:'Magical', statLabel:'Damage', statValue:'2', proximity:'Close', roll:'Spellcast', cost:'2 Safe Casts', description:'You target a point within Close Proximity and molten lava bursts out of it. You make a Spellcast Roll for each creature within Melee Proximity of this point. On a crit, affected creatures are Burning.' },
+  { name:'Knockout', tradition:'Phrenomancy', damageType:'Magical', statLabel:'Damage', statValue:'—', proximity:'Close', roll:'Spell Resist', cost:'2 Safe Casts', description:'You target an area within Close Proximity and invoke a power drowsiness to all creatures within that area. Creatures within that area must make a Spell Resist Roll against your Magicks bonus. On a failure, they fall asleep until they are struck or shaken awake.' },
+  { name:'Tongues', tradition:'Arcanomancy', damageType:'Magical', statLabel:'Heal', statValue:'—', proximity:'Self', roll:'—', cost:'1 Safe Casts', description:'You open a hidden compartment in your mind. Until the end of the scene, you can understand any spoken or written language.' },
+  { name:'Featherfoot', tradition:'Aeromancy', damageType:'Magical', statLabel:'Heal', statValue:'—', proximity:'Melee', roll:'—', cost:'2 Safe Casts', description:'You touch a number of creatures equal to your Magicks bonus and give them a temporary boon. They grow spectral wings on their ankles, allowing them to hover instead of fall. These creatures suffer no fall damage until the end of scene.' },
 ];
 
 /*****************************************************************
@@ -1262,8 +1366,14 @@ const SRD_SPELLS = [
  * Categories that take add/remove only (plain string lists):
  * expertiseExamples, names, surnames
  *
- * weaponTags is a map (tag -> definition text), so it takes
- * add/override (both merged as key overwrites) and remove (by key).
+ * weaponTags, weaponTypes, and armorClasses are maps (key ->
+ * definition/stat object), so each takes add/override (merged as key
+ * overwrites) and remove (by key). weapons/armors items reference a
+ * type/class key via their `type` field — adding a brand-new named
+ * weapon or armor piece to a Setting only requires an add on
+ * weapons/armors if it reuses an existing type/class (e.g. another
+ * Dagger); only add a new weaponTypes/armorClasses entry if you're
+ * introducing a mechanically new category.
  *
  * The SRD setting itself has an empty overlay — it IS the baseline.
  * Add new settings to the SETTINGS object below; nothing else in
@@ -1273,7 +1383,16 @@ const SRD_SPELLS = [
 const SETTINGS = {
   SRD: {
     label: "System Reference Document (SRD)",
-    overlays: {}
+    overlays: {},
+    // Default typography — medieval-fantasy grit. A Setting can override
+    // any of these keys; unset keys fall back to SRD's values below.
+    // display: the game title only. header: section headers, labels,
+    // badges, stat values. body: prose and descriptions.
+    theme: {
+      display: "'Lordish', 'Cinzel', serif",
+      header: "'Cinzel', serif",
+      body: "'Vollkorn', serif"
+    }
   }
   // Example shape for a future setting:
   // GraceMightTech: {
@@ -1284,6 +1403,16 @@ const SETTINGS = {
   //     weaponTags: { add:{ "Overheat": "..." } },
   //     spells:     { remove:["Raise Thrall"] },
   //     names:      { add:["Zeke","Nyx"] }
+  //   },
+  //   // Only override the keys that should change — e.g. keep SRD's body
+  //   // font but swap display/header for a neon cyberpunk pairing:
+  //   // NOTE: a theme can only reference fonts already loaded via a
+  //   // <link> tag in <head> (or an @font-face) — setting this variable
+  //   // alone doesn't fetch the font file. Add the Google Fonts link (or
+  //   // @font-face) for any new family before referencing it here.
+  //   theme: {
+  //     display: "'Orbitron', sans-serif",
+  //     header: "'Rajdhani', sans-serif"
   //   }
   // }
 };
@@ -1333,15 +1462,29 @@ function mergeStrings(base, overlay){
 // Active (currently selected setting's) data — every render function
 // in this file reads from these, never from the SRD_* arrays directly.
 let NAMES, SURNAMES, ANCESTRIES, BACKGROUNDS, OCCUPATIONS, ARCHETYPES,
-    EXPERTISE_EXAMPLES, WEAPONS, WEAPON_TAGS, ARMORS, EQUIPMENT_SETS,
+    EXPERTISE_EXAMPLES, WEAPONS, WEAPON_TYPES, WEAPON_TAGS, ARMORS, ARMOR_CLASSES, EQUIPMENT_SETS,
     SPELLS, FIELD_DATA;
 
 let currentSettingKey = "SRD";
+
+// Sets the three typography CSS variables (--font-display, --font-header,
+// --font-body) from a Setting's `theme` block, falling back to SRD's
+// values for any key the Setting doesn't override. Called on every
+// applySetting() so switching Settings re-skins the whole page.
+function applyTheme(theme){
+  const merged = { ...SETTINGS.SRD.theme, ...(theme || {}) };
+  const root = document.documentElement.style;
+  root.setProperty("--font-display", merged.display);
+  root.setProperty("--font-header", merged.header);
+  root.setProperty("--font-body", merged.body);
+}
 
 function applySetting(key, skipGenerate){
   const setting = SETTINGS[key] || SETTINGS.SRD;
   const ov = setting.overlays || {};
   currentSettingKey = SETTINGS[key] ? key : "SRD";
+
+  applyTheme(setting.theme);
 
   NAMES = mergeStrings(SRD_NAMES, ov.names);
   SURNAMES = mergeStrings(SRD_SURNAMES, ov.surnames);
@@ -1350,8 +1493,10 @@ function applySetting(key, skipGenerate){
   OCCUPATIONS = mergeList(SRD_OCCUPATIONS, ov.occupations);
   ARCHETYPES = mergeList(SRD_ARCHETYPES, ov.archetypes);
   EXPERTISE_EXAMPLES = mergeStrings(SRD_EXPERTISE_EXAMPLES, ov.expertiseExamples);
+  WEAPON_TYPES = mergeMap(SRD_WEAPON_TYPES, ov.weaponTypes);
   WEAPONS = mergeList(SRD_WEAPONS, ov.weapons);
   WEAPON_TAGS = mergeMap(SRD_WEAPON_TAGS, ov.weaponTags);
+  ARMOR_CLASSES = mergeMap(SRD_ARMOR_CLASSES, ov.armorClasses);
   ARMORS = mergeList(SRD_ARMORS, ov.armors);
   EQUIPMENT_SETS = mergeList(SRD_EQUIPMENT_SETS, ov.equipmentSets);
   SPELLS = mergeList(SRD_SPELLS, ov.spells);
@@ -1555,6 +1700,14 @@ function formatBonus(n){
   return n >= 0 ? "+"+n : ""+n;
 }
 
+// A spell "deals damage" for badge purposes only when it actually has a
+// damage number attached — not every Damage-labeled entry does (many are
+// debuffs/utility that share the label per the book's existing Damage/Heal
+// taxonomy but carry "—" as a placeholder statValue).
+function spellDealsDamage(s){
+  return s.statLabel === "Damage" && s.statValue !== "—";
+}
+
 // Returns the feature name picked at a given Ability/Tier, or null if none.
 function featurePickedAt(ability, tier){
   const idx = levelUpPicks[ability][tier];
@@ -1607,15 +1760,16 @@ function renderFeatureBox(elId, entry){
 
 function renderWeaponTable(selected){
   const weapon = findBy(WEAPONS, selected);
+  const type = WEAPON_TYPES[weapon.type] || {};
   const box = document.getElementById("weapon-feature");
 
-  const statLine = `<span class="badge">Damage: ${weapon.damage}</span><span class="badge">Bonus: ${weapon.bonus}</span><span class="badge">Tag: ${weapon.tag}</span>`;
+  const statLine = `<span class="badge">Type: ${weapon.type}</span><span class="badge">Damage: ${type.damage}</span><span class="badge">Bonus: ${type.bonus}</span><span class="badge">Tag: ${type.tag}</span><span class="badge">${type.damageType} Damage</span>`;
 
-  if(weapon.tag === "—"){
+  if(type.tag === "—"){
     box.innerHTML = `<span class="fname">${weapon.name}</span>${statLine}`;
     return;
   }
-  const tagNames = weapon.tag.split(",").map(t=>t.trim());
+  const tagNames = type.tag.split(",").map(t=>t.trim());
   const tagDefs = tagNames.map(tag => `
     <div style="margin-top:8px;">
       <span class="fname">${tag}</span>${WEAPON_TAGS[tag] || ""}
@@ -1626,9 +1780,10 @@ function renderWeaponTable(selected){
 
 function renderArmorTable(selected){
   const armor = findBy(ARMORS, selected);
+  const cls = ARMOR_CLASSES[armor.type] || {};
   const box = document.getElementById("armor-feature");
-  const statLine = `<span class="badge">Armor Rating: ${armor.rating}</span><span class="badge">Evasion Bonus: ${armor.evasion}</span>`;
-  const special = armor.special !== "—" ? `<div style="margin-top:8px;">${armor.special}</div>` : "";
+  const statLine = `<span class="badge">Class: ${armor.type}</span><span class="badge">Armor Rating: ${cls.rating}</span><span class="badge">Evasion Bonus: ${cls.evasion}</span>`;
+  const special = cls.special !== "—" ? `<div style="margin-top:8px;">${cls.special}</div>` : "";
   box.innerHTML = `<span class="fname">${armor.name}</span>${statLine}${special}`;
 }
 
@@ -1728,6 +1883,7 @@ function renderSpells(){
         <span class="badge">${s.statLabel}: ${s.statValue}</span>
         <span class="badge">Proximity: ${s.proximity}</span>
         <span class="badge">Roll: ${s.roll}</span>
+        ${spellDealsDamage(s) ? `<span class="badge">${s.damageType} Damage</span>` : ""}
         <span class="badge" style="margin-bottom:16px">Cost: ${s.cost}</span><br>
 		${s.description}
       </div>
@@ -1872,10 +2028,10 @@ function computeDerived(){
   // archetype bonus is added). Heavy Armor drops total Evasion to 0,
   // overriding everything else, including archetype bonuses.
   let graceContribution = graceBonus;
-  if(armor.name === "Medium Armor") graceContribution = Math.min(graceContribution, 2);
-  const armorFlatBonus = armor.name === "Clothing" ? 1 : 0;
+  if(armor.type === "Medium Armor") graceContribution = Math.min(graceContribution, 2);
+  const armorFlatBonus = armor.type === "Clothing" ? 1 : 0;
   let evasion = graceContribution + archetype.evasionBonus + armorFlatBonus;
-  if(armor.name === "Heavy Armor") evasion = 0;
+  if(armor.type === "Heavy Armor") evasion = 0;
 
   // Safe Casts = spells-known baseline (Magicks bonus) + any flat
   // bonuses from Arcane Reservoir (+1) / Archmage (+2).
@@ -2148,7 +2304,9 @@ function renderDossier(derived){
   const occupation = findBy(OCCUPATIONS, document.getElementById("occupation").value);
   const archetype = findBy(ARCHETYPES, document.getElementById("archetype").value);
   const weapon = findBy(WEAPONS, document.getElementById("weapon").value);
+  const weaponType = WEAPON_TYPES[weapon.type] || {};
   const armor = findBy(ARMORS, document.getElementById("armor").value);
+  const armorClass = ARMOR_CLASSES[armor.type] || {};
   const equipmentSet = findBy(EQUIPMENT_SETS, document.getElementById("equipmentSet").value);
   const expertise = currentExpertise();
 
@@ -2186,8 +2344,8 @@ function renderDossier(derived){
     </div>
     <div class="dossier-stat"><div class="v">${derived.evasion}</div><div class="l">Evasion</div></div>
     <div class="dossier-stat">
-      <div class="v">${armor.rating}</div><div class="l">Armor</div>
-      ${makeCircleTrack(armor.rating)}
+      <div class="v">${armorClass.rating}</div><div class="l">Armor</div>
+      ${makeCircleTrack(armorClass.rating)}
     </div>
     <div class="dossier-stat">
       <div class="v">${derived.safeCasts}</div><div class="l">Safe Casts</div>
@@ -2231,25 +2389,26 @@ function renderDossier(derived){
         <span class="badge">${s.statLabel}: ${s.statValue}</span>
         <span class="badge">Proximity: ${s.proximity}</span>
         <span class="badge">Roll: ${s.roll}</span>
+        ${spellDealsDamage(s) ? `<span class="badge">${s.damageType} Damage</span>` : ""}
         <span class="badge"style="margin-bottom:16px">Cost: ${s.cost}</span><br>
 		${s.description}
       </div>
     `).join("");
   }
 
-  const weaponTagDefs = weapon.tag === "—" ? "" :
-    weapon.tag.split(",").map(t=>t.trim()).map(tag => `${tag}: ${WEAPON_TAGS[tag]||""}`).join(" ");
+  const weaponTagDefs = weaponType.tag === "—" ? "" :
+    weaponType.tag.split(",").map(t=>t.trim()).map(tag => `${tag}: ${WEAPON_TAGS[tag]||""}`).join(" ");
 
   document.getElementById("d-equipment").innerHTML = `
     <div class="dossier-entry">
-      <span class="fname">Weapon — ${weapon.name}</span>
-      <span class="badge">Damage: ${weapon.damage}</span><span class="badge">Bonus: ${weapon.bonus}</span><span class="badge">Tag: ${weapon.tag}</span>
+      <span class="fname">Weapon — ${weapon.name} (${weapon.type})</span>
+      <span class="badge">Damage: ${weaponType.damage}</span><span class="badge">Bonus: ${weaponType.bonus}</span><span class="badge">Tag: ${weaponType.tag}</span><span class="badge">${weaponType.damageType} Damage</span>
       <br>${weaponTagDefs}
     </div>
     <div class="dossier-entry">
-      <span class="fname">Armor — ${armor.name}</span>
-      <span class="badge">Armor Rating: ${armor.rating}</span><span class="badge">Evasion Bonus: ${armor.evasion}</span><br>
-      ${armor.special !== "—" ? armor.special : ""}
+      <span class="fname">Armor — ${armor.name} (${armor.type})</span>
+      <span class="badge">Armor Rating: ${armorClass.rating}</span><span class="badge">Evasion Bonus: ${armorClass.evasion}</span><br>
+      ${armorClass.special !== "—" ? armorClass.special : ""}
     </div>
   `;
 
