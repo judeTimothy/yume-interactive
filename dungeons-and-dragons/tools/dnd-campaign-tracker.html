@@ -1,0 +1,946 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Campaign Tracker</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+SC:wght@600;700&family=Spectral:ital,wght@0,400;0,500;0,600;1,400&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#0a0606;
+    --panel:#170a0a;
+    --panel-2:#22100f;
+    --line:#4a1418;
+    --bone:#e8dcd7;
+    --bone-dim:#a3807e;
+    --blood:#7a0c14;
+    --blood-bright:#b3121c;
+    --gold:#c8434b;
+    --gold-dim:#7a2e33;
+    --ok:#8a4a4a;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:
+      radial-gradient(1100px 700px at 12% -10%, #2a0f10 0%, transparent 60%),
+      radial-gradient(900px 600px at 110% 10%, #200a0a 0%, transparent 55%),
+      var(--ink);
+    color:var(--bone);
+    font-family:'Spectral', serif;
+    padding:28px 18px 80px;
+    line-height:1.5;
+  }
+  .wrap{max-width:980px;margin:0 auto;}
+
+  header{
+    display:flex;
+    align-items:center;
+    gap:18px;
+    padding-bottom:22px;
+    margin-bottom:26px;
+    border-bottom:1px solid var(--line);
+  }
+  .mark{flex:0 0 auto;width:64px;height:64px;border-radius:4px;overflow:hidden;}
+  .mark img{width:100%;height:100%;object-fit:cover;display:block;}
+  .title-block{flex:1;min-width:0;}
+  h1{
+    font-family:'Cormorant SC', serif;
+    font-weight:700;
+    letter-spacing:0.06em;
+    font-size:28px;
+    margin:0;
+    color:var(--bone);
+    text-transform:uppercase;
+    background:transparent;
+    border:none;
+    width:100%;
+    padding:0;
+  }
+  h1:focus{outline:1px solid var(--gold-dim);}
+  .subtitle{
+    color:var(--gold);
+    font-family:'JetBrains Mono', monospace;
+    font-size:11px;
+    letter-spacing:0.14em;
+    text-transform:uppercase;
+    margin-top:4px;
+  }
+  .subtitle .sep{color:var(--bone-dim);}
+
+  /* ---------- Account bar ---------- */
+  .account-bar{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    flex-wrap:wrap;
+    margin-bottom:18px;
+    padding:12px 14px;
+    background:var(--panel-2);
+    border:1px solid var(--line);
+    border-radius:4px;
+  }
+  .account-status{
+    font-family:'JetBrains Mono', monospace;
+    font-size:11px;
+    color:var(--bone-dim);
+    flex:1;
+    min-width:200px;
+  }
+  .account-status .user{color:var(--gold);}
+
+  .toolbar{
+    display:flex;
+    gap:10px;
+    flex-wrap:wrap;
+    align-items:center;
+    margin-bottom:26px;
+  }
+  button{
+    font-family:'JetBrains Mono', monospace;
+    font-size:12px;
+    letter-spacing:0.06em;
+    text-transform:uppercase;
+    padding:10px 16px;
+    border-radius:3px;
+    border:1px solid var(--line);
+    background:var(--panel-2);
+    color:var(--bone);
+    cursor:pointer;
+    transition:border-color .15s ease, color .15s ease, background .15s ease;
+  }
+  button:hover{border-color:var(--gold-dim);color:var(--gold);}
+  button.primary{background:var(--blood);border-color:var(--blood);color:var(--bone);}
+  button.primary:hover{background:var(--blood-bright);border-color:var(--blood-bright);color:#fff;}
+  button.ghost{background:transparent;}
+  button.small{padding:5px 9px;font-size:10.5px;}
+  button:disabled{opacity:0.35;cursor:not-allowed;}
+  .toolbar-status{font-family:'JetBrains Mono', monospace;font-size:11px;color:var(--bone-dim);margin-left:auto;}
+  .toolbar-status .ok{color:var(--ok);}
+
+  section{
+    background:var(--panel);
+    border:1px solid var(--line);
+    border-radius:4px;
+    padding:22px 24px;
+    margin-bottom:18px;
+    position:relative;
+  }
+  section::before{
+    content:attr(data-step);
+    position:absolute;
+    top:-11px;
+    left:20px;
+    background:var(--ink);
+    padding:0 8px;
+    font-family:'JetBrains Mono', monospace;
+    font-size:10px;
+    letter-spacing:0.12em;
+    color:var(--gold-dim);
+    text-transform:uppercase;
+  }
+  h2{
+    font-family:'Cormorant SC', serif;
+    font-size:20px;
+    letter-spacing:0.04em;
+    text-transform:uppercase;
+    margin:0 0 16px;
+    color:var(--gold);
+    border-bottom:1px solid var(--line);
+    padding-bottom:10px;
+    display:flex;
+    align-items:baseline;
+    justify-content:space-between;
+    gap:10px;
+  }
+  h2 .add-btn{font-size:10.5px;padding:5px 10px;}
+  .empty-note{font-size:13px;color:var(--bone-dim);font-style:italic;}
+
+  input[type="text"], select, textarea{
+    background:#150909;
+    border:1px solid var(--line);
+    border-radius:3px;
+    color:var(--bone);
+    font-family:'Spectral', serif;
+    font-size:14px;
+    padding:8px 10px;
+  }
+  input[type="text"]:focus, select:focus, textarea:focus{outline:1px solid var(--gold-dim);}
+  textarea{width:100%;resize:vertical;min-height:44px;font-family:'Spectral', serif;font-size:13.5px;line-height:1.5;}
+  input[type="number"]{
+    background:#150909;border:1px solid var(--line);border-radius:3px;color:var(--bone);
+    font-family:'JetBrains Mono', monospace;font-size:14px;padding:8px 10px;width:100px;
+  }
+
+  /* ---------- Dossier-entry cards (Quests, Sessions) ---------- */
+  .entry-list{display:flex;flex-direction:column;gap:12px;}
+  .dossier-entry{padding-left:12px;border-left:2px solid var(--blood);font-size:13.5px;color:var(--bone-dim);}
+  .entry-head{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:4px;}
+  .entry-head .fname{font-family:'JetBrains Mono', monospace;font-size:11px;text-transform:uppercase;letter-spacing:0.04em;color:var(--bone);}
+  .entry-meta{font-family:'JetBrains Mono', monospace;font-size:10.5px;color:var(--bone-dim);letter-spacing:0.04em;}
+  .badge{
+    display:inline-block;padding:2px 8px;font-family:'JetBrains Mono', monospace;font-size:10px;
+    text-transform:uppercase;letter-spacing:0.04em;border-radius:2px;border:1px solid var(--ok);color:var(--ok);
+  }
+  .badge.warn{border-color:var(--gold);color:var(--gold);}
+  .badge.danger{border-color:var(--blood-bright);color:var(--blood-bright);}
+  .badge.dim{border-color:var(--bone-dim);color:var(--bone-dim);}
+  .entry-body{white-space:pre-wrap;word-wrap:break-word;}
+  .entry-edit-grid{display:grid;grid-template-columns:1fr 1fr auto;gap:8px;margin-bottom:8px;}
+  .entry-edit-grid input[type="text"], .entry-edit-grid select{width:100%;}
+  .entry-remove{align-self:start;}
+
+  /* ---------- Finale Countdown (Vampire: the Masquerade-inspired reds/black) ---------- */
+  .countdown-panel{
+    background:
+      radial-gradient(700px 320px at 50% -25%, #2e0608 0%, transparent 62%),
+      linear-gradient(180deg, #170707 0%, #0a0303 100%);
+    border:1px solid #5c0e12;
+    border-radius:4px;
+    padding:22px 24px;
+    margin-bottom:18px;
+    text-align:center;
+    box-shadow: 0 0 26px rgba(179,18,28,0.14) inset;
+  }
+  .countdown-label{
+    font-family:'JetBrains Mono', monospace;
+    font-size:11px;
+    letter-spacing:0.18em;
+    text-transform:uppercase;
+    color:#c8434b;
+    margin-bottom:6px;
+  }
+  .countdown-target{
+    font-family:'Cormorant SC', serif;
+    font-size:15px;
+    color:#a3807e;
+    letter-spacing:0.03em;
+    margin-bottom:16px;
+  }
+  .countdown-grid{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:12px;
+    max-width:420px;
+    margin:0 auto;
+  }
+  .countdown-unit{
+    background:#150707;
+    border:1px solid #5c0e12;
+    border-radius:3px;
+    padding:12px 8px;
+  }
+  .countdown-unit .v{
+    font-family:'JetBrains Mono', monospace;
+    font-size:26px;
+    font-weight:600;
+    color:#e6444d;
+    text-shadow:0 0 10px rgba(230,68,77,0.5);
+  }
+  .countdown-unit .l{
+    font-family:'JetBrains Mono', monospace;
+    font-size:9.5px;
+    letter-spacing:0.08em;
+    text-transform:uppercase;
+    color:#8a5b5b;
+    margin-top:4px;
+  }
+  .countdown-ended{
+    padding:30px 24px;
+    box-shadow: 0 0 40px rgba(230,68,77,0.22) inset;
+  }
+  .countdown-end-text{
+    font-family:'Cormorant SC', serif;
+    font-size:34px;
+    letter-spacing:0.06em;
+    text-transform:uppercase;
+    color:#e6444d;
+    text-shadow:0 0 22px rgba(230,68,77,0.65);
+  }
+
+  /* ---------- Cast grid (Party + NPCs/Factions) ---------- */
+  .cast-grid{display:grid;grid-template-columns:repeat(auto-fill, minmax(130px, 1fr));gap:14px;}
+  .cast-card{
+    background:#1c0d0d;border:1px solid var(--line);border-radius:4px;
+    padding:12px 10px;text-align:center;cursor:pointer;
+    transition:border-color .15s ease;
+  }
+  .cast-card:hover{border-color:var(--gold-dim);}
+  .cast-avatar{
+    width:100%;aspect-ratio:1/1;border-radius:3px;overflow:hidden;
+    background:#140909;border:1px solid var(--line);position:relative;margin-bottom:8px;
+  }
+  .cast-avatar img{width:100%;height:100%;object-fit:cover;display:block;}
+  .cast-avatar .avatar-fallback{
+    position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+    font-family:'Cormorant SC', serif;font-size:26px;color:var(--gold-dim);background:#140909;
+  }
+  .cast-name{
+    font-family:'Cormorant SC', serif;font-size:15px;letter-spacing:0.02em;color:var(--bone);
+    text-transform:uppercase;margin-bottom:6px;line-height:1.2;
+  }
+
+  /* ---------- Modal (cast detail / edit) ---------- */
+  .modal-backdrop{
+    display:none;position:fixed;inset:0;background:rgba(0,0,0,0.65);z-index:50;
+    align-items:flex-start;justify-content:center;padding:50px 16px;overflow-y:auto;
+  }
+  .modal-backdrop.open{display:flex;}
+  .modal{background:var(--panel);border:1px solid var(--line);border-radius:4px;max-width:560px;width:100%;padding:22px 24px;}
+  .modal-head{display:flex;gap:14px;align-items:center;margin-bottom:16px;padding-bottom:14px;border-bottom:1px solid var(--line);}
+  .modal-avatar{width:64px;height:64px;flex:0 0 auto;border-radius:3px;overflow:hidden;background:#140909;border:1px solid var(--line);position:relative;}
+  .modal-avatar img{width:100%;height:100%;object-fit:cover;display:block;}
+  .modal-avatar .avatar-fallback{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:'Cormorant SC', serif;font-size:24px;color:var(--gold-dim);}
+  .modal-name{font-family:'Cormorant SC', serif;font-size:22px;letter-spacing:0.03em;color:var(--bone);text-transform:uppercase;}
+  .modal-name-edit{width:100%;font-size:16px;margin-bottom:6px;}
+  .modal h3{
+    font-family:'Cormorant SC', serif;font-size:14px;text-transform:uppercase;letter-spacing:0.06em;
+    color:var(--gold);margin:18px 0 10px;border-bottom:1px solid var(--line);padding-bottom:6px;
+  }
+  .modal h3:first-of-type{margin-top:0;}
+  .modal-field{display:flex;flex-direction:column;gap:4px;margin-bottom:10px;}
+  .modal-field label{font-family:'JetBrains Mono', monospace;font-size:10px;text-transform:uppercase;letter-spacing:0.06em;color:var(--bone-dim);}
+  .modal-field input, .modal-field select, .modal-field textarea{width:100%;}
+  .affinity-general{display:flex;align-items:center;gap:10px;margin-bottom:14px;}
+  .affinity-row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:6px 0;border-bottom:1px dashed var(--line);font-size:13px;}
+  .affinity-row:last-child{border-bottom:none;}
+  .affinity-row .an{color:var(--bone);}
+  .affinity-row .at{font-family:'JetBrains Mono', monospace;font-size:9.5px;color:var(--bone-dim);text-transform:uppercase;margin-left:6px;}
+  .affinity-row select{padding:5px 8px;font-size:12px;}
+  .modal-footer{display:flex;justify-content:space-between;align-items:center;margin-top:18px;gap:10px;}
+  .modal-note{font-size:11px;color:var(--bone-dim);font-style:italic;}
+
+  /* ---------- Supplies ---------- */
+  .supplies-row{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;}
+  .supply-stat{background:#1c0d0d;border:1px solid var(--line);border-radius:3px;padding:16px;text-align:center;}
+  .supply-stat label{
+    display:block;font-family:'JetBrains Mono', monospace;font-size:11px;letter-spacing:0.1em;
+    text-transform:uppercase;color:var(--bone-dim);margin-bottom:10px;
+  }
+  .supply-stat .stat-value{font-family:'JetBrains Mono', monospace;font-size:24px;font-weight:600;color:var(--gold);}
+  .supply-edit{display:flex;gap:8px;justify-content:center;align-items:center;}
+
+  .updated-line{font-family:'JetBrains Mono', monospace;font-size:10.5px;color:var(--bone-dim);margin-top:-8px;margin-bottom:20px;}
+
+  @media(max-width:640px){
+    .supplies-row{grid-template-columns:1fr;}
+    .entry-edit-grid{grid-template-columns:1fr;}
+    .cast-grid{grid-template-columns:repeat(auto-fill, minmax(96px, 1fr));}
+    header{flex-wrap:wrap;}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div class="mark">
+      <img src="logo.png" alt="Campaign logo" onerror="this.style.display='none'">
+    </div>
+    <div class="title-block">
+      <h1 id="campaign-name" contenteditable="false">When The Light Fades</h1>
+      <div class="subtitle">Dungeons &amp; Dragons <span class="sep">·</span> Campaign Tracker</div>
+    </div>
+  </header>
+
+  <!-- ============ ACCOUNT / ADMIN GATE ============ -->
+  <div class="account-bar">
+    <div class="account-status" id="account-status">Loading…</div>
+    <button id="btn-sign-in" onclick="signInWithGoogle()">Sign in with Google</button>
+    <button id="btn-sign-out" onclick="signOutOfGoogle()" style="display:none;">Sign out</button>
+  </div>
+
+  <div class="updated-line" id="updated-line">Loading current state…</div>
+
+  <div class="toolbar">
+    <button id="edit-toggle" style="display:none;" onclick="toggleEditMode()">Edit Mode: Off</button>
+    <button id="save-btn" class="primary" style="display:none;" onclick="saveState()">Save Changes</button>
+    <span class="toolbar-status" id="toolbar-status"></span>
+  </div>
+
+  <!-- ============ FINALE COUNTDOWN ============ -->
+  <div class="countdown-panel" id="countdown-panel"></div>
+
+  <!-- ============ PARTY ============ -->
+  <section data-step="Party">
+    <h2>Party <button class="ghost small add-btn edit-only" style="display:none;" onclick="addCast('party')">+ Add Member</button></h2>
+    <div class="cast-grid" id="party-grid"></div>
+    <div class="empty-note" id="party-empty" style="display:none;">No party members logged yet.</div>
+  </section>
+
+  <!-- ============ SUPPLIES ============ -->
+  <section data-step="Supplies">
+    <h2>Supplies</h2>
+    <div class="supplies-row" id="supplies-row"></div>
+  </section>
+
+  <!-- ============ NPCs & FACTIONS ============ -->
+  <section data-step="NPCs & Factions">
+    <h2>NPCs &amp; Factions <button class="ghost small add-btn edit-only" style="display:none;" onclick="addCast('npc')">+ Add</button></h2>
+    <div class="cast-grid" id="npc-grid"></div>
+    <div class="empty-note" id="npc-empty" style="display:none;">No NPCs or factions logged yet.</div>
+  </section>
+
+  <!-- ============ QUESTS ============ -->
+  <section data-step="Quest & Plot Threads">
+    <h2>Quest &amp; Plot Threads <button class="ghost small add-btn edit-only" style="display:none;" onclick="addQuest()">+ Add</button></h2>
+    <div class="entry-list" id="quest-list"></div>
+    <div class="empty-note" id="quest-empty" style="display:none;">No open threads logged yet.</div>
+  </section>
+
+  <!-- ============ SESSION LOG ============ -->
+  <section data-step="Session Log">
+    <h2>Session Log <button class="ghost small add-btn edit-only" style="display:none;" onclick="addSession()">+ Add Entry</button></h2>
+    <div class="entry-list" id="session-list"></div>
+    <div class="empty-note" id="session-empty" style="display:none;">No sessions logged yet.</div>
+  </section>
+
+</div>
+
+<!-- ============ CAST DETAIL / EDIT MODAL ============ -->
+<div class="modal-backdrop" id="cast-modal-backdrop">
+  <div class="modal" id="cast-modal"></div>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+
+<script>
+/*****************************************************************
+ * CLOUD SETUP
+ *
+ * Reuses the same Firebase project as the Quick Character Generator
+ * (Google Sign-In + Firestore). Two things you still need to set,
+ * both one-time:
+ *
+ *   1. ADMIN_UID below — sign in with your own Google account once
+ *      on this page; since ADMIN_UID starts unset, the account bar
+ *      will show your UID on screen. Copy it in here.
+ *
+ *   2. Firestore Rules — add this alongside your existing rules so
+ *      the campaign doc is publicly readable but only writable by you:
+ *
+ *        match /campaign/{document=**} {
+ *          allow read: if true;
+ *          allow write: if request.auth != null
+ *                        && request.auth.uid == "PASTE_YOUR_UID_HERE";
+ *        }
+ *
+ *      Use the same UID in both places. Until both are set, edit
+ *      controls stay hidden for everyone (including you) — the page
+ *      still works fine as a read-only view in the meantime.
+ *****************************************************************/
+
+const FIREBASE_CONFIG = {
+  apiKey: "AIzaSyCY0tkVIUqGjO_6ayWJWLHNcRUpDls5VZ8",
+  authDomain: "grace-might-and-magicks.firebaseapp.com",
+  projectId: "grace-might-and-magicks",
+  storageBucket: "grace-might-and-magicks.firebasestorage.app",
+  messagingSenderId: "449279853302",
+  appId: "1:449279853302:web:fdef6375c84605bcf5a2d7",
+  measurementId: "G-693S1QT7MC"
+};
+
+const ADMIN_UID = "PASTE_YOUR_UID_HERE";
+const CLOUD_CONFIGURED = FIREBASE_CONFIG.apiKey !== "YOUR_API_KEY";
+
+let auth = null, db = null;
+let currentUser = null;
+let isAdmin = false;
+
+if(CLOUD_CONFIGURED){
+  firebase.initializeApp(FIREBASE_CONFIG);
+  auth = firebase.auth();
+  db = firebase.firestore();
+  auth.onAuthStateChanged(user=>{
+    currentUser = user;
+    isAdmin = !!user && ADMIN_UID !== "PASTE_YOUR_UID_HERE" && user.uid === ADMIN_UID;
+    if(!isAdmin && editMode) setEditMode(false);
+    refreshAccountBar();
+  });
+}
+
+function signInWithGoogle(){
+  if(!CLOUD_CONFIGURED){ alert("Cloud setup isn't configured on this deployment yet."); return; }
+  auth.signInWithPopup(new firebase.auth.GoogleAuthProvider())
+    .catch(err => alert("Sign-in failed: " + err.message));
+}
+function signOutOfGoogle(){
+  if(!auth) return;
+  auth.signOut();
+}
+
+function refreshAccountBar(){
+  const status = document.getElementById("account-status");
+  const btnIn = document.getElementById("btn-sign-in");
+  const btnOut = document.getElementById("btn-sign-out");
+
+  if(!CLOUD_CONFIGURED){
+    status.textContent = "Cloud setup isn't configured on this deployment yet — viewing local defaults only.";
+    btnIn.style.display = "none"; btnOut.style.display = "none";
+  } else if(currentUser){
+    btnIn.style.display = "none"; btnOut.style.display = "";
+    if(isAdmin){
+      status.innerHTML = `Signed in as <span class="user">${escapeHtml(currentUser.displayName || currentUser.email)}</span> · Admin`;
+    } else if(ADMIN_UID === "PASTE_YOUR_UID_HERE"){
+      status.innerHTML = `Signed in as ${escapeHtml(currentUser.displayName || currentUser.email)}. Admin UID not set yet — your UID: <span class="user">${currentUser.uid}</span> (paste into ADMIN_UID in the code)`;
+    } else {
+      status.innerHTML = `Signed in as ${escapeHtml(currentUser.displayName || currentUser.email)} · view-only`;
+    }
+  } else {
+    btnIn.style.display = ""; btnOut.style.display = "none";
+    status.textContent = "Not signed in — viewing the current campaign state.";
+  }
+
+  document.getElementById("edit-toggle").style.display = isAdmin ? "" : "none";
+  document.getElementById("save-btn").style.display = (isAdmin && editMode) ? "" : "none";
+  document.querySelectorAll(".edit-only").forEach(el => el.style.display = (isAdmin && editMode) ? "" : "none");
+}
+
+/*****************************************************************
+ * FINALE COUNTDOWN
+ *
+ * Fixed instant in time: September 13, 2026, 10:00 AM Philippine
+ * Standard Time (UTC+8, no DST) = 2026-09-13T02:00:00Z. Everyone
+ * counts down to the same moment regardless of their own time zone;
+ * only the displayed target date/time is localized per viewer.
+ *****************************************************************/
+const FINALE_TIMESTAMP = Date.UTC(2026, 8, 13, 2, 0, 0);
+
+function renderCountdown(){
+  const panel = document.getElementById("countdown-panel");
+  const diff = FINALE_TIMESTAMP - Date.now();
+
+  if(diff <= 0){
+    panel.classList.add("countdown-ended");
+    panel.innerHTML = `<div class="countdown-end-text">End is Nigh!</div>`;
+    return;
+  }
+  panel.classList.remove("countdown-ended");
+
+  const targetLocal = new Date(FINALE_TIMESTAMP).toLocaleString(undefined, { dateStyle:"full", timeStyle:"short" });
+  const totalSeconds = Math.floor(diff / 1000);
+  const days = Math.floor(totalSeconds / 86400);
+  const hours = Math.floor((totalSeconds % 86400) / 3600);
+  const minutes = Math.floor((totalSeconds % 3600) / 60);
+  const seconds = totalSeconds % 60;
+  const pad = n => String(n).padStart(2,'0');
+
+  panel.innerHTML = `
+    <div class="countdown-label">The Reckoning Approaches</div>
+    <div class="countdown-target">Finale — ${targetLocal}</div>
+    <div class="countdown-grid">
+      <div class="countdown-unit"><div class="v">${days}</div><div class="l">Days</div></div>
+      <div class="countdown-unit"><div class="v">${pad(hours)}</div><div class="l">Hours</div></div>
+      <div class="countdown-unit"><div class="v">${pad(minutes)}</div><div class="l">Minutes</div></div>
+      <div class="countdown-unit"><div class="v">${pad(seconds)}</div><div class="l">Seconds</div></div>
+    </div>
+  `;
+}
+
+/*****************************************************************
+ * STATE
+ *****************************************************************/
+const AFFINITY_LEVELS = ["Devoted","Friendly","Neutral","Wary","Hostile"];
+const QUEST_STATUSES = ["Active","Dormant","Resolved"];
+
+function badgeClassForAffinity(a){
+  if(a==="Devoted"||a==="Friendly") return "";
+  if(a==="Hostile") return "danger";
+  if(a==="Wary") return "warn";
+  return "dim";
+}
+function badgeClassForQuestStatus(s){
+  if(s==="Active") return "warn";
+  if(s==="Resolved") return "";
+  return "dim";
+}
+
+function defaultState(){
+  return {
+    campaignName: "When The Light Fades",
+    lastUpdated: null,
+    party: [],
+    supplies: { food: 0, camp: 0, funds: 0 },
+    npcs: [],
+    quests: [],
+    sessions: []
+  };
+}
+
+let state = defaultState();
+let editMode = false;
+let saving = false;
+let modalTarget = null; // { type:'party'|'npc', id }
+
+function uid(){ return Math.random().toString(36).slice(2,10); }
+function entityKey(type,id){ return type + ":" + id; }
+function listFor(type){ return type === "party" ? state.party : state.npcs; }
+function findEntity(type,id){ return listFor(type).find(e=>e.id===id); }
+
+function allEntities(){
+  return state.party.map(e=>({...e, type:"party"}))
+    .concat(state.npcs.map(e=>({...e, type:"npc"})));
+}
+
+/*****************************************************************
+ * STORAGE (Firestore)
+ *****************************************************************/
+function campaignDoc(){ return db.collection("campaign").doc("dnd-main"); }
+
+function mergeState(data){
+  const merged = Object.assign(defaultState(), data || {});
+  merged.supplies = Object.assign(defaultState().supplies, (data && data.supplies) || {});
+  merged.party = Array.isArray(merged.party) ? merged.party : [];
+  merged.npcs = Array.isArray(merged.npcs) ? merged.npcs : [];
+  merged.quests = Array.isArray(merged.quests) ? merged.quests : [];
+  merged.sessions = Array.isArray(merged.sessions) ? merged.sessions : [];
+  return merged;
+}
+
+function startListening(){
+  if(!CLOUD_CONFIGURED){ renderAll(); return; }
+  campaignDoc().onSnapshot(doc=>{
+    if(editMode) return; // admin is mid-edit — don't overwrite local draft
+    state = mergeState(doc.exists ? doc.data() : null);
+    renderAll();
+  }, err=>{
+    console.error("Snapshot error:", err);
+    updateToolbarStatus("Couldn't load live data.");
+    renderAll();
+  });
+}
+
+async function saveState(){
+  if(!isAdmin) return;
+  saving = true;
+  updateToolbarStatus("Saving…");
+  try{
+    const payload = Object.assign({}, state, {
+      lastUpdated: firebase.firestore.FieldValue.serverTimestamp()
+    });
+    await campaignDoc().set(payload);
+    state.lastUpdated = new Date().toISOString();
+    updateToolbarStatus("Saved ✓", true);
+    renderUpdatedLine();
+  } catch(err){
+    updateToolbarStatus("Save failed — try again");
+    console.error("Save error:", err);
+  }
+  saving = false;
+}
+
+function updateToolbarStatus(text, ok){
+  const el = document.getElementById("toolbar-status");
+  el.textContent = text;
+  el.className = "toolbar-status" + (ok ? " ok" : "");
+  if(ok) setTimeout(()=>{ if(el.textContent==="Saved ✓") el.textContent=""; }, 2500);
+}
+
+function renderUpdatedLine(){
+  const el = document.getElementById("updated-line");
+  const ts = state.lastUpdated;
+  let d = null;
+  if(ts && typeof ts.toDate === "function") d = ts.toDate();
+  else if(ts) d = new Date(ts);
+  el.textContent = d ? "Current as of " + d.toLocaleString(undefined, { dateStyle:"medium", timeStyle:"short" }) : "No updates saved yet.";
+}
+
+/*****************************************************************
+ * EDIT MODE
+ *****************************************************************/
+function toggleEditMode(){ if(isAdmin) setEditMode(!editMode); }
+function setEditMode(on){
+  editMode = on;
+  document.getElementById("edit-toggle").textContent = "Edit Mode: " + (editMode ? "On" : "Off");
+  document.getElementById("edit-toggle").classList.toggle("primary", editMode);
+  refreshAccountBar();
+  renderAll();
+}
+
+document.getElementById("campaign-name").addEventListener("blur", function(){
+  state.campaignName = this.textContent.trim() || "When The Light Fades";
+});
+
+/*****************************************************************
+ * RENDER — CAST GRIDS (Party + NPCs)
+ *****************************************************************/
+function avatarHtml(image, name, sizeClass){
+  const initials = (name||"?").trim().slice(0,1).toUpperCase() || "?";
+  const img = image
+    ? `<img src="${escapeAttr(image)}" alt="" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">`
+    : "";
+  return `<div class="${sizeClass}">${img}<div class="avatar-fallback" style="${image?'display:none;':'display:flex;'}">${initials}</div></div>`;
+}
+
+function renderCastGrid(type){
+  const list = listFor(type);
+  const gridId = type === "party" ? "party-grid" : "npc-grid";
+  const emptyId = type === "party" ? "party-empty" : "npc-empty";
+  document.getElementById(emptyId).style.display = list.length ? "none" : "block";
+
+  document.getElementById(gridId).innerHTML = list.map(e => `
+    <div class="cast-card" onclick="openCastModal('${type}','${e.id}')">
+      ${avatarHtml(e.image, e.name, "cast-avatar")}
+      <div class="cast-name">${escapeHtml(e.name) || "Unnamed"}</div>
+      <span class="badge ${badgeClassForAffinity(e.generalAffinity)}">${e.generalAffinity || "Neutral"}</span>
+    </div>
+  `).join("");
+}
+
+function addCast(type){
+  listFor(type).push({
+    id: uid(), name: "", image: "", role: "", status: "", notes: "",
+    generalAffinity: "Neutral", affinities: {}
+  });
+  renderCastGrid(type);
+}
+function removeCastFromModal(){
+  if(!modalTarget) return;
+  const { type, id } = modalTarget;
+  if(type === "party") state.party = state.party.filter(e=>e.id!==id);
+  else state.npcs = state.npcs.filter(e=>e.id!==id);
+  closeCastModal();
+  renderCastGrid(type);
+}
+function updateCastField(field, value){
+  if(!modalTarget) return;
+  const e = findEntity(modalTarget.type, modalTarget.id);
+  if(e) e[field] = value;
+}
+function setGeneralAffinity(value){
+  updateCastField("generalAffinity", value);
+  renderModalHead();
+}
+function setIndividualAffinity(otherKey, value){
+  if(!modalTarget) return;
+  const e = findEntity(modalTarget.type, modalTarget.id);
+  if(!e) return;
+  if(!e.affinities) e.affinities = {};
+  e.affinities[otherKey] = value;
+}
+
+/*****************************************************************
+ * CAST MODAL
+ *****************************************************************/
+function openCastModal(type, id){
+  modalTarget = { type, id };
+  document.getElementById("cast-modal-backdrop").classList.add("open");
+  renderModal();
+}
+function closeCastModal(){
+  modalTarget = null;
+  document.getElementById("cast-modal-backdrop").classList.remove("open");
+  renderCastGrid("party");
+  renderCastGrid("npc");
+}
+
+function renderModalHead(){
+  const e = findEntity(modalTarget.type, modalTarget.id);
+  if(!e) return;
+  document.getElementById("modal-badge-slot") && (document.getElementById("modal-badge-slot").className = "badge " + badgeClassForAffinity(e.generalAffinity));
+}
+
+function renderModal(){
+  const e = findEntity(modalTarget.type, modalTarget.id);
+  const modal = document.getElementById("cast-modal");
+  if(!e){ modal.innerHTML = ""; return; }
+
+  const others = allEntities().filter(o => !(o.type===modalTarget.type && o.id===e.id));
+
+  const headHtml = editMode ? `
+    <div class="modal-head">
+      ${avatarHtml(e.image, e.name, "modal-avatar")}
+      <div style="flex:1;min-width:0;">
+        <input type="text" class="modal-name-edit" value="${escapeAttr(e.name)}" placeholder="Name" onchange="updateCastField('name', this.value); renderModal();">
+        <input type="text" value="${escapeAttr(e.image)}" placeholder="Image URL" onchange="updateCastField('image', this.value); renderModal();">
+      </div>
+    </div>
+  ` : `
+    <div class="modal-head">
+      ${avatarHtml(e.image, e.name, "modal-avatar")}
+      <div class="modal-name">${escapeHtml(e.name) || "Unnamed"}</div>
+    </div>
+  `;
+
+  const detailFieldsHtml = editMode ? `
+    <div class="modal-field">
+      <label>${modalTarget.type === "party" ? "Race / Class" : "Role / Faction"}</label>
+      <input type="text" value="${escapeAttr(e.role)}" onchange="updateCastField('role', this.value)">
+    </div>
+    ${modalTarget.type === "party" ? `
+    <div class="modal-field">
+      <label>Current Status</label>
+      <input type="text" value="${escapeAttr(e.status)}" onchange="updateCastField('status', this.value)">
+    </div>` : ``}
+    <div class="modal-field">
+      <label>Notes</label>
+      <textarea onchange="updateCastField('notes', this.value)">${escapeHtml(e.notes)}</textarea>
+    </div>
+  ` : `
+    ${e.role ? `<div class="modal-field"><label>${modalTarget.type === "party" ? "Race / Class" : "Role / Faction"}</label><div>${escapeHtml(e.role)}</div></div>` : ``}
+    ${e.status ? `<div class="modal-field"><label>Current Status</label><div>${escapeHtml(e.status)}</div></div>` : ``}
+    ${e.notes ? `<div class="modal-field"><label>Notes</label><div class="entry-body">${escapeHtml(e.notes)}</div></div>` : ``}
+  `;
+
+  const generalAffinityHtml = editMode ? `
+    <div class="affinity-general">
+      <label style="font-family:'JetBrains Mono', monospace;font-size:10px;text-transform:uppercase;letter-spacing:0.06em;color:var(--bone-dim);">General Affinity</label>
+      <select onchange="setGeneralAffinity(this.value)">
+        ${AFFINITY_LEVELS.map(a=>`<option value="${a}" ${a===e.generalAffinity?"selected":""}>${a}</option>`).join("")}
+      </select>
+    </div>
+  ` : `
+    <div class="affinity-general">
+      <span class="badge ${badgeClassForAffinity(e.generalAffinity)}">${e.generalAffinity || "Neutral"}</span>
+    </div>
+  `;
+
+  const affinityRowsHtml = others.length === 0 ? `<div class="empty-note">No one else logged yet.</div>` : others.map(o => {
+    const key = entityKey(o.type, o.id);
+    const val = (e.affinities && e.affinities[key]) || "Neutral";
+    if(editMode){
+      return `
+      <div class="affinity-row">
+        <span><span class="an">${escapeHtml(o.name) || "Unnamed"}</span><span class="at">${o.type === "party" ? "party" : "npc"}</span></span>
+        <select onchange="setIndividualAffinity('${key}', this.value)">
+          ${AFFINITY_LEVELS.map(a=>`<option value="${a}" ${a===val?"selected":""}>${a}</option>`).join("")}
+        </select>
+      </div>`;
+    }
+    return `
+    <div class="affinity-row">
+      <span><span class="an">${escapeHtml(o.name) || "Unnamed"}</span><span class="at">${o.type === "party" ? "party" : "npc"}</span></span>
+      <span class="badge ${badgeClassForAffinity(val)}">${val}</span>
+    </div>`;
+  }).join("");
+
+  modal.innerHTML = `
+    ${headHtml}
+    <h3>Overview</h3>
+    ${generalAffinityHtml}
+    ${detailFieldsHtml}
+    <h3>Individual Affinity</h3>
+    ${affinityRowsHtml}
+    <div class="modal-footer">
+      ${editMode ? `<button class="small" onclick="removeCastFromModal()">Remove</button>` : `<span></span>`}
+      <button onclick="closeCastModal()">Close</button>
+    </div>
+  `;
+}
+
+/*****************************************************************
+ * RENDER — SUPPLIES
+ *****************************************************************/
+function renderSupplies(){
+  const row = document.getElementById("supplies-row");
+  const s = state.supplies;
+  const field = (key, label) => `
+    <div class="supply-stat">
+      <label>${label}</label>
+      ${editMode
+        ? `<div class="supply-edit"><input type="number" value="${s[key]}" onchange="setSupply('${key}', this.value)"></div>`
+        : `<div class="stat-value">${s[key]}</div>`}
+    </div>`;
+  row.innerHTML = field("food","Food") + field("camp","Camp Supplies") + field("funds","Funds (gp)");
+}
+function setSupply(key, value){
+  state.supplies[key] = parseInt(value,10) || 0;
+}
+
+/*****************************************************************
+ * RENDER — QUESTS
+ *****************************************************************/
+function renderQuests(){
+  const list = document.getElementById("quest-list");
+  document.getElementById("quest-empty").style.display = state.quests.length ? "none" : "block";
+  list.innerHTML = state.quests.map(q => {
+    if(editMode){
+      return `
+      <div class="dossier-entry">
+        <div class="entry-edit-grid">
+          <input type="text" value="${escapeAttr(q.title)}" placeholder="Thread title" style="grid-column:1/3;" onchange="updateQuest('${q.id}','title',this.value)">
+          <select onchange="updateQuest('${q.id}','status',this.value)">
+            ${QUEST_STATUSES.map(s=>`<option value="${s}" ${s===q.status?"selected":""}>${s}</option>`).join("")}
+          </select>
+        </div>
+        <textarea placeholder="Summary…" onchange="updateQuest('${q.id}','summary',this.value)">${escapeHtml(q.summary)}</textarea>
+        <button class="small entry-remove" onclick="removeQuest('${q.id}')">Remove</button>
+      </div>`;
+    }
+    return `
+    <div class="dossier-entry">
+      <div class="entry-head">
+        <span class="fname">${escapeHtml(q.title) || "Untitled thread"}</span>
+        <span class="badge ${badgeClassForQuestStatus(q.status)}">${q.status}</span>
+      </div>
+      ${q.summary ? `<div class="entry-body">${escapeHtml(q.summary)}</div>` : ""}
+    </div>`;
+  }).join("");
+}
+function addQuest(){ state.quests.unshift({ id:uid(), title:"", status:"Active", summary:"" }); renderQuests(); }
+function updateQuest(id, field, value){ const q = state.quests.find(x=>x.id===id); if(q) q[field] = value; }
+function removeQuest(id){ state.quests = state.quests.filter(x=>x.id!==id); renderQuests(); }
+
+/*****************************************************************
+ * RENDER — SESSION LOG
+ *****************************************************************/
+function renderSessions(){
+  const list = document.getElementById("session-list");
+  document.getElementById("session-empty").style.display = state.sessions.length ? "none" : "block";
+  list.innerHTML = state.sessions.map(s => {
+    if(editMode){
+      return `
+      <div class="dossier-entry">
+        <div class="entry-edit-grid">
+          <input type="text" value="${escapeAttr(s.date)}" placeholder="Date" onchange="updateSession('${s.id}','date',this.value)">
+          <input type="text" value="${escapeAttr(s.title)}" placeholder="Session title" onchange="updateSession('${s.id}','title',this.value)">
+        </div>
+        <textarea placeholder="What happened…" onchange="updateSession('${s.id}','summary',this.value)">${escapeHtml(s.summary)}</textarea>
+        <button class="small entry-remove" onclick="removeSession('${s.id}')">Remove</button>
+      </div>`;
+    }
+    return `
+    <div class="dossier-entry">
+      <div class="entry-head">
+        ${s.date ? `<span class="entry-meta">${escapeHtml(s.date)}</span>` : ""}
+        <span class="fname">${escapeHtml(s.title) || "Untitled session"}</span>
+      </div>
+      ${s.summary ? `<div class="entry-body">${escapeHtml(s.summary)}</div>` : ""}
+    </div>`;
+  }).join("");
+}
+function addSession(){ state.sessions.unshift({ id:uid(), date:"", title:"", summary:"" }); renderSessions(); }
+function updateSession(id, field, value){ const s = state.sessions.find(x=>x.id===id); if(s) s[field] = value; }
+function removeSession(id){ state.sessions = state.sessions.filter(x=>x.id!==id); renderSessions(); }
+
+/*****************************************************************
+ * HELPERS
+ *****************************************************************/
+function escapeHtml(str){ return String(str||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
+function escapeAttr(str){ return String(str||"").replace(/&/g,"&amp;").replace(/"/g,"&quot;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
+
+function renderAll(){
+  document.getElementById("campaign-name").textContent = state.campaignName;
+  document.getElementById("campaign-name").setAttribute("contenteditable", editMode ? "true" : "false");
+  renderUpdatedLine();
+  renderCastGrid("party");
+  renderCastGrid("npc");
+  renderSupplies();
+  renderQuests();
+  renderSessions();
+  if(modalTarget) renderModal();
+}
+
+/*****************************************************************
+ * INIT
+ *****************************************************************/
+refreshAccountBar();
+startListening();
+renderCountdown();
+setInterval(renderCountdown, 1000);
+</script>
+</body>
+</html>
