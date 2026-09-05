@@ -219,6 +219,16 @@
     letter-spacing:0.03em;
     margin-bottom:16px;
   }
+  .countdown-quest{
+    font-family:'Cormorant SC', serif;
+    font-size:24px;
+    font-weight:700;
+    letter-spacing:0.04em;
+    text-transform:uppercase;
+    color:#e6444d;
+    text-shadow:0 0 14px rgba(230,68,77,0.45);
+    margin-bottom:18px;
+  }
   .countdown-grid{
     display:grid;
     grid-template-columns:repeat(4,1fr);
@@ -382,21 +392,21 @@
   </section>
 
   <!-- ============ NPCs & FACTIONS ============ -->
-  <section data-step="NPCs & Factions">
+  <section data-step="NPCs & Factions" style="display: none;">
     <h2>NPCs &amp; Factions <button class="ghost small add-btn edit-only" style="display:none;" onclick="addCast('npc')">+ Add</button></h2>
     <div class="cast-grid" id="npc-grid"></div>
     <div class="empty-note" id="npc-empty" style="display:none;">No NPCs or factions logged yet.</div>
   </section>
 
   <!-- ============ QUESTS ============ -->
-  <section data-step="Quest & Plot Threads">
+  <section data-step="Quest & Plot Threads" style="display: none;">
     <h2>Quest &amp; Plot Threads <button class="ghost small add-btn edit-only" style="display:none;" onclick="addQuest()">+ Add</button></h2>
     <div class="entry-list" id="quest-list"></div>
     <div class="empty-note" id="quest-empty" style="display:none;">No open threads logged yet.</div>
   </section>
 
   <!-- ============ SESSION LOG ============ -->
-  <section data-step="Session Log">
+  <section data-step="Session Log" style="display: none;">
     <h2>Session Log <button class="ghost small add-btn edit-only" style="display:none;" onclick="addSession()">+ Add Entry</button></h2>
     <div class="entry-list" id="session-list"></div>
     <div class="empty-note" id="session-empty" style="display:none;">No sessions logged yet.</div>
@@ -537,6 +547,7 @@ function renderCountdown(){
   panel.innerHTML = `
     <div class="countdown-label">The Reckoning Approaches</div>
     <div class="countdown-target">Finale — ${targetLocal}</div>
+    <div class="countdown-quest">Confront Lotharr Sanguinius IX</div>
     <div class="countdown-grid">
       <div class="countdown-unit"><div class="v">${days}</div><div class="l">Days</div></div>
       <div class="countdown-unit"><div class="v">${pad(hours)}</div><div class="l">Hours</div></div>
