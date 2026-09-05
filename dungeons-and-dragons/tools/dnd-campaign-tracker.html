@@ -261,6 +261,11 @@
 
   /* ---------- Cast grid (Party + NPCs/Factions) ---------- */
   .cast-grid{display:grid;grid-template-columns:repeat(auto-fill, minmax(130px, 1fr));gap:14px;}
+  @media(min-width:641px){
+  .cast-grid{
+      grid-template-columns:repeat(5, 1fr);
+    }
+  }
   .cast-card{
     background:#1c0d0d;border:1px solid var(--line);border-radius:4px;
     padding:12px 10px;text-align:center;cursor:pointer;
@@ -370,7 +375,7 @@
   </section>
 
   <!-- ============ SUPPLIES ============ -->
-  <section data-step="Supplies">
+  <section data-step="Supplies" style="display: none;">
     <h2>Supplies</h2>
     <div class="supplies-row" id="supplies-row"></div>
   </section>
