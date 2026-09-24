@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>EVERMORE BUREAU ESTIMATE 1-60</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Courier+Prime:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f2f0ea;
+    --backdrop: #cfcac2;
+    --ink: #1a1a1a;
+    --line: #999;
+    --stamp: #7a1414;
+    --toolbar-bg: #222;
+    --toolbar-fg: #eee;
+    --grain-opacity: 0.4;
+  }
+  :root[data-theme="dark"] {
+    --bg: #2b2b2b;
+    --backdrop: #161616;
+    --ink: #eceae4;
+    --line: #666;
+    --stamp: #c96060;
+    --toolbar-bg: #444;
+    --toolbar-fg: #f2f0ea;
+    --grain-opacity: 0;
+  }
+  @page {
+    size: A4;
+    margin: 0.5in;
+  }
+  * { box-sizing: border-box; }
+  html { scroll-padding-top: env(safe-area-inset-top, 0px); }
+  body {
+    margin: 0;
+    background: var(--backdrop);
+    color: var(--ink);
+    font-family: 'Courier Prime', 'Courier New', monospace;
+    font-size: 15.5px;
+    line-height: 1.55;
+    padding: 36px 14px calc(70px + env(safe-area-inset-bottom, 0px));
+    padding-top: calc(36px + env(safe-area-inset-top, 0px));
+  }
+  .sheet-wrap { max-width: 800px; margin: 0 auto; }
+  .page {
+    position: relative;
+    background: var(--bg);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.35), 0 2px 6px rgba(0,0,0,0.25);
+    border: 1px solid rgba(0,0,0,0.12);
+    padding: 46px 40px 70px;
+    overflow: hidden;
+  }
+  .grain, .vignette { position: absolute; inset: 0; pointer-events: none; }
+  .grain { z-index: 2; opacity: var(--grain-opacity); mix-blend-mode: multiply;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.7' numOctaves='3' stitchTiles='stitch'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+  }
+  .vignette { z-index: 3; opacity: var(--grain-opacity);
+    background: radial-gradient(ellipse at center, transparent 55%, rgba(0,0,0,0.35) 100%);
+  }
+  .page > *:not(.grain):not(.vignette) { position: relative; z-index: 4; }
+
+  .classif { text-align: center; font-weight: 700; letter-spacing: 0.15em; font-size: 13px; text-decoration: line-through; margin-bottom: 4px; }
+  .doc-meta { display: flex; justify-content: space-between; font-size: 11.5px; margin: 14px 0 20px; border-bottom: 2px solid var(--ink); padding-bottom: 10px; }
+
+  .cover { text-align: center; padding-bottom: 24px; border-bottom: 3px double var(--ink); margin-bottom: 26px; }
+  .cover .kicker { font-size: 12px; letter-spacing: 0.08em; margin-bottom: 6px; }
+  .cover h1 { font-size: clamp(19px, 4.8vw, 24px); line-height: 1.4; margin: 10px 0 6px; letter-spacing: 0.02em; }
+  .cover .supersedes { font-style: italic; font-size: 13px; margin-bottom: 16px; }
+  .cover .submitted { font-size: 13.5px; line-height: 1.8; margin-top: 18px; }
+  .cover .concur { text-align: left; font-size: 12.5px; margin: 18px auto 0; max-width: 560px; padding: 10px 14px; border: 1px solid var(--line); }
+  .cover .fileno { font-size: 12.5px; margin-top: 18px; font-weight: 700; }
+
+  h2.sec { font-size: 16.5px; font-weight: 700; letter-spacing: 0.03em; border-bottom: 1.5px solid var(--ink); padding-bottom: 5px; margin: 30px 0 12px; text-transform: uppercase; }
+
+  ol.num { list-style: none; counter-reset: p; margin: 0 0 12px; padding: 0; }
+  ol.num li { counter-increment: p; padding-left: 26px; position: relative; margin-bottom: 10px; text-align: justify; }
+  ol.num li::before { content: counter(p) "."; position: absolute; left: 0; font-weight: 700; }
+  ol.disc { padding-left: 20px; font-size: 13.5px; margin: 0 0 10px; }
+  ol.disc li { margin-bottom: 7px; }
+
+  p { margin: 0 0 11px; text-align: justify; }
+
+  .box { border: 1px solid var(--ink); padding: 12px 14px; margin: 12px 0; }
+  .box .lbl { font-weight: 700; font-size: 12px; letter-spacing: 0.04em; margin-bottom: 6px; text-decoration: underline; }
+
+  table { width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 14px; }
+  th, td { text-align: left; padding: 5px 8px; border: 1px solid var(--line); vertical-align: top; }
+  th { font-weight: 700; }
+
+  .warn { border: 2px solid var(--stamp); color: var(--stamp); padding: 8px 12px; font-size: 12.5px; font-weight: 700; margin: 14px 0; letter-spacing: 0.02em; }
+  .foot { font-size: 12px; border-top: 1px solid var(--line); padding-top: 6px; margin: 16px 0 6px; }
+  hr.tear { border: none; border-top: 1px dashed var(--line); margin: 24px 0; }
+
+  .annex { border: 2px solid var(--ink); padding: 16px 18px 4px; margin-top: 8px; }
+  .field { margin-bottom: 14px; }
+  .field label { display: block; font-weight: 700; font-size: 11.5px; letter-spacing: 0.02em; margin-bottom: 5px; }
+  .fill-line { border-bottom: 1px solid var(--ink); height: 22px; }
+  .fill-block { border: 1px solid var(--line); height: 50px; }
+  .cbrow { display: flex; align-items: center; gap: 8px; margin-bottom: 7px; font-size: 14px; }
+  .cb { width: 14px; height: 14px; border: 1.5px solid var(--ink); flex-shrink: 0; }
+
+  footer { text-align: center; font-size: 11px; padding: 26px 20px 60px; border-top: 3px double var(--ink); margin-top: 34px; }
+
+  /* Toolbar */
+  .toolbar {
+    position: fixed;
+    right: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 50;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  .toolbar button {
+    width: 46px; height: 46px;
+    border-radius: 50%;
+    border: none;
+    background: var(--toolbar-bg);
+    color: var(--toolbar-fg);
+    font-family: 'Courier Prime', monospace;
+    font-size: 19px;
+    cursor: pointer;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+    display: flex; align-items: center; justify-content: center;
+  }
+  .toolbar button:active { transform: scale(0.94); }
+
+  .page-break { break-before: page; page-break-before: always; }
+
+  @media print {
+    :root, :root[data-theme="dark"] {
+      --bg: #fff !important;
+      --backdrop: #fff !important;
+      --ink: #000 !important;
+      --line: #000 !important;
+      --stamp: #000 !important;
+      --grain-opacity: 0 !important;
+    }
+    .toolbar, .grain, .vignette { display: none !important; }
+    body { background: #fff; color: #000; padding: 0; }
+    .sheet-wrap { max-width: none; }
+    .page { background: #fff !important; box-shadow: none; border: none; padding: 20px 10px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="toolbar">
+  <button id="printBtn" title="Print to PDF" aria-label="Print to PDF">🖨</button>
+  <button id="themeBtn" title="Toggle dark mode" aria-label="Toggle dark mode">◐</button>
+</div>
+
+<div class="sheet-wrap">
+<div class="page">
+<div class="grain"></div>
+<div class="vignette"></div>
+
+
+  <div class="classif">TOP SECRET</div>
+  <div class="doc-meta">
+    <span>EBE 1-60</span>
+    <span>ISSUED THIS DAY, TOWN CHARTER YEAR 60</span>
+  </div>
+
+  <div class="cover">
+    <div class="kicker">EVERMORE BUREAU ESTIMATE</div>
+    <h1>THE CAPACITY OF THE BUREAU TO CONTAIN<br>TALE-RELATED CRIME THROUGH THE PRESENT TERM</h1>
+    <div class="supersedes">(Supersedes standing bureau assessment; issued in light of recent developments)</div>
+    <div class="submitted">
+      <strong>SUBMITTED BY THE OFFICE OF THE MAYOR</strong><br>
+      The following parties participated in the preparation of this dossier: the Office of the Mayor, and the Evermore Bureau of Extraordinary Affairs.
+    </div>
+    <div class="concur">
+      <strong>Concurred in by:</strong> the Mayor's Office authorizes limited dissemination of this dossier to registered independent investigators of Lore, engaged under separate contract, for the sole purpose of the assignment described herein. The Bureau of Extraordinary Affairs was not consulted on the decision to disseminate outside its own personnel, the matter being one the Mayor has reserved to his own office.
+    </div>
+    <div class="fileno">No. ___ — ISSUED TO ASSIGNED INVESTIGATOR ONLY</div>
+  </div>
+
+  <h2 class="sec">Dissemination Notice</h2>
+  <ol class="disc">
+    <li>This dossier is disseminated by the Office of the Mayor of Evermore. This copy is for the information and use of the recipient alone, on a need-to-know basis. No further dissemination is authorized without the express permission of the Mayor's Office.</li>
+    <li>This copy may be retained for the duration of the assignment. Upon conclusion, it should be returned to the Office of the Mayor, or destroyed in a manner that leaves no legible portion.</li>
+    <li>The contents of this dossier remain confidential in perpetuity, irrespective of whether the recipient accepts the assignment described herein.</li>
+  </ol>
+  <div class="warn">THIS DOSSIER CONCERNS MATTERS AFFECTING THE INTERNAL SECURITY OF EVERMORE. UNAUTHORIZED DISCLOSURE OF ITS CONTENTS, IN ANY MANNER, TO ANY PERSON NOT EXPRESSLY CLEARED BY THE OFFICE OF THE MAYOR, IS PROHIBITED.</div>
+  <p style="font-size:13px;"><strong>DISTRIBUTION:</strong> Office of the Mayor &middot; Evermore Bureau of Extraordinary Affairs (record copy only) &middot; Assigned Investigator(s)</p>
+
+  <h2 class="sec">The Problem</h2>
+  <p>To assess the present reliability of the Evermore Bureau of Extraordinary Affairs, in light of a decline in resolved caseload and the recent death of a newly-installed Sheriff, and to determine what independent investigative capacity should be introduced to supplement or verify the Bureau's findings through the term of the present assignment.</p>
+
+  <h2 class="sec">Summary and Conclusions</h2>
+  <ol class="num">
+    <li>Evermore's civil order rests on an arrangement between its two resident populations — Tales and Plainsfolk — maintained principally through the licensing and enforcement of Mask use by the Bureau of Extraordinary Affairs, a division of the Evermore Police Department. This arrangement has held for a number of years without major incident.</li>
+    <li>Resolved caseload within the Bureau of Extraordinary Affairs has declined measurably over recent months. The cause of this decline has not been established. Contributing factors may include personnel attrition, equipment limitations, or deficiencies in current investigative method; we do not at this time rule out any of these.</li>
+    <li>A newly sworn Sheriff of the Evermore Police Department, installed specifically to address the above concerns, was killed before the end of his first day in office. The Mayor's Office regards the timing of this event as unlikely to be coincidental, though no determination of cause has been reached.</li>
+    <li>The Mayor's Office has concluded that independent investigative capacity, answerable solely to itself and not to the Department's internal chain, is warranted for the duration of this matter.</li>
+    <li>It is judged that such investigators can be usefully employed alongside the Bureau, provided they operate under clear terms of neutrality and confidentiality, detailed in Section IV below.</li>
+  </ol>
+
+  <h2 class="sec">I. Evermore — Background</h2>
+  <p>Evermore was established as a settlement for Tales — a self-designation used by fairy-tale-originating persons to distinguish themselves from Plainsfolk, the latter constituting the majority population of the wider region. In subsequent years the town's charter was amended to permit Plainsfolk residency as well. The two populations presently coexist under a single municipal authority.</p>
+  <p>The town's founding and continued operation depend in substantial part on financing provided by a private benefactor. The Mayor's Office does not regard this arrangement as a matter for inclusion in an investigator's operating brief, except insofar as it may bear on questions of institutional funding raised elsewhere in this dossier.</p>
+
+  <h2 class="sec">II. The Mask System</h2>
+  <ol class="num">
+    <li>Tales whose natural bearing would otherwise be conspicuous to Plainsfolk observation are required by ordinance to wear a Mask while in public within town limits. A Mask takes the physical form of a wearable facial covering at the point of issuance; upon being donned, it is consumed by the wearer and ceases to exist as a physical object, leaving only its effect in place. That effect alters the wearer's outward form, bearing, and voice to a specified alternate presentation, indistinguishable from natural appearance under ordinary scrutiny, for the duration of its license — reckoned from the moment of donning, not from the date of issuance.</li>
+    <li>A Mask's effect is understood to extend beyond outward appearance. Tales operating under a Mask consistently report a measurable dulling of physical and preternatural faculty relative to their unmasked capacity — a suppression the Bureau has observed but not fully characterized. Further, any attempt by a Masked wearer to exercise a power specific to their particular nature results in immediate and irreversible failure of the Mask's effect. There is no partial or controlled exercise of such a power while Masked; the attempt and the exposure are simultaneous.</li>
+    <li>A legally issued Mask is licensed through the Bureau of Extraordinary Affairs at a standing rate of 250 gold pieces, and its effect persists for seven days from the moment it is worn.</li>
+    <li>Unconfirmed reports, circulated informally and never substantiated by Bureau investigation, allege the existence of a cheaper, unlicensed alternative of shorter duration, said to originate from outside town limits. The Bureau has not identified a supplier, confirmed a price, verified a duration, or brought charges in connection with any such alternative. This office regards the matter as unverified speculation and cautions against treating it as established fact for operational purposes. Any information an investigator develops independently on this subject should be reported through proper channel rather than acted upon unilaterally.</li>
+    <li>Government personnel — Evermore Police Department officers and Bureau of Extraordinary Affairs agents alike — are issued Masks against a standing municipal allotment rather than personal expense. This allotment is financed in full by the town's private benefactor (see Section I). Requisition, replacement, and renewal of government-issued Masks — the date, stated reason, and frequency of each transaction — is logged and maintained by the personal secretary to the Mayor's Office. Investigators seeking a personnel Mask history should direct such requests there, through proper channel.</li>
+    <li>Detection of a Mask's effect, licensed or otherwise, is within ordinary Bureau capability. Forced removal prior to the end of a Mask's license requires either an authorized dispelling charm or, as a last resort, separation of the wearer's head from their body — the latter being restricted to Bureau-authorized personnel and equipment.</li>
+  </ol>
+
+  <h2 class="sec">III. Evermore Police Department and the Bureau of Extraordinary Affairs</h2>
+  <p>Ordinary policing in Evermore is the responsibility of the Evermore Police Department (EPD), staffed principally by Plainsfolk personnel. The Bureau of Extraordinary Affairs is a division of the EPD, distinct in personnel, procedure, and clearance, responsible for matters specific to Tale conduct and the enforcement of Mask ordinance. Bureau operations are not generally disclosed to EPD personnel outside the division, and officers exposed to Bureau matters beyond their clearance are subject to standard memory-management procedure, at the Bureau's discretion.</p>
+  <p>The assigned investigator(s) will be attached to the Bureau of Extraordinary Affairs for the duration of this assignment, with access to Bureau personnel and premises as required, but will report findings to the Mayor's Office directly.</p>
+
+  <h2 class="sec">IV. Terms of Engagement</h2>
+  <div class="box"><div class="lbl">Confidentiality</div><p style="margin:0;">The contents of this dossier, and any information acquired in the course of this assignment, are disclosed to the recipient under conditions of strict and permanent confidentiality. This obligation is not conditioned on the recipient's acceptance of the assignment; a recipient who declines to participate remains bound by it without exception, for the remainder of their life, in Lore or otherwise.</p></div>
+  <div class="box"><div class="lbl">Neutrality</div><p style="margin:0;">The assigned investigator, whether of Tale or Plainsfolk origin, is retained in a professional capacity and is expected to conduct this investigation without prejudice toward either population. The investigator is required to acknowledge the legitimate existence and standing of both Tales and Plainsfolk as a condition of this assignment, and to exercise no moral or civil authority beyond what is required to establish the facts of the case. Compensation is rendered for competent, impartial investigation; nothing further is asked, and nothing further will be recognized.</p></div>
+
+  <h2 class="sec">V. Classification of Investigator</h2>
+  <p>Each investigator accepting this assignment shall declare, prior to commencement, whether they are to be classified as Plainsfolk or as Tale for the duration of the assignment. This classification determines applicable ordinance (Section II) and should be discussed with the investigator's own record-keeper (GM) prior to the first day of active investigation.</p>
+  <table>
+    <tr><th>Classification</th><th>Operative conditions</th></tr>
+    <tr><td>Plainsfolk</td><td>Not subject to Mask ordinance. Moves through Evermore without additional legal encumbrance.</td></tr>
+    <tr><td>Tale</td><td>Subject to Mask ordinance unless naturally unremarkable in appearance. Operative capabilities while Masked or unmasked to be established separately with your GM.</td></tr>
+  </table>
+
+  <hr class="tear">
+
+  <h2 class="sec page-break">Annex A — Reply of Acceptance</h2>
+  <p class="foot">This portion alone is to be detached and returned to the Office of the Mayor as the recipient's formal acceptance of this assignment. <strong>No response received constitutes a decline</strong>, and the Office will proceed on that understanding without further notice.</p>
+  <div class="annex">
+    <div class="field"><label>RECIPIENT NAME</label><div class="fill-line"></div></div>
+    <div class="field"><label>INVESTIGATOR OF RECORD (CHARACTER NAME)</label><div class="fill-line"></div></div>
+    <div class="field"><label>CLASS / SUBCLASS</label><div class="fill-line"></div></div>
+    <div class="field">
+      <label>CLASSIFICATION (SECTION V)</label>
+      <div class="cbrow"><div class="cb"></div> Plainsfolk — race/subrace: <span style="flex:1; border-bottom:1px solid var(--ink); height:1.3em; margin-left:6px;"></span></div>
+      <div class="cbrow"><div class="cb"></div> Tale — designation: <span style="flex:1; border-bottom:1px solid var(--ink); height:1.3em; margin-left:6px;"></span></div>
+    </div>
+    <div class="field">
+      <label>ACKNOWLEDGMENT</label>
+      <div class="cbrow"><div class="cb"></div> The recipient acknowledges and accepts the Terms of Engagement set forth in Section IV in full, and by submission of this reply, formally accepts the assignment described in this dossier.</div>
+    </div>
+    <div class="field"><label>STATEMENT OF INTEREST — the investigator's stated reason for accepting this assignment, in their own words</label><div class="fill-block"></div></div>
+  </div>
+
+  <hr class="tear">
+
+  <h2 class="sec page-break">Annex B — For the Recipient's Own Records</h2>
+  <p class="foot">This portion is <strong>not</strong> returned to the Office of the Mayor. It is retained by the recipient's own table for the duration of the assignment.</p>
+  <div class="annex">
+    <p style="font-size:13px;">This assignment concerns matters of violence and civil unrest. The following is provided for the recipient's own use and is not a requirement of the Mayor's Office.</p>
+    <div class="field">
+      <label>THE RECIPIENT CONFIRMS COMFORT WITH THE FOLLOWING, AS THEY MAY ARISE IN THE COURSE OF THIS ASSIGNMENT:</label>
+      <div class="cbrow"><div class="cb"></div> Graphic description of violent death</div>
+      <div class="cbrow"><div class="cb"></div> Themes of prejudice and institutional failure</div>
+      <div class="cbrow"><div class="cb"></div> Genuine risk to the investigator, including death</div>
+    </div>
+    <div class="field"><label>MATTERS THE RECIPIENT WISHES SOFTENED, OMITTED, OR HANDLED OUTSIDE THE SESSION</label><div class="fill-block"></div></div>
+    <div class="field"><label>SIGNAL FOR PAUSE — a word or gesture requiring no further explanation in the moment</label><div class="fill-line"></div></div>
+  </div>
+
+</div>
+</div>
+
+<footer>
+  <div class="classif" style="font-size:11px;">TOP SECRET</div>
+  OFFICE OF THE MAYOR &middot; EVERMORE &middot; RETAIN OR DESTROY IN ACCORDANCE WITH SECTION I OF THIS NOTICE
+</footer>
+
+<script>
+(function(){
+  var root = document.documentElement;
+  var themeBtn = document.getElementById('themeBtn');
+  var printBtn = document.getElementById('printBtn');
+  function applyTheme(t){
+    if (t === 'dark') { root.setAttribute('data-theme','dark'); themeBtn.textContent = '◑'; }
+    else { root.removeAttribute('data-theme'); themeBtn.textContent = '◐'; }
+  }
+  var saved = 'light';
+  try { var s = localStorage.getItem('evermore-theme'); if (s) saved = s; } catch(e) {}
+  applyTheme(saved);
+  themeBtn.addEventListener('click', function(){
+    var cur = root.getAttribute('data-theme') === 'dark' ? 'dark' : 'light';
+    var next = cur === 'dark' ? 'light' : 'dark';
+    applyTheme(next);
+    try { localStorage.setItem('evermore-theme', next); } catch(e) {}
+  });
+  printBtn.addEventListener('click', function(){ window.print(); });
+})();
+</script>
+
+</body>
+</html>
