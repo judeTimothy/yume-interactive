@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://judetimothy.github.io/yume-interactive/sitemap.xml
