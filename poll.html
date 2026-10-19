@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://www.gstatic.com; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src https://firestore.googleapis.com https://api.country.is; base-uri 'self'; form-action 'none'; object-src 'none'" />
+  <meta name="referrer" content="strict-origin-when-cross-origin" />
+  <meta name="theme-color" content="#0d0d0f" />
+  <title>Community Poll — YUME Interactive</title>
+  <meta name="description" content="Vote in the YUME Interactive community poll and see live results from players and visitors around the world." />
+  <meta name="robots" content="index, follow" />
+  <link rel="canonical" href="https://judetimothy.github.io/yume-interactive/poll.html" />
+  <link rel="icon" href="favicon.ico" sizes="any" />
+  <link rel="icon" href="favicon-32.png" type="image/png" sizes="32x32" />
+  <link rel="apple-touch-icon" href="apple-touch-icon.png" />
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="poll.css" />
+</head>
+<body>
+  <a class="skip-link" href="#top">Skip to content</a>
+
+  <header class="site-header">
+    <div class="wide site-header__inner">
+      <a href="index.html" class="brand" aria-label="YUME Interactive home">
+        <img class="brand__logo" src="assets/logo-web.webp" width="128" height="128" alt="YUME Interactive logo" />
+        <span class="brand__text">
+          <span class="brand__name" id="brandName">YUME Interactive</span>
+          <span class="brand__meta" id="brandMeta">Indie Game Studio</span>
+        </span>
+      </a>
+
+      <nav class="site-nav" aria-label="Primary navigation">
+        <div class="site-nav__bar" id="navBarLinks">
+          <a href="index.html#work">Work</a>
+          <a href="index.html#capabilities">Capabilities</a>
+          <a href="index.html#case-study">Case Study</a>
+          <a href="index.html#contact">Contact</a>
+        </div>
+
+        <button class="menu-toggle" id="menuToggle" aria-expanded="false" aria-controls="mobileNav" aria-label="Toggle menu" type="button">
+          <span class="menu-toggle__icon" aria-hidden="true"></span>
+          <span class="visually-hidden">Toggle menu</span>
+        </button>
+
+        <div class="site-nav__panel" id="mobileNav">
+          <div class="site-nav__links" id="mobileNavLinks">
+            <a href="index.html#work">Work</a>
+            <a href="index.html#capabilities">Capabilities</a>
+            <a href="index.html#case-study">Case Study</a>
+            <a href="index.html#contact">Contact</a>
+          </div>
+        </div>
+      </nav>
+    </div>
+  </header>
+
+  <main id="top" class="poll-page">
+    <section class="section poll-section">
+      <div class="poll-glow" aria-hidden="true"></div>
+      <div class="container poll-wrap">
+        <article class="poll-card" id="pollCard">
+          <p class="eyebrow">Live community poll</p>
+          <h1 class="poll-q" id="pollQ"></h1>
+          <p class="muted" id="pollHint">One vote per browser. Results appear after you vote.</p>
+
+          <div class="poll-options" id="pollOptions" role="group" aria-labelledby="pollQ"></div>
+          <p class="poll-error" id="pollError" role="alert"></p>
+
+          <div class="poll-results" id="pollResults" aria-live="polite" hidden>
+            <p class="muted">Thanks for voting! You chose <strong id="pollMine"></strong>. Results update live.</p>
+            <div class="poll-pie-row">
+              <div class="poll-pie" id="pollPie" role="img" aria-label="Pie chart of poll results"></div>
+              <ul class="poll-legend" id="pollLegend"></ul>
+            </div>
+            <h2 class="poll-sub">Where voters are from · Top 5</h2>
+            <div class="poll-bars" id="pollBars"></div>
+          </div>
+        </article>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="wide footer-top">
+      <div class="footer-brand">
+        <h3 id="footerBrand">YUME Interactive</h3>
+        <p id="footerCopy">A small indie studio aiming to revolutionize the local indie scene.</p>
+      </div>
+
+      <div class="footer-columns" id="footerColumns">
+        <div>
+          <ul class="footer-links">
+            <li><strong>About the Studio</strong></li>
+              <li><a href="index.html#work">Work</a></li>
+              <li><a href="index.html#capabilities">Capabilities</a></li>
+              <li><a href="index.html#case-study">Case Study</a></li>
+              <li><a href="index.html#contact">Contact</a></li>
+          </ul>
+        </div>
+        <div>
+          <ul class="footer-links">
+            <li><strong>Become a Dreamer</strong></li>
+              <li><a href="https://yumeindie.itch.io" target="_blank" rel="noopener noreferrer">Itch.io</a></li>
+              <li><a href="https://steamcommunity.com/id/godprime" target="_blank" rel="noopener noreferrer">Steam</a></li>
+              <li><a href="https://github.com/judeTimothy" target="_blank" rel="noopener noreferrer">GitHub</a></li>
+              <li><a href="https://www.linkedin.com/in/jude-timothy-joshua-bomban-59387b1a7/" target="_blank" rel="noopener noreferrer">LinkedIn</a></li>
+          </ul>
+        </div>
+        <div>
+          <ul class="footer-links">
+            <li><strong>Legal</strong></li>
+              <li><a href="#">Privacy</a></li>
+              <li><a href="#">Terms</a></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="wide footer-bottom">
+      <span id="footerLegal">© <span id="year">2026</span> YUME Interactive. All rights reserved.</span>
+      <span id="footerTag">Built with plain HTML, CSS, and JavaScript.</span>
+    </div>
+  </footer>
+
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+  <script src="main.js" defer></script>
+  <script src="poll.js"></script>
+</body>
+</html>
