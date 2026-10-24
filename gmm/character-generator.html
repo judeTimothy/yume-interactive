@@ -569,6 +569,32 @@
   .saved-char-row button{padding:5px 9px;font-size:10.5px;}
   .modal-close{margin-top:14px;}
 
+  /* ---------- What's New ---------- */
+  .changelog-entry{margin-bottom:20px;}
+  .changelog-entry:last-child{margin-bottom:0;}
+  .changelog-entry h4{
+    font-family:var(--font-header);
+    font-size:14px;
+    letter-spacing:0.05em;
+    text-transform:uppercase;
+    color:var(--gold);
+    margin:0;
+  }
+  .changelog-date{
+    font-family:var(--font-header);
+    font-size:10px;
+    letter-spacing:0.08em;
+    color:var(--bone-dim);
+    text-transform:uppercase;
+  }
+  .changelog-entry ul{
+    margin:8px 0 0;
+    padding-left:18px;
+    font-size:13px;
+    color:var(--bone-dim);
+  }
+  .changelog-entry li{margin-bottom:4px;}
+
   /* ---------- Inventory ---------- */
   .inventory-list{
     display:grid;
@@ -816,7 +842,7 @@
     </div>
     <div class="title-block">
       <h1>Grace, Might &amp; Magicks</h1>
-      <div class="subtitle">Quick Character Generator · Public Playtest v0.4.5</div>
+      <div class="subtitle">Quick Character Generator · Public Playtest <span id="version-label">v0.4.5</span></div>
     </div>
   </header>
 
@@ -827,7 +853,7 @@
 
   <div class="toolbar no-print">
     <button class="primary" onclick="generateCharacter()">🎲 Generate Full Character</button>
-    <button onclick="exportJSON()">Copy JSON</button>
+    <button onclick="openWhatsNew()">📜 What's New</button>
   </div>
 
   <!-- ============ ACCOUNT / CLOUD SAVE ============ -->
@@ -845,6 +871,15 @@
       <h3>My Characters</h3>
       <div id="char-modal-list"><p class="fine">Loading…</p></div>
       <button class="modal-close" onclick="closeCharacterModal()">Close</button>
+    </div>
+  </div>
+
+  <!-- ============ WHAT'S NEW MODAL ============ -->
+  <div class="modal-backdrop no-print" id="whatsnew-backdrop" onclick="if(event.target===this)closeWhatsNew()">
+    <div class="modal">
+      <h3>What's New</h3>
+      <div id="whatsnew-list"></div>
+      <button class="modal-close" onclick="closeWhatsNew()">Close</button>
     </div>
   </div>
 
@@ -1083,6 +1118,52 @@ let SHOW_JSON_OUTPUT = false;
 function toggleJsonVisibility(){
   document.getElementById("json-block").style.display = SHOW_JSON_OUTPUT ? "block" : "none";
 }
+
+/*****************************************************************
+ * CHANGELOG — "What's New" popup
+ *
+ * To add a new release: paste a new object at the TOP of this list.
+ * The first entry is also used as the version label in the page
+ * header, so that's the only place you need to touch per update.
+ * Each string in notes becomes one bullet (basic HTML like <b> or
+ * <i> works; use &lt; for a literal "<").
+ *****************************************************************/
+
+const CHANGELOG = [
+  {
+    version: "v0.4.5",
+    date: "October 2026",
+    notes: [
+      "Replace this with what changed in v0.4.5.",
+      "One string per bullet."
+    ]
+  }
+  // Copy this template and paste it ABOVE the v0.4.5 entry:
+  // { version:"v0.4.6", date:"Month Year", notes:["...", "..."] },
+];
+
+function renderWhatsNew(){
+  document.getElementById("whatsnew-list").innerHTML = CHANGELOG.map(entry => `
+    <div class="changelog-entry">
+      <h4>${entry.version}</h4>
+      <div class="changelog-date">${entry.date || ""}</div>
+      <ul>${entry.notes.map(n => <li>${n}</li>).join("")}</ul>
+    </div>
+  `).join("");
+}
+
+function openWhatsNew(){
+  renderWhatsNew();
+  document.getElementById("whatsnew-backdrop").classList.add("open");
+}
+
+function closeWhatsNew(){
+  document.getElementById("whatsnew-backdrop").classList.remove("open");
+}
+
+document.addEventListener("keydown", e => {
+  if(e.key === "Escape") closeWhatsNew();
+});
 
 /*****************************************************************
  * DATA — transcribed from Grace, Might & Magicks, Public Playtest v0.4.5
@@ -1344,12 +1425,12 @@ const SRD_SPELLS = [
  * themselves. Three operations, per category:
  *
  *   add:      brand-new entries with no SRD counterpart
- *   override: replace an SRD entry by matching `name`
+ *   override: replace an SRD entry by matching name
  *             (falls back to an add if no SRD entry has that name)
- *   remove:   drop an SRD entry by `name`
+ *   remove:   drop an SRD entry by name
  *
  * Categories that take add/override/remove (array-of-objects,
- * matched by `name`): ancestries, backgrounds, occupations,
+ * matched by name): ancestries, backgrounds, occupations,
  * archetypes, weapons, armors, equipmentSets, spells
  *
  * Categories that take add/remove only (plain string lists):
@@ -1358,7 +1439,7 @@ const SRD_SPELLS = [
  * weaponTags, weaponTypes, and armorClasses are maps (key ->
  * definition/stat object), so each takes add/override (merged as key
  * overwrites) and remove (by key). weapons/armors items reference a
- * type/class key via their `type` field — adding a brand-new named
+ * type/class key via their type field — adding a brand-new named
  * weapon or armor piece to a Setting only requires an add on
  * weapons/armors if it reuses an existing type/class (e.g. another
  * Dagger); only add a new weaponTypes/armorClasses entry if you're
@@ -1457,7 +1538,7 @@ let NAMES, SURNAMES, ANCESTRIES, BACKGROUNDS, OCCUPATIONS, ARCHETYPES,
 let currentSettingKey = "SRD";
 
 // Sets the three typography CSS variables (--font-display, --font-header,
-// --font-body) from a Setting's `theme` block, falling back to SRD's
+// --font-body) from a Setting's theme block, falling back to SRD's
 // values for any key the Setting doesn't override. Called on every
 // applySetting() so switching Settings re-skins the whole page.
 function applyTheme(theme){
@@ -1742,9 +1823,9 @@ function populateSelect(id, list, key){
 
 function renderFeatureBox(elId, entry){
   document.getElementById(elId).innerHTML =
-    `<span class="fname">${entry.featureName}</span>${entry.featureText}<br>` +
-    (entry.hpTag ? `<span class="badge">${entry.hpTag} · ${entry.hp} Max HP</span>` : "") +
-    (entry.bonusTag ? `<span class="badge">${entry.bonusTag} · ${entry.hpBonus ? "+"+entry.hpBonus+" Max HP" : "+"+entry.evasionBonus+" Evasion"}</span>` : "");
+    <span class="fname">${entry.featureName}</span>${entry.featureText}<br> +
+    (entry.hpTag ? <span class="badge">${entry.hpTag} · ${entry.hp} Max HP</span> : "") +
+    (entry.bonusTag ? <span class="badge">${entry.bonusTag} · ${entry.hpBonus ? "+"+entry.hpBonus+" Max HP" : "+"+entry.evasionBonus+" Evasion"}</span> : "");
 }
 
 function renderWeaponTable(selected){
@@ -1752,10 +1833,10 @@ function renderWeaponTable(selected){
   const type = WEAPON_TYPES[weapon.type] || {};
   const box = document.getElementById("weapon-feature");
 
-  const statLine = `<span class="badge">Type: ${weapon.type}</span><span class="badge">Damage: ${type.damage}</span><span class="badge">Bonus: ${type.bonus}</span><span class="badge">Tag: ${type.tag}</span><span class="badge">${type.damageType} Damage</span>`;
+  const statLine = <span class="badge">Type: ${weapon.type}</span><span class="badge">Damage: ${type.damage}</span><span class="badge">Bonus: ${type.bonus}</span><span class="badge">Tag: ${type.tag}</span><span class="badge">${type.damageType} Damage</span>;
 
   if(type.tag === "—"){
-    box.innerHTML = `<span class="fname">${weapon.name}</span>${statLine}`;
+    box.innerHTML = <span class="fname">${weapon.name}</span>${statLine};
     return;
   }
   const tagNames = type.tag.split(",").map(t=>t.trim());
@@ -1764,22 +1845,22 @@ function renderWeaponTable(selected){
       <span class="fname">${tag}</span>${WEAPON_TAGS[tag] || ""}
     </div>
   `).join("");
-  box.innerHTML = `<span class="fname">${weapon.name}</span>${statLine}${tagDefs}`;
+  box.innerHTML = <span class="fname">${weapon.name}</span>${statLine}${tagDefs};
 }
 
 function renderArmorTable(selected){
   const armor = findBy(ARMORS, selected);
   const cls = ARMOR_CLASSES[armor.type] || {};
   const box = document.getElementById("armor-feature");
-  const statLine = `<span class="badge">Class: ${armor.type}</span><span class="badge">Armor Rating: ${cls.rating}</span><span class="badge">Evasion Bonus: ${cls.evasion}</span>`;
-  const special = cls.special !== "—" ? `<div style="margin-top:8px;">${cls.special}</div>` : "";
-  box.innerHTML = `<span class="fname">${armor.name}</span>${statLine}${special}`;
+  const statLine = <span class="badge">Class: ${armor.type}</span><span class="badge">Armor Rating: ${cls.rating}</span><span class="badge">Evasion Bonus: ${cls.evasion}</span>;
+  const special = cls.special !== "—" ? <div style="margin-top:8px;">${cls.special}</div> : "";
+  box.innerHTML = <span class="fname">${armor.name}</span>${statLine}${special};
 }
 
 function renderEquipmentSetBox(selected){
   const set = findBy(EQUIPMENT_SETS, selected);
   document.getElementById("equipmentSet-feature").innerHTML =
-    `<span class="fname">Contents</span>${set.items.join(", ")}`;
+    <span class="fname">Contents</span>${set.items.join(", ")};
 }
 
 /*****************************************************************
@@ -1837,7 +1918,7 @@ function renderSpells(){
   const list = document.getElementById("spell-list");
 
   if(known === 0){
-    note.innerHTML = `Magicks bonus is <strong>${formatBonus(magicksBonus)}</strong>. A Magicks bonus of +1 or higher is required to wield magicks — this character has no spells.`;
+    note.innerHTML = Magicks bonus is <strong>${formatBonus(magicksBonus)}</strong>. A Magicks bonus of +1 or higher is required to wield magicks — this character has no spells.;
     rerollField.style.display="none";
     list.innerHTML="";
     chosenSpells=[];
@@ -1847,9 +1928,9 @@ function renderSpells(){
   rerollField.style.display="flex";
   const safeCasts = known + safeCastBonusFromLevelUp();
   const safeCastNote = safeCastBonusFromLevelUp()
-    ? ` (${known} from Magicks bonus + ${safeCastBonusFromLevelUp()} from Tier features)`
+    ?  (${known} from Magicks bonus + ${safeCastBonusFromLevelUp()} from Tier features)
     : "";
-  note.innerHTML = `Magicks bonus is <strong>${formatBonus(magicksBonus)}</strong>${asiCount("Magicks") ? " (base "+stats.Magicks+" + "+asiCount("Magicks")+" ASI)" : ""}. Spells known: <strong>${known}</strong>. Safe casts: <strong>${safeCasts}</strong> per Long Downtime${safeCastNote}.`;
+  note.innerHTML = Magicks bonus is <strong>${formatBonus(magicksBonus)}</strong>${asiCount("Magicks") ? " (base "+stats.Magicks+" + "+asiCount("Magicks")+" ASI)" : ""}. Spells known: <strong>${known}</strong>. Safe casts: <strong>${safeCasts}</strong> per Long Downtime${safeCastNote}.;
 
   // trim or fill chosenSpells to match "known" count without unnecessary rerolls
   if(chosenSpells.length > known){
@@ -1865,14 +1946,14 @@ function renderSpells(){
   list.innerHTML = chosenSpells.map((s,i) => `
     <div class="spell-slot">
       <select onchange="changeSpell(${i}, this.value)">
-        ${SPELLS.map(sp => `<option value="${sp.name}" ${sp.name===s.name?'selected':''}>${sp.name} — ${sp.tradition}</option>`).join("")}
+        ${SPELLS.map(sp => <option value="${sp.name}" ${sp.name===s.name?'selected':''}>${sp.name} — ${sp.tradition}</option>).join("")}
       </select>
       <div class="feature-box" style="margin-left:0;margin-top:8px;margin-bottom:0;">
         <span class="fname" style="margin-bottom:0px">${s.name} · ${s.tradition}</span>
         <span class="badge">${s.statLabel}: ${s.statValue}</span>
         <span class="badge">Proximity: ${s.proximity}</span>
         <span class="badge">Roll: ${s.roll}</span>
-        ${spellDealsDamage(s) ? `<span class="badge">${s.damageType} Damage</span>` : ""}
+        ${spellDealsDamage(s) ? <span class="badge">${s.damageType} Damage</span> : ""}
         <span class="badge" style="margin-bottom:16px">Cost: ${s.cost}</span><br>
 		${s.description}
       </div>
@@ -1980,7 +2061,7 @@ function rerollName(){
   const firstName = randomItem(NAMES);
   const surName = randomItem(SURNAMES);
   
-  document.getElementById("name").value = `${firstName} ${surName}`;
+  document.getElementById("name").value = ${firstName} ${surName};
   updateCharacter();
 }
 
@@ -2075,7 +2156,7 @@ function updateCharacter(){
 
   character.abilityScores = { ...stats };
 
-  character.spellsKnown = chosenSpells.map(s => `${s.name} (${s.tradition})`);
+  character.spellsKnown = chosenSpells.map(s => ${s.name} (${s.tradition}));
   character.safeCasts = derived.safeCasts;
 
   character.equipment = {
@@ -2119,7 +2200,7 @@ function syncBackstoryDisplay(){
   const value = textarea.value;
   document.getElementById("d-backstory-print").textContent = value;
   const counter = document.getElementById("backstory-counter");
-  if(counter) counter.textContent = `${value.length} / ${BACKSTORY_CHAR_CAP} characters`;
+  if(counter) counter.textContent = ${value.length} / ${BACKSTORY_CHAR_CAP} characters;
 }
 
 function onBackstoryInput(){
@@ -2132,9 +2213,9 @@ function makeCircleTrack(count, max){
   let circles = "";
   for(let i=0;i<max;i++){
     const stateClass = i < active ? "active" : "inactive";
-    circles += `<span class="circle ${stateClass}" onclick="this.classList.toggle('filled')"></span>`;
+    circles += <span class="circle ${stateClass}" onclick="this.classList.toggle('filled')"></span>;
   }
-  return `<div class="circle-track">${circles}</div>`;
+  return <div class="circle-track">${circles}</div>;
 }
 
 // Converts the internal {Ability:{Tier:featureIndex}} picks into
@@ -2247,7 +2328,7 @@ function renderLevelUpTracker(){
   const available = availableLevelUpPoints();
 
   const badge = document.getElementById("d-levelup-points");
-  badge.textContent = `Points: ${spent} / ${available}`;
+  badge.textContent = Points: ${spent} / ${available};
   badge.classList.toggle("full", spent >= available);
 
   container.innerHTML = abilities.map(ability => `
@@ -2259,9 +2340,9 @@ function renderLevelUpTracker(){
         const prevTier = TIER_ORDER[TIER_ORDER.indexOf(tierObj.tier)-1];
         let statusNote = "";
         if(!unlocked){
-          statusNote = ` <span class="no-print" style="opacity:0.6;">— locked (take Tier ${prevTier} first)</span>`;
+          statusNote =  <span class="no-print" style="opacity:0.6;">— locked (take Tier ${prevTier} first)</span>;
         } else if(picked === null && spent >= available){
-          statusNote = ` <span class="no-print" style="opacity:0.6;">— no points to spend</span>`;
+          statusNote =  <span class="no-print" style="opacity:0.6;">— no points to spend</span>;
         }
         return `
         <div class="tier-block">
@@ -2302,7 +2383,7 @@ function renderDossier(derived){
   document.getElementById("d-name").textContent = document.getElementById("name").value || "Unnamed";
   document.getElementById("d-level").textContent = document.getElementById("level").value;
   document.getElementById("d-subline").textContent =
-    `${ancestry.name} · ${background.name} · ${occupation.name} · ${archetype.name}`;
+    ${ancestry.name} · ${background.name} · ${occupation.name} · ${archetype.name};
 
   const graceEff = effectiveBonus("Grace");
   const mightEff = effectiveBonus("Might");
@@ -2314,15 +2395,15 @@ function renderDossier(derived){
   document.getElementById("d-abilities-row").innerHTML = `
     <div class="dossier-stat">
       <div class="v">${formatBonus(graceEff)}</div><div class="l">Grace</div>
-      ${graceASI ? `<div class="asi-note no-print">base ${stats.Grace} +${graceASI} ASI</div>` : ""}
+      ${graceASI ? <div class="asi-note no-print">base ${stats.Grace} +${graceASI} ASI</div> : ""}
     </div>
     <div class="dossier-stat">
       <div class="v">${formatBonus(mightEff)}</div><div class="l">Might</div>
-      ${mightASI ? `<div class="asi-note no-print">base ${stats.Might} +${mightASI} ASI</div>` : ""}
+      ${mightASI ? <div class="asi-note no-print">base ${stats.Might} +${mightASI} ASI</div> : ""}
     </div>
     <div class="dossier-stat">
       <div class="v">${formatBonus(magicksEff)}</div><div class="l">Magicks</div>
-      ${magicksASI ? `<div class="asi-note no-print">base ${stats.Magicks} +${magicksASI} ASI</div>` : ""}
+      ${magicksASI ? <div class="asi-note no-print">base ${stats.Magicks} +${magicksASI} ASI</div> : ""}
     </div>
   `;
 
@@ -2378,7 +2459,7 @@ function renderDossier(derived){
         <span class="badge">${s.statLabel}: ${s.statValue}</span>
         <span class="badge">Proximity: ${s.proximity}</span>
         <span class="badge">Roll: ${s.roll}</span>
-        ${spellDealsDamage(s) ? `<span class="badge">${s.damageType} Damage</span>` : ""}
+        ${spellDealsDamage(s) ? <span class="badge">${s.damageType} Damage</span> : ""}
         <span class="badge"style="margin-bottom:16px">Cost: ${s.cost}</span><br>
 		${s.description}
       </div>
@@ -2386,7 +2467,7 @@ function renderDossier(derived){
   }
 
   const weaponTagDefs = weaponType.tag === "—" ? "" :
-    weaponType.tag.split(",").map(t=>t.trim()).map(tag => `${tag}: ${WEAPON_TAGS[tag]||""}`).join(" ");
+    weaponType.tag.split(",").map(t=>t.trim()).map(tag => ${tag}: ${WEAPON_TAGS[tag]||""}).join(" ");
 
   document.getElementById("d-equipment").innerHTML = `
     <div class="dossier-entry">
@@ -2405,7 +2486,7 @@ function renderDossier(derived){
     <div class="fine" style="margin:0 0 12px;">${equipmentSet.name}</div>
     ${!inventoryUnlocked ? `
       <div class="inventory-locked-note">Choose an Equipment Set above to unlock inventory editing.</div>
-    ` : `
+     : 
       <div class="inventory-list">
         ${inventoryItems.map((item, i) => `
           <div class="inventory-item">
@@ -2424,9 +2505,15 @@ function renderDossier(derived){
   `;
 }
 
+// NOTE: exportJSON() is no longer wired to a button (the toolbar's
+// "Copy JSON" button was replaced by "What's New"). It's kept here so
+// it can be re-added later; to use it, add
+//   <button onclick="exportJSON()">Copy JSON</button>
+// back into the toolbar, or call it from the browser console.
 function exportJSON(){
   navigator.clipboard.writeText(JSON.stringify(character, null, 4));
-  const btn = event.target;
+  const btn = event && event.target;
+  if(!btn) return;
   const original = btn.textContent;
   btn.textContent = "Copied!";
   setTimeout(()=>{ btn.textContent = original; }, 1200);
@@ -2440,7 +2527,7 @@ function printCharacterSheet(){
   const rawName = document.getElementById("name").value.trim() || "Character";
   const safeName = rawName.replace(/[\\/:*?"<>|]/g, "").trim() || "Character";
   const originalTitle = document.title;
-  document.title = `${safeName} - Grace, Might & Magicks`;
+  document.title = ${safeName} - Grace, Might & Magicks;
 
   let restored = false;
   const restore = () => {
@@ -2528,7 +2615,7 @@ function refreshAccountBar(){
   const btnSave = document.getElementById("btn-save-cloud");
 
   if(currentUser){
-    status.innerHTML = `Signed in as <span class="user">${currentUser.displayName || currentUser.email}</span>`;
+    status.innerHTML = Signed in as <span class="user">${currentUser.displayName || currentUser.email}</span>;
     btnIn.style.display = "none";
     btnOut.style.display = "";
     btnMine.style.display = "";
@@ -2561,7 +2648,7 @@ function signOutOfGoogle(){
 }
 
 // Gathers everything needed to fully reconstruct the character later —
-// deliberately separate from the display-oriented `character` object,
+// deliberately separate from the display-oriented character object,
 // so cloud save stays reliable even if the dossier's JSON shape changes.
 function collectSaveState(){
   return {
@@ -2647,14 +2734,14 @@ function closeCharacterModal(){
 
 function loadCharacterListIntoModal(){
   const list = document.getElementById("char-modal-list");
-  if(!currentUser){ list.innerHTML = `<p class="fine">Sign in to see your saved characters.</p>`; return; }
+  if(!currentUser){ list.innerHTML = <p class="fine">Sign in to see your saved characters.</p>; return; }
 
-  list.innerHTML = `<p class="fine">Loading…</p>`;
+  list.innerHTML = <p class="fine">Loading…</p>;
   db.collection("users").doc(currentUser.uid).collection("characters")
     .get()
     .then(snapshot => {
       if(snapshot.empty){
-        list.innerHTML = `<p class="fine">No saved characters yet. Build one, then click "Save Character".</p>`;
+        list.innerHTML = <p class="fine">No saved characters yet. Build one, then click "Save Character".</p>;
         return;
       }
       list.innerHTML = snapshot.docs.map(doc => {
@@ -2672,7 +2759,7 @@ function loadCharacterListIntoModal(){
         </div>`;
       }).join("");
     })
-    .catch(err => { list.innerHTML = `<p class="fine">Couldn't load characters: ${err.message}</p>`; });
+    .catch(err => { list.innerHTML = <p class="fine">Couldn't load characters: ${err.message}</p>; });
 }
 
 function loadCharacterFromCloud(id){
@@ -2721,6 +2808,7 @@ renderLevelUpTracker();
 refreshAccountBar();
 document.getElementById("d-backstory").setAttribute("maxlength", BACKSTORY_CHAR_CAP);
 syncBackstoryDisplay();
+if(CHANGELOG.length) document.getElementById("version-label").textContent = CHANGELOG[0].version;
 applySetting("SRD");
 
 </script>
