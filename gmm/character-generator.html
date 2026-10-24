@@ -41,10 +41,8 @@
     --gold-dim:#8a7440;
     --ok:#5c7a52;
 
-    /* ---- Typography — driven per-Setting by applyTheme() in <script>.
-         A Setting can override any of these via its `theme` block;
-         SRD's values (medieval-fantasy grit) are the defaults below. ---- */
-    --font-display:'Lordish', 'Cinzel', serif;   /* Game title only */
+    /* ---- Typography ---- */
+    --font-display:'Lordish', 'Cinzel', serif;   /* Game title */
     --font-header:'Cinzel', serif;                /* Section headers, labels, badges, stat values */
     --font-body:'Vollkorn', serif;                 /* Prose, descriptions, feature text */
   }
@@ -770,12 +768,7 @@
       background:#fff;
       border-color:#999;
 
-      /* ---- TUNE THIS ----
-         Printed box height. Lower it if the sheet is spilling onto a
-         second page; raise it if there's empty space below the text.
-         Pairs with BACKSTORY_CHAR_CAP in the JS below — shrink
-         that too if you lower this, so players can't type more than
-         visibly fits. */
+    
       height:1.55in;
       overflow:hidden;
     }
@@ -1031,9 +1024,7 @@
         <textarea id="d-backstory" class="backstory-box no-print"
           placeholder="Backstory, personality, bonds, notes…"
           oninput="onBackstoryInput()" onchange="updateCharacter()"></textarea>
-        <!-- Static mirror shown only when printing, so the box's fixed
-             size (see .backstory-box CSS) reliably clips instead of
-             pushing the sheet onto a second page. -->
+        
         <div id="d-backstory-print" class="backstory-box print-only"></div>
       </div>
 	  
@@ -1072,9 +1063,7 @@
 
 </div>
 
-<!-- Firebase (Google Sign-In + Firestore cloud save). Safe to load even
-     before FIREBASE_CONFIG below is filled in — see the CLOUD SAVE
-     section further down for setup instructions. -->
+<!-- Firebase (Google Sign-In + Firestore cloud save) -->
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
@@ -1139,7 +1128,7 @@ const SRD_ANCESTRIES = [
   { name:"Orc", featureName:"Marked by War", featureText:"Once per scene, the first time you hit a target that has a history of war or battle, you deal 1 more damage.", hpTag:"Sturdy", hp:3 },
   { name:"Goblin", featureName:"Skittish", featureText:"Whenever you examine wreckage, ruins, refuse heap, or spoils of war, you know if it is poisoned or trapped. If someone else triggers a trap from those, you can immediately move out of the way.", hpTag:"Lean", hp:2 },
   { name:"Gnome", featureName:"Analytical", featureText:"Once per scene, you may ask the GM one yes/no question about a creature's nature, intent, or weakness.", hpTag:"Lean", hp:2 },
-  { name:"Beastkin", featureName:"Wild Instinct", featureText:"Once per scene, you are forewarned when conflict breaks out. You can move to reposition before everyone has made their move. This doesn't count against your movement.", hpTag:"Sturdy", hp:3 }
+  { name:"Beastkin", featureName:"Predator's Mark", featureText:"The first successfully hit you land in a scene marks your target. The next attack an ally makes against the marked target has Advantage. This is lost the moment that attack is made, hit or miss, or when the spotlight returns to you, whichever comes first.", hpTag:"Sturdy", hp:3 }
 ];
 
 const SRD_BACKGROUNDS = [
@@ -1172,7 +1161,7 @@ const SRD_ARCHETYPES = [
   { name:"Envoy", featureName:"Silver Accord", featureText:"When a conflict is about to lead to inevitable violence, attempt to talk down one specific individual. Once per scene, you can treat one failed roll as a success this way.", bonusTag:"Slick", hpBonus:0, evasionBonus:1 },
   { name:"Trickster", featureName:"Sleight of Circumstance", featureText:"Create a distraction that draws a target's attention onto you. Once per scene, you can immediately roll your Help die to any ally you can see after they roll.", bonusTag:"Slick", hpBonus:0, evasionBonus:1 },
   { name:"Herbalist", featureName:"Practiced Remedy", featureText:"When you perform a Healing action, heal an additional HP.", bonusTag:"Tough", hpBonus:2, evasionBonus:0 },
-  { name:"Adept", featureName:"Attuned Mind", featureText:"Once per Long Downtime, you can safely cast a spell without counting it against your safe casts.", bonusTag:"Tough", hpBonus:2, evasionBonus:0 }
+  { name:"Adept", featureName:"Attuned Mind", featureText:"Once per Long Downtime, you can safely cast one spell without spending any Safe Casts, whatever its cost.", bonusTag:"Tough", hpBonus:2, evasionBonus:0 }
 ];
 
 const SRD_EXPERTISE_EXAMPLES = [
@@ -1327,10 +1316,10 @@ const SRD_SPELLS = [
   { name:'Rewind', tradition:'Chronomancy', damageType:'Magical', statLabel:'Damage', statValue:'—', proximity:'Near', roll:'Spell Resist', cost:'1 Safe Cast', description:'Time briefly folds back around a creature within Near Proximity and it must make a Spell Resist Roll. If that creature just rolled a die and it fails to resist the spell, it must reroll that die and use the new result. A willing creature can choose to not resist the spell.' },
   { name:'Foresight', tradition:'Chronomancy', damageType:'Magical', statLabel:'Damage', statValue:'—', proximity:'Near', roll:'—', cost:'1 Safe Cast', description:'You share with a willing creature a glimpse of where their target will falter. They gain a +1 die bonus to their next Attack Roll or Spellcast Roll.' },
   { name:'Glamour', tradition:'Glamomancy', damageType:'Magical', statLabel:'Damage', statValue:'—', proximity:'Self', roll:'—', cost:'1 Safe Cast', description:'You alter your own appearance to resemble a specific person you have seen, until you dismiss the spell or it is dispelled. This alteration is not an illusion but you do not gain any specific traits, features, or abilities the person may possess.' },
-  { name:'Binding Word', tradition:'Desmomancy', damageType:'Magical', statLabel:'Damage', statValue:'—', proximity:'Near', roll:'—', cost:'2 Safe Casts', description:'A target you can see within reasonable Proximity must make a Spell Resist Roll against your Magicks bonus. If it fails to resist the spell, the target loses its strength to raise its hand to harm another creature as their next action.' },
+  { name:'Binding Word', tradition:'Desmomancy', damageType:'Magical', statLabel:'Damage', statValue:'—', proximity:'Near', roll:'Spell Resist', cost:'2 Safe Casts', description:'A target you can see within reasonable Proximity must make a Spell Resist Roll against your Magicks bonus. If it fails to resist the spell, the target loses its strength to raise its hand to harm another creature as their next action.' },
   { name:'Mirror Step', tradition:'Glamomancy', damageType:'Magical', statLabel:'Damage', statValue:'—', proximity:'Self', roll:'—', cost:'3 Safe Casts', description:'You conjure a flickering illusory duplicate of yourself. The next attack made against you automatically targets the duplicate instead, unless the strike is a critical hit. The duplicate then dissolves.' },
   { name:'Anchor', tradition:'Gravimancy', damageType:'Magical', statLabel:'Damage', statValue:'—', proximity:'Self', roll:'—', cost:'1 Safe Cast', description:'You alter the gravity around you. Until your next action, you cannot be moved, pushed, or knocked Prone against your will. Your movement becomes 0 and you take a -1 penalty to Evasion (cannot go below 0).' },
-  { name:'Crush', tradition:'Gravimancy', damageType:'Magical', statLabel:'Damage', statValue:'3', proximity:'Near', roll:'—', cost:'2 Safe Casts', description:'You alter the gravity around a creature or object you can see within reasonable Proximity. The creature makes a Spell Resist against your Magicks bonus. Any creature within Melee Proximity of the target must make the same Spell Resist. On a failure, the affected creature takes 3 damage and is slowed until their next action.' },
+  { name:'Crush', tradition:'Gravimancy', damageType:'Magical', statLabel:'Damage', statValue:'3', proximity:'Near', roll:'Spell Resist', cost:'2 Safe Casts', description:'You alter the gravity around a creature or object you can see within reasonable Proximity. The creature makes a Spell Resist against your Magicks bonus. Any creature within Melee Proximity of the target must make the same Spell Resist. On a failure, the affected creature takes 3 damage and is slowed until their next action.' },
   { name:'Incinerate', tradition:'Pyromancy', damageType:'Magical', statLabel:'Damage', statValue:'3', proximity:'Close', roll:'Spellcast', cost:'2 Safe Casts', description:'You unleash a cone of fire in front of you, striking all creatures within Close Proximity. You must make a separate Spellcast Roll for each affected creature. On a crit, the affected creature is Burning.' },
   { name:'Immolate', tradition:'Pyromancy', damageType:'Magical', statLabel:'Damage', statValue:'—', proximity:'Self', roll:'—', cost:'1 Safe Cast', description:'You set yourself ablaze and are now Burning. For each of your actions while Burning, you gain +1 Armor, up to a maximum equal to your Magicks bonus. You can smother the flames yourself at any given time. The Armor bonus dissipates the moment Burning ends, by any means. You cannot cast this spell while under the effects of Stoneguard.' },
   { name:'Quicksand', tradition:'Geomancy', damageType:'Magical', statLabel:'Damage', statValue:'—', proximity:'Near', roll:'—', cost:'1 Safe Cast', description:'You choose a point within Near Proximity and conjure a patch of quicksand covering the area within Close Proximity of that point. The terrain becomes unstable and whenever a creature enters or ends its movement within the quicksand, it makes a Might Ability Roll against your Magicks bonus. On a failure, the creature becomes Restrained. You and others that resisted the spell may move across the terrain as if you were slowed. This spell permanently alters the terrain.' },
@@ -1599,7 +1588,7 @@ const TIER_TREE = {
     { tier:'I', features:[
       { name:'Spellblade', text:'When you make a weapon attack immediately after casting a spell on your previous action, gain +1 die on that attack.' },
       { name:'Ritualist', text:'Spells that would normally require a Spellcast Roll outside combat automatically succeed if you have sufficient time and there is no immediate danger.' },
-      { name:'Efficient Casting', text:'The first spell you cast each scene does not count against your safe casting limit.' },
+      { name:'Efficient Casting', text:'The first spell you cast each scene costs 1 fewer Safe Cast.' },
       { name:'Arcane Insight', text:'You can now add your Magicks bonus to Knowledge and Investigation Challenges.' },
     ]},
     { tier:'II', features:[
