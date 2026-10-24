@@ -8,16 +8,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700&family=Vollkorn:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
 <style>
-  /* ---- LORDISH SETUP ----
-     Lordish (Creative Media Lab) is used for the game title only — it's
-     free for personal use but requires a paid commercial license for
-     public/web use: https://creativemarket.com/creativemedialab/3746233-Lordish
-     Once licensed, drop the webfont files (woff2 preferred) in a
-     ./fonts/ folder next to this HTML file, named to match below, and
-     this will pick them up automatically. Until then, the fallback
-     stack (Cinzel, serif) is used so the title still looks intentional
-     rather than broken.
-  */
+
   @font-face{
     font-family:'Lordish';
     src: url('./fonts/Lordish-Regular.woff2') format('woff2'),
@@ -570,6 +561,20 @@
   .modal-close{margin-top:14px;}
 
   /* ---------- What's New ---------- */
+  #btn-whatsnew{position:relative;}
+  .notify-dot{
+    display:none;
+    position:absolute;
+    top:-6px;
+    right:-6px;
+    width:12px;
+    height:12px;
+    background:#d93a2b;
+    border:2px solid var(--ink);
+    border-radius:50%;
+    box-shadow:0 0 6px rgba(217,58,43,0.7);
+  }
+  #btn-whatsnew.has-new .notify-dot{display:block;}
   .changelog-entry{margin-bottom:20px;}
   .changelog-entry:last-child{margin-bottom:0;}
   .changelog-entry h4{
@@ -695,9 +700,6 @@
     word-wrap:break-word;
     resize:vertical;
 
-    /* ---- TUNE THIS ----
-       Screen-editing height. Change freely; it has no effect on the
-       printed page (the print-only mirror below controls that). */
     height:126px;
   }
   .print-only{display:none;}
@@ -853,7 +855,7 @@
 
   <div class="toolbar no-print">
     <button class="primary" onclick="generateCharacter()">🎲 Generate Full Character</button>
-    <button onclick="openWhatsNew()">📜 What's New</button>
+    <button id="btn-whatsnew" onclick="openWhatsNew()">📜 What's New<span class="notify-dot"></span></button>
   </div>
 
   <!-- ============ ACCOUNT / CLOUD SAVE ============ -->
@@ -1055,7 +1057,6 @@
       <div class="dossier-block" id="d-backstory-block">
         <h3>Backstory &amp; Details</h3>
         <div class="fine no-print" id="backstory-counter" style="margin-bottom:6px;"></div>
-        <!-- Editable on screen; hidden when printing. -->
         <textarea id="d-backstory" class="backstory-box no-print"
           placeholder="Backstory, personality, bonds, notes…"
           oninput="onBackstoryInput()" onchange="updateCharacter()"></textarea>
@@ -1106,12 +1107,8 @@
 <script>
 
 /*****************************************************************
- * CONFIG
- *
- * Set to true to show the raw JSON output block by default.
- * Can also be flipped from the browser console at any time:
- *   SHOW_JSON_OUTPUT = true; toggleJsonVisibility();
- *****************************************************************/
+* CONFIG
+*****************************************************************/
 
 let SHOW_JSON_OUTPUT = false;
 
@@ -1121,12 +1118,6 @@ function toggleJsonVisibility(){
 
 /*****************************************************************
  * CHANGELOG — "What's New" popup
- *
- * To add a new release: paste a new object at the TOP of this list.
- * The first entry is also used as the version label in the page
- * header, so that's the only place you need to touch per update.
- * Each string in notes becomes one bullet (basic HTML like <b> or
- * <i> works; use &lt; for a literal "<").
  *****************************************************************/
 
 const CHANGELOG = [
@@ -1134,27 +1125,100 @@ const CHANGELOG = [
     version: "v0.4.5",
     date: "October 2026",
     notes: [
-      "Replace this with what changed in v0.4.5.",
-      "One string per bullet."
+      "Short Downtime takes 1 hour of in-game time. You can gain benefits from this type of rest as much as your level per day. Refreshes after a Long Downtime.",
+      "Long Downtime takes 8 hours of in-game time. You can only benefit from this type of rest once every 24 hours.",
+      "Efficient Casting now explicitly states that the first spell you cast each scene costs one fewer Safe Cast.",
+      "Attuned Mind now explicitly states that you can cast a spell without using any Safe Casts regardless of cost once per Long Downtime.",
+      "Beastkin Wild Instinct replaced with Predator's Mark."
+    ],
+    
+    /*
+    version: "v0.4.6",
+    date: "October 2026",
+    notes: [
+      "Short Downtime takes 1 hour of in-game time. You can gain benefits from this type of rest as much as your level per day. Refreshes after a Long Downtime.",
+      "Long Downtime takes 8 hours of in-game time. You can only benefit from this type of rest once every 24 hours.",
+      "Efficient Casting now explicitly states that the first spell you cast each scene costs one fewer Safe Cast.",
+      "Attuned Mind now explicitly states that you can cast a spell without using any Safe Casts regardless of cost once per Long Downtime.",
+      "Beastkin Wild Instinct replaced with Predator's Mark."
     ]
+    */
   }
-  // Copy this template and paste it ABOVE the v0.4.5 entry:
-  // { version:"v0.4.6", date:"Month Year", notes:["...", "..."] },
 ];
 
 function renderWhatsNew(){
-  document.getElementById("whatsnew-list").innerHTML = CHANGELOG.map(entry => `
-    <div class="changelog-entry">
-      <h4>${entry.version}</h4>
-      <div class="changelog-date">${entry.date || ""}</div>
-      <ul>${entry.notes.map(n => <li>${n}</li>).join("")}</ul>
-    </div>
-  `).join("");
+  var html = "";
+  for(var i = 0; i < CHANGELOG.length; i++){
+    var entry = CHANGELOG[i];
+    html += '<div class="changelog-entry">';
+    html += '<h4>' + entry.version + '</h4>';
+    html += '<div class="changelog-date">' + (entry.date || "") + '</div>';
+    html += '<ul>';
+    for(var j = 0; j < entry.notes.length; j++){
+      html += '<li>' + entry.notes[j] + '</li>';
+    }
+    html += '</ul></div>';
+  }
+  document.getElementById("whatsnew-list").innerHTML = html;
+}
+
+
+const WHATSNEW_SEEN_KEY = "gmm_whatsnew_seen";
+let firestoreSeen = null;   
+let seenState = "none";     
+
+function getLocalSeen(){
+  try { return localStorage.getItem(WHATSNEW_SEEN_KEY); }
+  catch(e){ return null; }
+}
+
+function getSeenVersion(){
+  var local = getLocalSeen();
+  if(currentUser){
+    if(seenState === "loading") return CHANGELOG[0].version;
+    if(seenState === "ok") return firestoreSeen || local;
+  }
+  return local;
+}
+
+function setSeenVersion(v){
+  try { localStorage.setItem(WHATSNEW_SEEN_KEY, v); }
+  catch(e){  }
+  if(currentUser && db){
+    firestoreSeen = v;
+    db.collection("users").doc(currentUser.uid)
+      .set({ whatsNewSeen: v }, { merge: true })
+      .catch(function(){});
+  }
+}
+
+function loadSeenFromCloud(){
+  if(!currentUser || !db) return;
+  seenState = "loading";
+  db.collection("users").doc(currentUser.uid).get()
+    .then(function(doc){
+      firestoreSeen = (doc.exists && doc.data().whatsNewSeen) || null;
+      seenState = "ok";
+      refreshWhatsNewBadge();
+    })
+    .catch(function(){
+      seenState = "failed";
+      refreshWhatsNewBadge();
+    });
+}
+
+function refreshWhatsNewBadge(){
+  var btn = document.getElementById("btn-whatsnew");
+  if(!btn || !CHANGELOG.length) return;
+  var isNew = getSeenVersion() !== CHANGELOG[0].version;
+  btn.classList.toggle("has-new", isNew);
 }
 
 function openWhatsNew(){
   renderWhatsNew();
   document.getElementById("whatsnew-backdrop").classList.add("open");
+  if(CHANGELOG.length) setSeenVersion(CHANGELOG[0].version);
+  refreshWhatsNewBadge();
 }
 
 function closeWhatsNew(){
@@ -1251,13 +1315,6 @@ const SRD_EXPERTISE_EXAMPLES = [
   "Riverboat Navigation","Beast Taming","Forgery","Court Etiquette","Bell-Diving"
 ];
 
-// Weapon TYPES are the mechanical templates (damage, ability bonus, tag) —
-// unchanged from prior versions. SRD_WEAPONS below is the actual pick list
-// shown to players: real, named weapons, each tagged with the type it
-// inherits its stats from. This mirrors the book's own stated design
-// (a "Sidearm" is explicitly a template that could just as easily be a
-// dao, arming sword, or kriegsmesser with identical stats) — we're just
-// pre-filling that reflavoring step instead of leaving it to the player.
 const SRD_WEAPON_TYPES = {
   "Unarmed": { damage:"+0", bonus:"Might", tag:"—", damageType:"Physical" },
   "Improvised": { damage:"+1", bonus:"Might", tag:"Improvised", damageType:"Physical" },
@@ -1273,9 +1330,7 @@ const SRD_WEAPON_TYPES = {
 };
 
 const SRD_WEAPONS = [
-  // Unarmed / Improvised aren't real gear choices — they're fallback
-  // states (your fists, or whatever's lying around) — so each stays a
-  // single generic entry rather than a curated list.
+
   { name:"Bare Fists", type:"Unarmed" },
   { name:"Improvised Weapon", type:"Improvised" },
 
@@ -1328,9 +1383,6 @@ const SRD_WEAPON_TAGS = {
   "Misfire": "Rolling a 1 counts against your successes. If this makes you miss your attack, the weapon misfires and you receive 1 HP damage. The weapon is now broken and cannot be used until repaired during Downtime."
 };
 
-// Armor CLASSES are the mechanical templates (rating, evasion, special) —
-// SRD_ARMORS below is the pick list of real, named armor, each tagged
-// with the class it inherits its stats from. Same reasoning as weapons.
 const SRD_ARMOR_CLASSES = {
   "Clothing": { rating:0, evasion:"+1", special:"—" },
   "Light Armor": { rating:1, evasion:"0", special:"—" },
@@ -1418,46 +1470,13 @@ const SRD_SPELLS = [
 
 /*****************************************************************
  * SETTINGS SYSTEM
- *
- * Everything above is the SRD (System Reference Document) — the
- * game's default baseline. A Setting layers changes on top of the
- * SRD for one or more categories, without touching the SRD arrays
- * themselves. Three operations, per category:
- *
- *   add:      brand-new entries with no SRD counterpart
- *   override: replace an SRD entry by matching name
- *             (falls back to an add if no SRD entry has that name)
- *   remove:   drop an SRD entry by name
- *
- * Categories that take add/override/remove (array-of-objects,
- * matched by name): ancestries, backgrounds, occupations,
- * archetypes, weapons, armors, equipmentSets, spells
- *
- * Categories that take add/remove only (plain string lists):
- * expertiseExamples, names, surnames
- *
- * weaponTags, weaponTypes, and armorClasses are maps (key ->
- * definition/stat object), so each takes add/override (merged as key
- * overwrites) and remove (by key). weapons/armors items reference a
- * type/class key via their type field — adding a brand-new named
- * weapon or armor piece to a Setting only requires an add on
- * weapons/armors if it reuses an existing type/class (e.g. another
- * Dagger); only add a new weaponTypes/armorClasses entry if you're
- * introducing a mechanically new category.
- *
- * The SRD setting itself has an empty overlay — it IS the baseline.
- * Add new settings to the SETTINGS object below; nothing else in
- * the file needs to change to pick them up.
  *****************************************************************/
 
 const SETTINGS = {
   SRD: {
     label: "System Reference Document (SRD)",
     overlays: {},
-    // Default typography — medieval-fantasy grit. A Setting can override
-    // any of these keys; unset keys fall back to SRD's values below.
-    // display: the game title only. header: section headers, labels,
-    // badges, stat values. body: prose and descriptions.
+
     theme: {
       display: "'Lordish', 'Cinzel', serif",
       header: "'Cinzel', serif",
@@ -1528,19 +1547,13 @@ function mergeStrings(base, overlay){
   }
   return result;
 }
-
-// Active (currently selected setting's) data — every render function
-// in this file reads from these, never from the SRD_* arrays directly.
 let NAMES, SURNAMES, ANCESTRIES, BACKGROUNDS, OCCUPATIONS, ARCHETYPES,
     EXPERTISE_EXAMPLES, WEAPONS, WEAPON_TYPES, WEAPON_TAGS, ARMORS, ARMOR_CLASSES, EQUIPMENT_SETS,
     SPELLS, FIELD_DATA;
 
 let currentSettingKey = "SRD";
 
-// Sets the three typography CSS variables (--font-display, --font-header,
-// --font-body) from a Setting's theme block, falling back to SRD's
-// values for any key the Setting doesn't override. Called on every
-// applySetting() so switching Settings re-skins the whole page.
+
 function applyTheme(theme){
   const merged = { ...SETTINGS.SRD.theme, ...(theme || {}) };
   const root = document.documentElement.style;
@@ -1702,12 +1715,12 @@ const TIER_TREE = {
 const STAT_ARRAY = ["+2","+1","-1"];
 let stats = { Grace:"+2", Might:"+1", Magicks:"-1" };
 let chosenSpells = [];
-let inventoryItems = [];        // mutable per-character list, seeded from the chosen Equipment Set
-let inventoryUnlocked = false;  // true once an Equipment Set (Set A/B) has actually been chosen
+let inventoryItems = [];        
+let inventoryUnlocked = false;  
 
 const TIER_ORDER = ["I","II","III","IV","V"];
 
-// levelUpPicks[Ability][Tier] = feature index chosen at that tier, or null
+
 function freshLevelUpPicks(){
   const picks = {};
   ["Grace","Might","Magicks"].forEach(ability=>{
@@ -1745,8 +1758,6 @@ function escapeAttr(str){
     .replace(/>/g, "&gt;");
 }
 
-// Counts "Ability Score Improvement" picks taken for a given ability
-// (only Tier II and Tier V offer it, so this is 0, 1, or 2).
 function asiCount(ability){
   let count = 0;
   TIER_ORDER.forEach(tier=>{
@@ -1760,8 +1771,7 @@ function asiCount(ability){
   return count;
 }
 
-// The number that actually matters at the table: base stat + any
-// Ability Score Improvement picks for that ability.
+
 function effectiveBonus(ability){
   return bonusOf(stats[ability]) + asiCount(ability);
 }
@@ -1770,15 +1780,12 @@ function formatBonus(n){
   return n >= 0 ? "+"+n : ""+n;
 }
 
-// A spell "deals damage" for badge purposes only when it actually has a
-// damage number attached — not every Damage-labeled entry does (many are
-// debuffs/utility that share the label per the book's existing Damage/Heal
-// taxonomy but carry "—" as a placeholder statValue).
+
 function spellDealsDamage(s){
   return s.statLabel === "Damage" && s.statValue !== "—";
 }
 
-// Returns the feature name picked at a given Ability/Tier, or null if none.
+
 function featurePickedAt(ability, tier){
   const idx = levelUpPicks[ability][tier];
   if(idx === null) return null;
@@ -1786,7 +1793,7 @@ function featurePickedAt(ability, tier){
   return (tierObj && tierObj.features[idx]) ? tierObj.features[idx].name : null;
 }
 
-// Flat HP bonus from specific Might Tier features (Hardy +1, Juggernaut +2).
+
 function hpBonusFromLevelUp(){
   let bonus = 0;
   if(featurePickedAt("Might","I") === "Hardy") bonus += 1;
@@ -1794,8 +1801,7 @@ function hpBonusFromLevelUp(){
   return bonus;
 }
 
-// Flat Safe Cast bonus from specific Magicks Tier features
-// (Arcane Reservoir +1, Archmage +2) — on top of the Magicks-bonus-based total.
+
 function safeCastBonusFromLevelUp(){
   let bonus = 0;
   if(featurePickedAt("Magicks","III") === "Arcane Reservoir") bonus += 1;
@@ -1823,9 +1829,9 @@ function populateSelect(id, list, key){
 
 function renderFeatureBox(elId, entry){
   document.getElementById(elId).innerHTML =
-    <span class="fname">${entry.featureName}</span>${entry.featureText}<br> +
-    (entry.hpTag ? <span class="badge">${entry.hpTag} · ${entry.hp} Max HP</span> : "") +
-    (entry.bonusTag ? <span class="badge">${entry.bonusTag} · ${entry.hpBonus ? "+"+entry.hpBonus+" Max HP" : "+"+entry.evasionBonus+" Evasion"}</span> : "");
+    `<span class="fname">${entry.featureName}</span>${entry.featureText}<br>` +
+    (entry.hpTag ? `<span class="badge">${entry.hpTag} · ${entry.hp} Max HP</span>` : "") +
+    (entry.bonusTag ? `<span class="badge">${entry.bonusTag} · ${entry.hpBonus ? "+"+entry.hpBonus+" Max HP" : "+"+entry.evasionBonus+" Evasion"}</span>` : "");
 }
 
 function renderWeaponTable(selected){
@@ -1833,10 +1839,10 @@ function renderWeaponTable(selected){
   const type = WEAPON_TYPES[weapon.type] || {};
   const box = document.getElementById("weapon-feature");
 
-  const statLine = <span class="badge">Type: ${weapon.type}</span><span class="badge">Damage: ${type.damage}</span><span class="badge">Bonus: ${type.bonus}</span><span class="badge">Tag: ${type.tag}</span><span class="badge">${type.damageType} Damage</span>;
+  const statLine = `<span class="badge">Type: ${weapon.type}</span><span class="badge">Damage: ${type.damage}</span><span class="badge">Bonus: ${type.bonus}</span><span class="badge">Tag: ${type.tag}</span><span class="badge">${type.damageType} Damage</span>`;
 
   if(type.tag === "—"){
-    box.innerHTML = <span class="fname">${weapon.name}</span>${statLine};
+    box.innerHTML = `<span class="fname">${weapon.name}</span>${statLine}`;
     return;
   }
   const tagNames = type.tag.split(",").map(t=>t.trim());
@@ -1845,30 +1851,24 @@ function renderWeaponTable(selected){
       <span class="fname">${tag}</span>${WEAPON_TAGS[tag] || ""}
     </div>
   `).join("");
-  box.innerHTML = <span class="fname">${weapon.name}</span>${statLine}${tagDefs};
+  box.innerHTML = `<span class="fname">${weapon.name}</span>${statLine}${tagDefs}`;
 }
 
 function renderArmorTable(selected){
   const armor = findBy(ARMORS, selected);
   const cls = ARMOR_CLASSES[armor.type] || {};
   const box = document.getElementById("armor-feature");
-  const statLine = <span class="badge">Class: ${armor.type}</span><span class="badge">Armor Rating: ${cls.rating}</span><span class="badge">Evasion Bonus: ${cls.evasion}</span>;
-  const special = cls.special !== "—" ? <div style="margin-top:8px;">${cls.special}</div> : "";
-  box.innerHTML = <span class="fname">${armor.name}</span>${statLine}${special};
+  const statLine = `<span class="badge">Class: ${armor.type}</span><span class="badge">Armor Rating: ${cls.rating}</span><span class="badge">Evasion Bonus: ${cls.evasion}</span>`;
+  const special = cls.special !== "—" ? `<div style="margin-top:8px;">${cls.special}</div>` : "";
+  box.innerHTML = `<span class="fname">${armor.name}</span>${statLine}${special}`;
 }
 
 function renderEquipmentSetBox(selected){
   const set = findBy(EQUIPMENT_SETS, selected);
   document.getElementById("equipmentSet-feature").innerHTML =
-    <span class="fname">Contents</span>${set.items.join(", ")};
+    `<span class="fname">Contents</span>${set.items.join(", ")}`;
 }
 
-/*****************************************************************
- * INVENTORY (editable) — items start as a copy of the chosen
- * Equipment Set's contents, then the player can freely rename,
- * add, or remove items from there. Editing is only exposed once
- * an Equipment Set (Set A/B) has actually been selected.
- *****************************************************************/
 
 function resetInventoryFromSet(selected){
   const set = findBy(EQUIPMENT_SETS, selected);
@@ -1918,7 +1918,7 @@ function renderSpells(){
   const list = document.getElementById("spell-list");
 
   if(known === 0){
-    note.innerHTML = Magicks bonus is <strong>${formatBonus(magicksBonus)}</strong>. A Magicks bonus of +1 or higher is required to wield magicks — this character has no spells.;
+    note.innerHTML = `Magicks bonus is <strong>${formatBonus(magicksBonus)}</strong>. A Magicks bonus of +1 or higher is required to wield magicks — this character has no spells.`;
     rerollField.style.display="none";
     list.innerHTML="";
     chosenSpells=[];
@@ -1928,11 +1928,10 @@ function renderSpells(){
   rerollField.style.display="flex";
   const safeCasts = known + safeCastBonusFromLevelUp();
   const safeCastNote = safeCastBonusFromLevelUp()
-    ?  (${known} from Magicks bonus + ${safeCastBonusFromLevelUp()} from Tier features)
+    ? ` (${known} from Magicks bonus + ${safeCastBonusFromLevelUp()} from Tier features)`
     : "";
-  note.innerHTML = Magicks bonus is <strong>${formatBonus(magicksBonus)}</strong>${asiCount("Magicks") ? " (base "+stats.Magicks+" + "+asiCount("Magicks")+" ASI)" : ""}. Spells known: <strong>${known}</strong>. Safe casts: <strong>${safeCasts}</strong> per Long Downtime${safeCastNote}.;
+  note.innerHTML = `Magicks bonus is <strong>${formatBonus(magicksBonus)}</strong>${asiCount("Magicks") ? " (base "+stats.Magicks+" + "+asiCount("Magicks")+" ASI)" : ""}. Spells known: <strong>${known}</strong>. Safe casts: <strong>${safeCasts}</strong> per Long Downtime${safeCastNote}.`;
 
-  // trim or fill chosenSpells to match "known" count without unnecessary rerolls
   if(chosenSpells.length > known){
     chosenSpells = chosenSpells.slice(0, known);
   } else if(chosenSpells.length < known){
@@ -1946,14 +1945,14 @@ function renderSpells(){
   list.innerHTML = chosenSpells.map((s,i) => `
     <div class="spell-slot">
       <select onchange="changeSpell(${i}, this.value)">
-        ${SPELLS.map(sp => <option value="${sp.name}" ${sp.name===s.name?'selected':''}>${sp.name} — ${sp.tradition}</option>).join("")}
+        ${SPELLS.map(sp => `<option value="${sp.name}" ${sp.name===s.name?'selected':''}>${sp.name} — ${sp.tradition}</option>`).join("")}
       </select>
       <div class="feature-box" style="margin-left:0;margin-top:8px;margin-bottom:0;">
         <span class="fname" style="margin-bottom:0px">${s.name} · ${s.tradition}</span>
         <span class="badge">${s.statLabel}: ${s.statValue}</span>
         <span class="badge">Proximity: ${s.proximity}</span>
         <span class="badge">Roll: ${s.roll}</span>
-        ${spellDealsDamage(s) ? <span class="badge">${s.damageType} Damage</span> : ""}
+        ${spellDealsDamage(s) ? `<span class="badge">${s.damageType} Damage</span>` : ""}
         <span class="badge" style="margin-bottom:16px">Cost: ${s.cost}</span><br>
 		${s.description}
       </div>
@@ -1965,8 +1964,6 @@ function changeSpell(index, newName){
   const newSpell = SPELLS.find(sp => sp.name === newName);
   const oldSpell = chosenSpells[index];
 
-  // spells known must stay unique — if the new pick is already held in
-  // another slot, that slot takes the old spell instead (same pattern as stats)
   const dupIndex = chosenSpells.findIndex((s,i2) => i2!==index && s.name===newName);
   if(dupIndex !== -1){
     chosenSpells[dupIndex] = oldSpell;
@@ -2061,7 +2058,7 @@ function rerollName(){
   const firstName = randomItem(NAMES);
   const surName = randomItem(SURNAMES);
   
-  document.getElementById("name").value = ${firstName} ${surName};
+  document.getElementById("name").value = `${firstName} ${surName}`;
   updateCharacter();
 }
 
@@ -2093,18 +2090,12 @@ function computeDerived(){
 
   const hp = ancestry.hp + archetype.hpBonus + hpBonusFromLevelUp();
 
-  // Evasion = Grace bonus + Archetype bonus + Armor modifier.
-  // Medium Armor caps the Grace-bonus portion at +2 (applied before the
-  // archetype bonus is added). Heavy Armor drops total Evasion to 0,
-  // overriding everything else, including archetype bonuses.
   let graceContribution = graceBonus;
   if(armor.type === "Medium Armor") graceContribution = Math.min(graceContribution, 2);
   const armorFlatBonus = armor.type === "Clothing" ? 1 : 0;
   let evasion = graceContribution + archetype.evasionBonus + armorFlatBonus;
   if(armor.type === "Heavy Armor") evasion = 0;
 
-  // Safe Casts = spells-known baseline (Magicks bonus) + any flat
-  // bonuses from Arcane Reservoir (+1) / Archmage (+2).
   const safeCasts = Math.max(0, magicksBonus) + safeCastBonusFromLevelUp();
 
   return { hp, evasion, safeCasts };
@@ -2119,7 +2110,7 @@ function generateCharacter(){
 
   document.getElementById("level").value = "1";
   levelUpPicks = freshLevelUpPicks();
-  currentCharId = null; // A freshly generated character is a new, unsaved one.
+  currentCharId = null; 
 
   document.getElementById("d-backstory").value = "";
   syncBackstoryDisplay();
@@ -2143,7 +2134,7 @@ function generateCharacter(){
 
 function updateCharacter(){
   const derived = computeDerived();
-  renderSpells(); // keep spells known / safe casts in sync with any ASI changes before building the JSON below
+  renderSpells(); 
 
   character.name = document.getElementById("name").value;
   character.level = parseInt(document.getElementById("level").value, 10) || 1;
@@ -2156,7 +2147,7 @@ function updateCharacter(){
 
   character.abilityScores = { ...stats };
 
-  character.spellsKnown = chosenSpells.map(s => ${s.name} (${s.tradition}));
+  character.spellsKnown = chosenSpells.map(s => `${s.name} (${s.tradition})`);
   character.safeCasts = derived.safeCasts;
 
   character.equipment = {
@@ -2179,28 +2170,16 @@ function updateCharacter(){
   renderLevelUpTracker();
 }
 
-// The highest Max HP a character can ever reach: best Ancestry (3) +
-// best Archetype bonus (3) + Hardy (+1, Might Tier I) + Juggernaut
-// (+2, Might Tier V) = 9. Used so the HP circle track never runs out
-// of circles for a fully built-out character.
-const MAX_HP_CIRCLES = 9;
 
-// ---- TUNE THIS ----
-// Max characters allowed in the Backstory & Details box. Pairs with the
-// printed box's height (see .backstory-box in the print media query in
-// <style> above) — if text is getting clipped on the printed sheet,
-// lower this number (or raise that height) until a full box of text
-// fits without pushing onto a second page.
+const MAX_HP_CIRCLES = 9;
 const BACKSTORY_CHAR_CAP = 700;
 
-// Keeps the print-only mirror and the live character counter in sync
-// with whatever's currently typed in the backstory textarea.
 function syncBackstoryDisplay(){
   const textarea = document.getElementById("d-backstory");
   const value = textarea.value;
   document.getElementById("d-backstory-print").textContent = value;
   const counter = document.getElementById("backstory-counter");
-  if(counter) counter.textContent = ${value.length} / ${BACKSTORY_CHAR_CAP} characters;
+  if(counter) counter.textContent = `${value.length} / ${BACKSTORY_CHAR_CAP} characters`;
 }
 
 function onBackstoryInput(){
@@ -2213,14 +2192,11 @@ function makeCircleTrack(count, max){
   let circles = "";
   for(let i=0;i<max;i++){
     const stateClass = i < active ? "active" : "inactive";
-    circles += <span class="circle ${stateClass}" onclick="this.classList.toggle('filled')"></span>;
+    circles += `<span class="circle ${stateClass}" onclick="this.classList.toggle('filled')"></span>`;
   }
-  return <div class="circle-track">${circles}</div>;
+  return `<div class="circle-track">${circles}</div>`;
 }
 
-// Converts the internal {Ability:{Tier:featureIndex}} picks into
-// {Ability:{Tier:featureName}} for JSON export / cloud save, so saved
-// characters stay readable and stable even if TIER_TREE ordering changes.
 function levelUpPicksAsNames(){
   const out = {};
   Object.keys(levelUpPicks).forEach(ability=>{
@@ -2234,7 +2210,6 @@ function levelUpPicksAsNames(){
   return out;
 }
 
-// Reverse of levelUpPicksAsNames() — used when loading a saved character.
 function levelUpPicksFromNames(namedPicks){
   const picks = freshLevelUpPicks();
   if(!namedPicks) return picks;
@@ -2275,17 +2250,15 @@ function handleTierPick(ability, tier, featureIndex){
   const current = levelUpPicks[ability][tier];
 
   if(current === featureIndex){
-    // Deselecting — also clear any higher Tiers in this Ability, since their
-    // prerequisite (this Tier) is being removed.
     const idx = TIER_ORDER.indexOf(tier);
     levelUpPicks[ability][tier] = null;
     for(let i = idx+1; i < TIER_ORDER.length; i++){
       levelUpPicks[ability][TIER_ORDER[i]] = null;
     }
   } else {
-    if(!isTierUnlocked(ability, tier)) return; // Tier locked, ignore.
+    if(!isTierUnlocked(ability, tier)) return; 
     const spendingNewPoint = current === null;
-    if(spendingNewPoint && spentLevelUpPoints() >= availableLevelUpPoints()) return; // No points left.
+    if(spendingNewPoint && spentLevelUpPoints() >= availableLevelUpPoints()) return; 
     levelUpPicks[ability][tier] = featureIndex;
   }
 
@@ -2294,8 +2267,6 @@ function handleTierPick(ability, tier, featureIndex){
 }
 
 function trimLevelUpPicksToFit(){
-  // If the level was lowered and picks now exceed available points,
-  // trim from the highest Tier down until it fits.
   let guard = 0;
   while(spentLevelUpPoints() > availableLevelUpPoints() && guard < 100){
     guard++;
@@ -2328,7 +2299,7 @@ function renderLevelUpTracker(){
   const available = availableLevelUpPoints();
 
   const badge = document.getElementById("d-levelup-points");
-  badge.textContent = Points: ${spent} / ${available};
+  badge.textContent = `Points: ${spent} / ${available}`;
   badge.classList.toggle("full", spent >= available);
 
   container.innerHTML = abilities.map(ability => `
@@ -2340,9 +2311,9 @@ function renderLevelUpTracker(){
         const prevTier = TIER_ORDER[TIER_ORDER.indexOf(tierObj.tier)-1];
         let statusNote = "";
         if(!unlocked){
-          statusNote =  <span class="no-print" style="opacity:0.6;">— locked (take Tier ${prevTier} first)</span>;
+          statusNote = ` <span class="no-print" style="opacity:0.6;">— locked (take Tier ${prevTier} first)</span>`;
         } else if(picked === null && spent >= available){
-          statusNote =  <span class="no-print" style="opacity:0.6;">— no points to spend</span>;
+          statusNote = ` <span class="no-print" style="opacity:0.6;">— no points to spend</span>`;
         }
         return `
         <div class="tier-block">
@@ -2383,7 +2354,7 @@ function renderDossier(derived){
   document.getElementById("d-name").textContent = document.getElementById("name").value || "Unnamed";
   document.getElementById("d-level").textContent = document.getElementById("level").value;
   document.getElementById("d-subline").textContent =
-    ${ancestry.name} · ${background.name} · ${occupation.name} · ${archetype.name};
+    `${ancestry.name} · ${background.name} · ${occupation.name} · ${archetype.name}`;
 
   const graceEff = effectiveBonus("Grace");
   const mightEff = effectiveBonus("Might");
@@ -2395,15 +2366,15 @@ function renderDossier(derived){
   document.getElementById("d-abilities-row").innerHTML = `
     <div class="dossier-stat">
       <div class="v">${formatBonus(graceEff)}</div><div class="l">Grace</div>
-      ${graceASI ? <div class="asi-note no-print">base ${stats.Grace} +${graceASI} ASI</div> : ""}
+      ${graceASI ? `<div class="asi-note no-print">base ${stats.Grace} +${graceASI} ASI</div>` : ""}
     </div>
     <div class="dossier-stat">
       <div class="v">${formatBonus(mightEff)}</div><div class="l">Might</div>
-      ${mightASI ? <div class="asi-note no-print">base ${stats.Might} +${mightASI} ASI</div> : ""}
+      ${mightASI ? `<div class="asi-note no-print">base ${stats.Might} +${mightASI} ASI</div>` : ""}
     </div>
     <div class="dossier-stat">
       <div class="v">${formatBonus(magicksEff)}</div><div class="l">Magicks</div>
-      ${magicksASI ? <div class="asi-note no-print">base ${stats.Magicks} +${magicksASI} ASI</div> : ""}
+      ${magicksASI ? `<div class="asi-note no-print">base ${stats.Magicks} +${magicksASI} ASI</div>` : ""}
     </div>
   `;
 
@@ -2459,7 +2430,7 @@ function renderDossier(derived){
         <span class="badge">${s.statLabel}: ${s.statValue}</span>
         <span class="badge">Proximity: ${s.proximity}</span>
         <span class="badge">Roll: ${s.roll}</span>
-        ${spellDealsDamage(s) ? <span class="badge">${s.damageType} Damage</span> : ""}
+        ${spellDealsDamage(s) ? `<span class="badge">${s.damageType} Damage</span>` : ""}
         <span class="badge"style="margin-bottom:16px">Cost: ${s.cost}</span><br>
 		${s.description}
       </div>
@@ -2467,7 +2438,7 @@ function renderDossier(derived){
   }
 
   const weaponTagDefs = weaponType.tag === "—" ? "" :
-    weaponType.tag.split(",").map(t=>t.trim()).map(tag => ${tag}: ${WEAPON_TAGS[tag]||""}).join(" ");
+    weaponType.tag.split(",").map(t=>t.trim()).map(tag => `${tag}: ${WEAPON_TAGS[tag]||""}`).join(" ");
 
   document.getElementById("d-equipment").innerHTML = `
     <div class="dossier-entry">
@@ -2486,7 +2457,7 @@ function renderDossier(derived){
     <div class="fine" style="margin:0 0 12px;">${equipmentSet.name}</div>
     ${!inventoryUnlocked ? `
       <div class="inventory-locked-note">Choose an Equipment Set above to unlock inventory editing.</div>
-     : 
+    ` : `
       <div class="inventory-list">
         ${inventoryItems.map((item, i) => `
           <div class="inventory-item">
@@ -2505,11 +2476,7 @@ function renderDossier(derived){
   `;
 }
 
-// NOTE: exportJSON() is no longer wired to a button (the toolbar's
-// "Copy JSON" button was replaced by "What's New"). It's kept here so
-// it can be re-added later; to use it, add
-//   <button onclick="exportJSON()">Copy JSON</button>
-// back into the toolbar, or call it from the browser console.
+
 function exportJSON(){
   navigator.clipboard.writeText(JSON.stringify(character, null, 4));
   const btn = event && event.target;
@@ -2519,15 +2486,12 @@ function exportJSON(){
   setTimeout(()=>{ btn.textContent = original; }, 1200);
 }
 
-// Browsers pull the default filename for "Print → Save as PDF" from
-// document.title at the moment window.print() is called. We swap the
-// title in just for that moment, then put it back afterward so the
-// tab/header UI is unaffected.
+
 function printCharacterSheet(){
   const rawName = document.getElementById("name").value.trim() || "Character";
   const safeName = rawName.replace(/[\\/:*?"<>|]/g, "").trim() || "Character";
   const originalTitle = document.title;
-  document.title = ${safeName} - Grace, Might & Magicks;
+  document.title = `${safeName} - Grace, Might & Magicks`;
 
   let restored = false;
   const restore = () => {
@@ -2540,44 +2504,9 @@ function printCharacterSheet(){
 
   window.print();
 
-  // Safety net for browsers/flows that don't reliably fire 'afterprint'.
+
   setTimeout(restore, 1500);
 }
-
-/*****************************************************************
- * CLOUD SAVE — Google Sign-In + Firestore
- *
- * SETUP (one-time, do this before deploying):
- *   1. Go to https://console.firebase.google.com, create a project
- *      (free "Spark" plan is enough).
- *   2. Project Settings → General → "Your apps" → Add app → Web (</>).
- *      Copy the firebaseConfig object it gives you into FIREBASE_CONFIG
- *      below. This config is safe to leave public in client-side code —
- *      it's not a secret, access is controlled by the security rules
- *      in step 4.
- *   3. Authentication → Sign-in method → enable "Google".
- *      Authentication → Settings → Authorized domains → add your GitHub
- *      Pages domain (e.g. yourname.github.io) if it isn't there already.
- *   4. Firestore Database → Create database → start in production mode.
- *      Then go to the Rules tab and paste:
- *
- *        rules_version = '2';
- *        service cloud.firestore {
- *          match /databases/{database}/documents {
- *            match /users/{uid}/characters/{charId} {
- *              allow read, write: if request.auth != null && request.auth.uid == uid;
- *            }
- *          }
- *        }
- *
- *      This makes sure a signed-in player can only ever read or write
- *      their own saved characters.
- *
- *   Until FIREBASE_CONFIG is filled in, the Sign In button will just
- *   explain that cloud save isn't configured yet — everything else on
- *   the page works exactly as before (local-only, Copy JSON to keep a
- *   backup).
- *****************************************************************/
 
 const FIREBASE_CONFIG = {
   apiKey: "AIzaSyCY0tkVIUqGjO_6ayWJWLHNcRUpDls5VZ8",
@@ -2594,7 +2523,7 @@ const CLOUD_SAVE_CONFIGURED = FIREBASE_CONFIG.apiKey !== "YOUR_API_KEY";
 let auth = null;
 let db = null;
 let currentUser = null;
-let currentCharId = null; // Firestore doc id of the loaded/saved character, or null if unsaved.
+let currentCharId = null; 
 
 if(CLOUD_SAVE_CONFIGURED){
   firebase.initializeApp(FIREBASE_CONFIG);
@@ -2603,7 +2532,14 @@ if(CLOUD_SAVE_CONFIGURED){
   auth.onAuthStateChanged(user => {
     currentUser = user;
     refreshAccountBar();
-    if(user) loadCharacterListIntoModal();
+    if(user){
+      loadCharacterListIntoModal();
+      loadSeenFromCloud();
+    } else {
+      seenState = "none";
+      firestoreSeen = null;
+      refreshWhatsNewBadge();
+    }
   });
 }
 
@@ -2615,7 +2551,7 @@ function refreshAccountBar(){
   const btnSave = document.getElementById("btn-save-cloud");
 
   if(currentUser){
-    status.innerHTML = Signed in as <span class="user">${currentUser.displayName || currentUser.email}</span>;
+    status.innerHTML = `Signed in as <span class="user">${currentUser.displayName || currentUser.email}</span>`;
     btnIn.style.display = "none";
     btnOut.style.display = "";
     btnMine.style.display = "";
@@ -2647,9 +2583,6 @@ function signOutOfGoogle(){
   closeCharacterModal();
 }
 
-// Gathers everything needed to fully reconstruct the character later —
-// deliberately separate from the display-oriented character object,
-// so cloud save stays reliable even if the dossier's JSON shape changes.
 function collectSaveState(){
   return {
     settingKey: currentSettingKey,
@@ -2676,7 +2609,7 @@ function collectSaveState(){
 function restoreSaveState(data){
   if(data.settingKey && data.settingKey !== currentSettingKey){
     document.getElementById("setting").value = data.settingKey;
-    applySetting(data.settingKey, true); // true = don't auto-generate a random character
+    applySetting(data.settingKey, true); 
   }
 
   document.getElementById("name").value = data.name || "";
@@ -2734,14 +2667,14 @@ function closeCharacterModal(){
 
 function loadCharacterListIntoModal(){
   const list = document.getElementById("char-modal-list");
-  if(!currentUser){ list.innerHTML = <p class="fine">Sign in to see your saved characters.</p>; return; }
+  if(!currentUser){ list.innerHTML = `<p class="fine">Sign in to see your saved characters.</p>`; return; }
 
-  list.innerHTML = <p class="fine">Loading…</p>;
+  list.innerHTML = `<p class="fine">Loading…</p>`;
   db.collection("users").doc(currentUser.uid).collection("characters")
     .get()
     .then(snapshot => {
       if(snapshot.empty){
-        list.innerHTML = <p class="fine">No saved characters yet. Build one, then click "Save Character".</p>;
+        list.innerHTML = `<p class="fine">No saved characters yet. Build one, then click "Save Character".</p>`;
         return;
       }
       list.innerHTML = snapshot.docs.map(doc => {
@@ -2759,7 +2692,7 @@ function loadCharacterListIntoModal(){
         </div>`;
       }).join("");
     })
-    .catch(err => { list.innerHTML = <p class="fine">Couldn't load characters: ${err.message}</p>; });
+    .catch(err => { list.innerHTML = `<p class="fine">Couldn't load characters: ${err.message}</p>`; });
 }
 
 function loadCharacterFromCloud(id){
@@ -2809,6 +2742,7 @@ refreshAccountBar();
 document.getElementById("d-backstory").setAttribute("maxlength", BACKSTORY_CHAR_CAP);
 syncBackstoryDisplay();
 if(CHANGELOG.length) document.getElementById("version-label").textContent = CHANGELOG[0].version;
+refreshWhatsNewBadge();
 applySetting("SRD");
 
 </script>
