@@ -497,7 +497,7 @@ function refreshAccountBar(){
  * STATE
  *****************************************************************/
 const AFFINITY_LEVELS = ["Devoted","Friendly","Neutral","Wary","Hostile"];
-const QUEST_STATUSES = ["Active","Dormant","Resolved"];
+const QUEST_STATUSES = ["Active","Dormant","Resolved","Failed","Abandoned"];
 const LIFE_STATES = ["Alive","Dead","Unknown"];
 
 // Heat: derived per region from flagged NPCs' affinity toward each party member.
@@ -532,6 +532,8 @@ function badgeClassForAffinity(a){
 function badgeClassForQuestStatus(s){
   if(s==="Active") return "warn";
   if(s==="Resolved") return "";
+  if(s==="Failed") return "danger";
+  if(s==="Abandoned") return "muted-gold";
   return "dim";
 }
 function badgeClassForLife(l){
