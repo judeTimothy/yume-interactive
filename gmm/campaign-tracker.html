@@ -199,6 +199,8 @@
     transition:border-color .15s ease;
   }
   .cast-card:hover{border-color:var(--gold-dim);}
+  .cast-card.dead .cast-avatar img{filter:grayscale(1) brightness(.8);}
+  .cast-card.dead .cast-name{color:var(--bone-dim);}
   .cast-avatar{
     width:100%;aspect-ratio:1/1;border-radius:3px;overflow:hidden;
     background:#0c0a08;border:1px solid var(--line);position:relative;margin-bottom:8px;
@@ -212,29 +214,59 @@
     font-family:'Cormorant SC', serif;font-size:15px;letter-spacing:0.02em;color:var(--bone);
     text-transform:uppercase;margin-bottom:6px;line-height:1.2;
   }
+  .cast-badges{display:flex;gap:5px;justify-content:center;flex-wrap:wrap;}
+  .cast-level{font-family:'JetBrains Mono', monospace;font-size:10px;color:var(--bone-dim);margin-top:6px;letter-spacing:0.04em;}
 
-  /* ---------- Modal (cast detail / edit) ---------- */
+  /* ---------- Modal (wiki-style cast article) ---------- */
   .modal-backdrop{
     display:none;position:fixed;inset:0;background:rgba(0,0,0,0.65);z-index:50;
     align-items:flex-start;justify-content:center;padding:50px 16px;overflow-y:auto;
   }
   .modal-backdrop.open{display:flex;}
-  .modal{background:var(--panel);border:1px solid var(--line);border-radius:4px;max-width:560px;width:100%;padding:22px 24px;}
-  .modal-head{display:flex;gap:14px;align-items:center;margin-bottom:16px;padding-bottom:14px;border-bottom:1px solid var(--line);}
+  .modal{background:var(--panel);border:1px solid var(--line);border-radius:4px;max-width:780px;width:100%;padding:22px 26px;}
+  .modal-title-row{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;padding-bottom:10px;border-bottom:1px solid var(--line);margin-bottom:14px;}
+  .modal-name{font-family:'Cormorant SC', serif;font-size:28px;letter-spacing:0.03em;color:var(--bone);text-transform:uppercase;line-height:1.1;}
+  .modal-epithet{font-style:italic;color:var(--gold);font-size:14px;}
+  .modal-body{display:flow-root;}
   .modal-avatar{width:64px;height:64px;flex:0 0 auto;border-radius:3px;overflow:hidden;background:#0c0a08;border:1px solid var(--line);position:relative;}
   .modal-avatar img{width:100%;height:100%;object-fit:cover;display:block;}
   .modal-avatar .avatar-fallback{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:'Cormorant SC', serif;font-size:24px;color:var(--gold-dim);}
-  .modal-name{font-family:'Cormorant SC', serif;font-size:22px;letter-spacing:0.03em;color:var(--bone);text-transform:uppercase;}
-  .modal-name-edit{width:100%;font-size:16px;margin-bottom:6px;}
-  .modal h3{
-    font-family:'Cormorant SC', serif;font-size:14px;text-transform:uppercase;letter-spacing:0.06em;
-    color:var(--gold);margin:18px 0 10px;border-bottom:1px solid var(--line);padding-bottom:6px;
+  .modal-avatar.ib-portrait{width:100%;height:auto;aspect-ratio:1/1;margin-bottom:10px;}
+  .modal-avatar.ib-portrait .avatar-fallback{font-size:56px;}
+  .modal-avatar.is-dead img{filter:grayscale(1) brightness(.85);}
+
+  .infobox{
+    float:right;width:250px;margin:0 0 16px 22px;
+    background:#120f0c;border:1px solid var(--line);border-radius:4px;padding:12px;
   }
-  .modal h3:first-of-type{margin-top:0;}
+  .ib-caption{text-align:center;font-style:italic;font-size:12.5px;color:var(--gold);margin:-2px 0 10px;}
+  .ib-row{display:flex;justify-content:space-between;gap:10px;padding:5px 0;border-top:1px dashed var(--line);font-size:12.5px;}
+  .ib-row:first-of-type{border-top:none;}
+  .ib-row .ib-k{font-family:'JetBrains Mono', monospace;font-size:9.5px;text-transform:uppercase;letter-spacing:0.06em;color:var(--bone-dim);flex:0 0 auto;padding-top:2px;}
+  .ib-row .ib-v{text-align:right;color:var(--bone);min-width:0;word-wrap:break-word;}
+  .ib-field{display:flex;flex-direction:column;gap:3px;margin-bottom:8px;}
+  .ib-field label{font-family:'JetBrains Mono', monospace;font-size:9.5px;text-transform:uppercase;letter-spacing:0.06em;color:var(--bone-dim);}
+  .ib-field input, .ib-field select{width:100%;font-size:13px;padding:6px 8px;}
+
+  .modal h3{
+    font-family:'Cormorant SC', serif;font-size:15px;text-transform:uppercase;letter-spacing:0.06em;
+    color:var(--gold);margin:18px 0 10px;border-bottom:1px solid var(--line);padding-bottom:6px;
+    overflow:hidden;
+  }
+  .modal-body > h3:first-child{margin-top:0;}
   .modal-field{display:flex;flex-direction:column;gap:4px;margin-bottom:10px;}
   .modal-field label{font-family:'JetBrains Mono', monospace;font-size:10px;text-transform:uppercase;letter-spacing:0.06em;color:var(--bone-dim);}
   .modal-field input, .modal-field select, .modal-field textarea{width:100%;}
-  .affinity-general{display:flex;align-items:center;gap:10px;margin-bottom:14px;}
+  .wiki-text{font-size:14.5px;color:var(--bone);white-space:pre-wrap;word-wrap:break-word;}
+  .wiki-quote{border-left:2px solid var(--gold-dim);padding-left:12px;font-style:italic;color:var(--bone-dim);}
+
+  .moment-list{display:flex;flex-direction:column;gap:10px;border-left:1px solid var(--line);margin-left:4px;padding-left:14px;}
+  .moment{position:relative;font-size:13.5px;}
+  .moment::before{content:"";position:absolute;left:-19px;top:7px;width:8px;height:8px;border-radius:50%;background:var(--blood);}
+  .moment .m-session{font-family:'JetBrains Mono', monospace;font-size:10.5px;text-transform:uppercase;letter-spacing:0.05em;color:var(--gold);margin-right:8px;}
+  .moment-edit{display:grid;grid-template-columns:110px 1fr auto;gap:8px;align-items:start;}
+  .moment-edit input{width:100%;}
+
   .affinity-row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:6px 0;border-bottom:1px dashed var(--line);font-size:13px;}
   .affinity-row:last-child{border-bottom:none;}
   .affinity-row .an{color:var(--bone);}
@@ -243,7 +275,34 @@
   .modal-footer{display:flex;justify-content:space-between;align-items:center;margin-top:18px;gap:10px;}
   .modal-note{font-size:11px;color:var(--bone-dim);font-style:italic;}
 
-  /* ---------- Supplies ---------- */
+  /* ---------- Heat / regions ---------- */
+  .heat-box{margin-top:12px;padding-top:10px;border-top:1px solid var(--line);}
+  .heat-title{font-family:'JetBrains Mono', monospace;font-size:9.5px;text-transform:uppercase;letter-spacing:0.06em;color:var(--bone-dim);margin-bottom:8px;}
+  .heat-row{margin-bottom:12px;}
+  .heat-row:last-child{margin-bottom:0;}
+  .heat-top{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:5px;font-size:12.5px;}
+  .heat-region{color:var(--bone);min-width:0;word-wrap:break-word;}
+  .heat-bar{position:relative;height:8px;background:#0c0a08;border:1px solid var(--line);border-radius:2px;overflow:hidden;}
+  .heat-fill{height:100%;background:var(--ok);}
+  .heat-fill.t1{background:var(--gold-dim);}
+  .heat-fill.t2{background:var(--gold);}
+  .heat-fill.t3{background:var(--blood);}
+  .heat-fill.t4{background:var(--blood-bright);}
+  .heat-tick{position:absolute;top:0;bottom:0;width:1px;background:var(--ink);}
+  .heat-sub{font-family:'JetBrains Mono', monospace;font-size:10px;color:var(--bone-dim);margin-top:4px;line-height:1.4;}
+  .heat-adjust{display:flex;align-items:center;gap:8px;margin-top:6px;font-family:'JetBrains Mono', monospace;font-size:9.5px;text-transform:uppercase;letter-spacing:0.06em;color:var(--bone-dim);}
+  .heat-adjust input{width:70px;padding:4px 6px;font-size:12px;}
+  .badge.heat-b1{border-color:var(--gold-dim);color:var(--gold-dim);}
+  .badge.heat-b2{border-color:var(--gold);color:var(--gold);}
+  .badge.heat-b3{border-color:var(--blood-bright);color:var(--blood-bright);}
+  .badge.heat-b4{border-color:var(--blood-bright);background:var(--blood);color:#fff;}
+  .ib-check{display:flex;align-items:center;gap:8px;margin-bottom:8px;font-size:12.5px;color:var(--bone);cursor:pointer;}
+  .ib-check input{accent-color:var(--blood);}
+  .ib-note{font-size:11.5px;color:var(--bone-dim);font-style:italic;}
+  .region-row{display:grid;grid-template-columns:1fr auto;gap:8px;margin-bottom:8px;}
+  .region-row input{width:100%;}
+
+  /* ---------- Supplies / holdings tiles ---------- */
   .supplies-row{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;}
   .supply-stat{background:#120f0c;border:1px solid var(--line);border-radius:3px;padding:16px;text-align:center;}
   .supply-stat label{
@@ -260,6 +319,10 @@
     .entry-edit-grid{grid-template-columns:1fr;}
     .cast-grid{grid-template-columns:repeat(auto-fill, minmax(96px, 1fr));}
     header{flex-wrap:wrap;}
+    .infobox{float:none;width:100%;margin:0 0 16px 0;}
+    .moment-edit{grid-template-columns:1fr;}
+    .modal{padding:18px 16px;}
+    .modal-name{font-size:24px;}
   }
 </style>
 </head>
@@ -298,10 +361,11 @@
     <div class="empty-note" id="party-empty" style="display:none;">No party members logged yet.</div>
   </section>
 
-  <!-- ============ SUPPLIES ============ -->
-  <section data-step="Supplies">
-    <h2>Supplies</h2>
-    <div class="supplies-row" id="supplies-row"></div>
+  <!-- ============ REGIONS (edit mode only) ============ -->
+  <section data-step="Regions" class="edit-only" style="display:none;">
+    <h2>Regions <button class="ghost small add-btn" onclick="addRegion()">+ Add Region</button></h2>
+    <div id="region-list"></div>
+    <div class="empty-note" id="region-empty" style="display:none;">No regions yet. Add one, then assign NPCs to it to start tracking Heat.</div>
   </section>
 
   <!-- ============ NPCs & FACTIONS ============ -->
@@ -433,6 +497,30 @@ function refreshAccountBar(){
  *****************************************************************/
 const AFFINITY_LEVELS = ["Devoted","Friendly","Neutral","Wary","Hostile"];
 const QUEST_STATUSES = ["Active","Dormant","Resolved"];
+const LIFE_STATES = ["Alive","Dead","Unknown"];
+
+// Heat: derived per region from flagged NPCs' affinity toward each party member.
+// Only negative feelings add Heat; friendliness never erases a crime.
+const HEAT_POINTS = { Hostile:3, Wary:1, Neutral:0, Friendly:0, Devoted:0 };
+const HEAT_TIERS = [
+  { name:"Clean",    min:0 },
+  { name:"Noticed",  min:1 },
+  { name:"Wanted",   min:3 },
+  { name:"Hunted",   min:6 },
+  { name:"Infamous", min:9 }
+];
+
+// Text-area sections shown in the wiki article, in display order.
+// "notes" is the original Notes field, now presented as Background.
+const WIKI_SECTIONS = [
+  ["notes","Background"],
+  ["appearance","Appearance"],
+  ["personality","Personality"],
+  ["abilities","Abilities & Gear"],
+  ["goals","Goals"],
+  ["bonds","Bonds"],
+  ["fears","Fears"]
+];
 
 function badgeClassForAffinity(a){
   if(a==="Devoted"||a==="Friendly") return "";
@@ -445,13 +533,20 @@ function badgeClassForQuestStatus(s){
   if(s==="Resolved") return "";
   return "dim";
 }
+function badgeClassForLife(l){
+  if(l==="Dead") return "danger";
+  if(l==="Unknown") return "dim";
+  return "";
+}
+function hasNum(v){ return v !== "" && v !== null && v !== undefined && !isNaN(v); }
 
 function defaultState(){
   return {
     campaignName: "The Campaign",
     lastUpdated: null,
     party: [],
-    supplies: { food: 0, camp: 0, funds: 0 },
+    supplies: { food: 0, camp: 0, funds: 0 }, // legacy; stockpiles now live on NPC/faction entries
+    regions: [],
     npcs: [],
     quests: [],
     sessions: []
@@ -482,6 +577,7 @@ function mergeState(data){
   const merged = Object.assign(defaultState(), data || {});
   merged.supplies = Object.assign(defaultState().supplies, (data && data.supplies) || {});
   merged.party = Array.isArray(merged.party) ? merged.party : [];
+  merged.regions = Array.isArray(merged.regions) ? merged.regions : [];
   merged.npcs = Array.isArray(merged.npcs) ? merged.npcs : [];
   merged.quests = Array.isArray(merged.quests) ? merged.quests : [];
   merged.sessions = Array.isArray(merged.sessions) ? merged.sessions : [];
@@ -555,12 +651,12 @@ document.getElementById("campaign-name").addEventListener("blur", function(){
 /*****************************************************************
  * RENDER — CAST GRIDS (Party + NPCs)
  *****************************************************************/
-function avatarHtml(image, name, sizeClass){
+function avatarHtml(image, name, sizeClass, extraClass){
   const initials = (name||"?").trim().slice(0,1).toUpperCase() || "?";
   const img = image
     ? `<img src="${escapeAttr(image)}" alt="" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">`
     : "";
-  return `<div class="${sizeClass}">${img}<div class="avatar-fallback" style="${image?'display:none;':'display:flex;'}">${initials}</div></div>`;
+  return `<div class="${sizeClass}${extraClass ? " " + extraClass : ""}">${img}<div class="avatar-fallback" style="${image?'display:none;':'display:flex;'}">${initials}</div></div>`;
 }
 
 function renderCastGrid(type){
@@ -569,19 +665,31 @@ function renderCastGrid(type){
   const emptyId = type === "party" ? "party-empty" : "npc-empty";
   document.getElementById(emptyId).style.display = list.length ? "none" : "block";
 
-  document.getElementById(gridId).innerHTML = list.map(e => `
-    <div class="cast-card" onclick="openCastModal('${type}','${e.id}')">
+  document.getElementById(gridId).innerHTML = list.map(e => {
+    const life = e.life || "Alive";
+    return `
+    <div class="cast-card ${life==="Dead" ? "dead" : ""}" onclick="openCastModal('${type}','${e.id}')">
       ${avatarHtml(e.image, e.name, "cast-avatar")}
       <div class="cast-name">${escapeHtml(e.name) || "Unnamed"}</div>
-      <span class="badge ${badgeClassForAffinity(e.generalAffinity)}">${e.generalAffinity || "Neutral"}</span>
-    </div>
-  `).join("");
+      <div class="cast-badges">
+        ${type === "party" ? heatBadgeHtml(e) : `<span class="badge ${badgeClassForAffinity(e.generalAffinity)}">${e.generalAffinity || "Neutral"}</span>`}
+        ${life !== "Alive" ? `<span class="badge ${badgeClassForLife(life)}">${life}</span>` : ""}
+      </div>
+      ${hasNum(e.level) ? `<div class="cast-level">Lv ${e.level}</div>` : ""}
+    </div>`;
+  }).join("");
 }
 
 function addCast(type){
   listFor(type).push({
     id: uid(), name: "", image: "", role: "", status: "", notes: "",
-    generalAffinity: "Neutral", affinities: {}
+    generalAffinity: "Neutral", affinities: {},
+    epithet: "", fullName: "", aliases: "", player: "", age: "", homeland: "", affiliation: "",
+    level: "", life: "Alive", sessionsLasted: "", fate: "",
+    appearance: "", personality: "", abilities: "", goals: "", bonds: "", fears: "",
+    quotes: "", moments: [],
+    regionId: "", countsHeat: false, heatMods: {},
+    hasHoldings: false, holdings: { food: 0, camp: 0, funds: 0 }
   });
   renderCastGrid(type);
 }
@@ -598,9 +706,15 @@ function updateCastField(field, value){
   const e = findEntity(modalTarget.type, modalTarget.id);
   if(e) e[field] = value;
 }
+function updateCastNumber(field, value){
+  if(!modalTarget) return;
+  const e = findEntity(modalTarget.type, modalTarget.id);
+  if(!e) return;
+  const trimmed = String(value).trim();
+  e[field] = trimmed === "" ? "" : Math.max(0, parseInt(trimmed, 10) || 0);
+}
 function setGeneralAffinity(value){
   updateCastField("generalAffinity", value);
-  renderModalHead();
 }
 function setIndividualAffinity(otherKey, value){
   if(!modalTarget) return;
@@ -610,8 +724,177 @@ function setIndividualAffinity(otherKey, value){
   e.affinities[otherKey] = value;
 }
 
+/* ---- Notable moments (timeline) ---- */
+function addMoment(){
+  if(!modalTarget) return;
+  const e = findEntity(modalTarget.type, modalTarget.id);
+  if(!e) return;
+  if(!Array.isArray(e.moments)) e.moments = [];
+  e.moments.push({ id: uid(), session: "", text: "" });
+  renderModal();
+}
+function updateMoment(id, field, value){
+  if(!modalTarget) return;
+  const e = findEntity(modalTarget.type, modalTarget.id);
+  const m = e && Array.isArray(e.moments) ? e.moments.find(x=>x.id===id) : null;
+  if(m) m[field] = value;
+}
+function removeMoment(id){
+  if(!modalTarget) return;
+  const e = findEntity(modalTarget.type, modalTarget.id);
+  if(!e || !Array.isArray(e.moments)) return;
+  e.moments = e.moments.filter(x=>x.id!==id);
+  renderModal();
+}
+
 /*****************************************************************
- * CAST MODAL
+ * REGIONS & HEAT
+ *****************************************************************/
+function regionName(id){
+  const r = state.regions.find(x=>x.id===id);
+  return r ? (r.name || "Unnamed region") : "";
+}
+function addRegion(){ state.regions.push({ id: uid(), name: "" }); renderRegions(); if(modalTarget) renderModal(); }
+function updateRegion(id, value){
+  const r = state.regions.find(x=>x.id===id);
+  if(r) r.name = value;
+  if(modalTarget) renderModal();
+}
+function removeRegion(id){
+  state.regions = state.regions.filter(x=>x.id!==id);
+  state.npcs.forEach(n=>{ if(n.regionId === id) n.regionId = ""; });
+  state.party.forEach(p=>{ if(p.heatMods) delete p.heatMods[id]; });
+  renderRegions();
+  if(modalTarget) renderModal();
+}
+function renderRegions(){
+  const list = document.getElementById("region-list");
+  document.getElementById("region-empty").style.display = state.regions.length ? "none" : "block";
+  list.innerHTML = state.regions.map(r => `
+    <div class="region-row">
+      <input type="text" value="${escapeAttr(r.name)}" placeholder="Region name" onchange="updateRegion('${r.id}', this.value)">
+      <button class="small" onclick="removeRegion('${r.id}')">Remove</button>
+    </div>`).join("");
+}
+function regionSelectHtml(e){
+  return `<select onchange="updateCastField('regionId', this.value)">
+    <option value="">— None —</option>
+    ${state.regions.map(r=>`<option value="${r.id}" ${r.id===e.regionId?"selected":""}>${escapeHtml(r.name) || "Unnamed region"}</option>`).join("")}
+  </select>`;
+}
+
+// Base Heat = sum of points from living, flagged NPCs in the region, based on
+// how each feels about this party member. Manual adjustment is added on top.
+function heatFor(playerId, regionId){
+  const key = entityKey("party", playerId);
+  let base = 0;
+  state.npcs.forEach(n=>{
+    if(!n.countsHeat || n.regionId !== regionId) return;
+    if((n.life || "Alive") === "Dead") return;
+    const a = (n.affinities && n.affinities[key]) || "Neutral";
+    base += HEAT_POINTS[a] || 0;
+  });
+  const player = findEntity("party", playerId);
+  const mod = parseInt(player && player.heatMods ? player.heatMods[regionId] : 0, 10) || 0;
+  return { base, mod, total: Math.max(0, base + mod) };
+}
+function tierIndexFor(total){
+  let idx = 0;
+  HEAT_TIERS.forEach((t,i)=>{ if(total >= t.min) idx = i; });
+  return idx;
+}
+function topHeat(playerId){
+  let best = 0;
+  state.regions.forEach(r=>{ best = Math.max(best, heatFor(playerId, r.id).total); });
+  return best;
+}
+function heatBadgeHtml(e){
+  if(!state.regions.length) return "";
+  const idx = tierIndexFor(topHeat(e.id));
+  return `<span class="badge heat-b${idx}">${HEAT_TIERS[idx].name}</span>`;
+}
+function updateHeatMod(regionId, value){
+  if(!modalTarget) return;
+  const e = findEntity(modalTarget.type, modalTarget.id);
+  if(!e) return;
+  if(!e.heatMods) e.heatMods = {};
+  e.heatMods[regionId] = parseInt(value, 10) || 0;
+  renderModal();
+}
+function heatBoxHtml(e){
+  if(!state.regions.length){
+    return editMode ? `<div class="heat-box"><div class="heat-title">Heat</div><div class="ib-note">Add regions in the Regions section to track Heat.</div></div>` : "";
+  }
+  const maxMin = HEAT_TIERS[HEAT_TIERS.length-1].min;
+  const ticks = HEAT_TIERS.slice(1, -1).map(t=>`<div class="heat-tick" style="left:${(t.min/maxMin)*100}%"></div>`).join("");
+  const rows = state.regions.map(r=>{
+    const h = heatFor(e.id, r.id);
+    if(!editMode && h.total === 0) return "";
+    const idx = tierIndexFor(h.total);
+    const next = HEAT_TIERS[idx+1];
+    const pct = Math.min(100, (h.total / maxMin) * 100);
+    const sub = (next ? `${h.total} · ${next.min - h.total} to ${next.name}` : `${h.total} · highest tier`)
+      + (h.mod ? ` (${h.base} from NPCs ${h.mod > 0 ? "+" : "−"}${Math.abs(h.mod)} adj.)` : "");
+    return `
+      <div class="heat-row">
+        <div class="heat-top"><span class="heat-region">${escapeHtml(r.name) || "Unnamed region"}</span><span class="badge heat-b${idx}">${HEAT_TIERS[idx].name}</span></div>
+        <div class="heat-bar"><div class="heat-fill t${idx}" style="width:${pct}%"></div>${ticks}</div>
+        <div class="heat-sub">${sub}</div>
+        ${editMode ? `<div class="heat-adjust"><span>Adjust</span><input type="number" value="${h.mod}" onchange="updateHeatMod('${r.id}', this.value)"></div>` : ""}
+      </div>`;
+  }).join("");
+  return `<div class="heat-box"><div class="heat-title">Heat</div>${rows || `<div class="ib-note">Clean in every region.</div>`}</div>`;
+}
+function affinityHintHtml(e, type){
+  if(!editMode || type !== "npc" || !e.countsHeat) return "";
+  const where = regionName(e.regionId);
+  return `<div class="modal-note" style="margin-bottom:8px;">${where
+    ? `Wary (+1) and Hostile (+3) toward a party member add to their Heat in ${escapeHtml(where)}.`
+    : "Assign a region so this NPC's Wary and Hostile ratings add to party Heat."}</div>`;
+}
+
+/*****************************************************************
+ * HOLDINGS (camp stockpiles carried by an NPC / faction entry)
+ *****************************************************************/
+function updateHoldings(key, value){
+  if(!modalTarget) return;
+  const e = findEntity(modalTarget.type, modalTarget.id);
+  if(!e) return;
+  if(!e.holdings) e.holdings = { food:0, camp:0, funds:0 };
+  e.holdings[key] = parseInt(value, 10) || 0;
+}
+function legacySuppliesTotal(){
+  const s = state.supplies || {};
+  return (s.food||0) + (s.camp||0) + (s.funds||0);
+}
+function importLegacySupplies(){
+  if(!modalTarget) return;
+  const e = findEntity(modalTarget.type, modalTarget.id);
+  if(!e) return;
+  const s = state.supplies || {};
+  const cur = e.holdings || { food:0, camp:0, funds:0 };
+  e.holdings = { food: (cur.food||0) + (s.food||0), camp: (cur.camp||0) + (s.camp||0), funds: (cur.funds||0) + (s.funds||0) };
+  e.hasHoldings = true;
+  state.supplies = { food:0, camp:0, funds:0 };
+  renderModal();
+}
+function holdingsHtml(e){
+  const h = e.holdings || { food:0, camp:0, funds:0 };
+  const tile = (key, label) => `
+    <div class="supply-stat">
+      <label>${label}</label>
+      ${editMode
+        ? `<div class="supply-edit"><input type="number" value="${h[key]||0}" onchange="updateHoldings('${key}', this.value)"></div>`
+        : `<div class="stat-value">${h[key]||0}</div>`}
+    </div>`;
+  const legacy = (editMode && legacySuppliesTotal() > 0)
+    ? `<div style="margin-top:10px;"><button class="ghost small" onclick="importLegacySupplies()">Import old camp supplies (${state.supplies.food||0} food · ${state.supplies.camp||0} camp · ${state.supplies.funds||0} gp)</button></div>`
+    : "";
+  return `<h3>Holdings</h3><div class="supplies-row">${tile("food","Food")}${tile("camp","Camp Supplies")}${tile("funds","Funds (gp)")}</div>${legacy}`;
+}
+
+/*****************************************************************
+ * CAST MODAL (wiki-style article)
  *****************************************************************/
 function openCastModal(type, id){
   modalTarget = { type, id };
@@ -625,10 +908,126 @@ function closeCastModal(){
   renderCastGrid("npc");
 }
 
-function renderModalHead(){
-  const e = findEntity(modalTarget.type, modalTarget.id);
-  if(!e) return;
-  document.getElementById("modal-badge-slot") && (document.getElementById("modal-badge-slot").className = "badge " + badgeClassForAffinity(e.generalAffinity));
+document.getElementById("cast-modal-backdrop").addEventListener("click", function(ev){
+  if(ev.target === this) closeCastModal();
+});
+
+function ibRow(label, valueHtml){
+  return `<div class="ib-row"><span class="ib-k">${label}</span><span class="ib-v">${valueHtml}</span></div>`;
+}
+function ibField(label, inputHtml){
+  return `<div class="ib-field"><label>${label}</label>${inputHtml}</div>`;
+}
+function ibText(field, value, placeholder, rerender){
+  return `<input type="text" value="${escapeAttr(value)}" ${placeholder ? `placeholder="${escapeAttr(placeholder)}"` : ""} onchange="updateCastField('${field}', this.value);${rerender ? " renderModal();" : ""}">`;
+}
+function ibNumber(field, value){
+  return `<input type="number" min="0" value="${hasNum(value) ? value : ""}" onchange="updateCastNumber('${field}', this.value)">`;
+}
+
+function renderInfoboxView(e, type){
+  const isParty = type === "party";
+  const roleLabel = isParty ? "Ancestry / Archetype" : "Role / Faction";
+  const life = e.life || "Alive";
+  const rows = [];
+
+  if(e.fullName) rows.push(ibRow("Full Name", escapeHtml(e.fullName)));
+  if(e.aliases) rows.push(ibRow("Aliases", escapeHtml(e.aliases)));
+  if(isParty && e.player) rows.push(ibRow("Player", escapeHtml(e.player)));
+  if(e.role) rows.push(ibRow(roleLabel, escapeHtml(e.role)));
+  if(e.age) rows.push(ibRow("Age", escapeHtml(e.age)));
+  if(e.homeland) rows.push(ibRow("Homeland", escapeHtml(e.homeland)));
+  if(e.affiliation) rows.push(ibRow("Affiliation", escapeHtml(e.affiliation)));
+  if(e.status) rows.push(ibRow("Status", escapeHtml(e.status)));
+  if(hasNum(e.level)) rows.push(ibRow("Level", escapeHtml(e.level)));
+  rows.push(ibRow("Life", `<span class="badge ${badgeClassForLife(life)}">${life}</span>`));
+  if(hasNum(e.sessionsLasted)) rows.push(ibRow("Sessions Lasted", escapeHtml(e.sessionsLasted)));
+  if(life === "Dead" && e.fate) rows.push(ibRow("Fate", escapeHtml(e.fate)));
+  if(!isParty){
+    if(e.regionId && regionName(e.regionId)) rows.push(ibRow("Region", escapeHtml(regionName(e.regionId))));
+    if(e.countsHeat) rows.push(ibRow("Heat Source", "Yes"));
+    rows.push(ibRow("Affinity", `<span class="badge ${badgeClassForAffinity(e.generalAffinity)}">${e.generalAffinity || "Neutral"}</span>`));
+  }
+
+  return `
+    <aside class="infobox">
+      ${avatarHtml(e.image, e.name, "modal-avatar", "ib-portrait" + (life==="Dead" ? " is-dead" : ""))}
+      ${e.epithet ? `<div class="ib-caption">${escapeHtml(e.epithet)}</div>` : ""}
+      ${rows.join("")}
+      ${isParty ? heatBoxHtml(e) : ""}
+    </aside>`;
+}
+
+function renderInfoboxEdit(e, type){
+  const isParty = type === "party";
+  const roleLabel = isParty ? "Ancestry / Archetype" : "Role / Faction";
+  const life = e.life || "Alive";
+
+  return `
+    <aside class="infobox">
+      ${avatarHtml(e.image, e.name, "modal-avatar", "ib-portrait" + (life==="Dead" ? " is-dead" : ""))}
+      ${ibField("Name", ibText("name", e.name, "Name", true))}
+      ${ibField("Epithet", ibText("epithet", e.epithet, "e.g. The Wolf-Warden", true))}
+      ${ibField("Image URL", ibText("image", e.image, "https://…", true))}
+      ${ibField("Full Name", ibText("fullName", e.fullName))}
+      ${ibField("Aliases", ibText("aliases", e.aliases))}
+      ${isParty ? ibField("Player", ibText("player", e.player)) : ""}
+      ${ibField(roleLabel, ibText("role", e.role))}
+      ${ibField("Age", ibText("age", e.age))}
+      ${ibField("Homeland", ibText("homeland", e.homeland))}
+      ${ibField("Affiliation", ibText("affiliation", e.affiliation))}
+      ${ibField("Current Status", ibText("status", e.status))}
+      ${ibField("Level", ibNumber("level", e.level))}
+      ${ibField("Life", `<select onchange="updateCastField('life', this.value); renderModal();">
+        ${LIFE_STATES.map(l=>`<option value="${l}" ${l===life?"selected":""}>${l}</option>`).join("")}
+      </select>`)}
+      ${ibField("Sessions Lasted", ibNumber("sessionsLasted", e.sessionsLasted))}
+      ${life === "Dead" ? ibField("Fate", ibText("fate", e.fate, "How they fell")) : ""}
+      ${isParty ? "" : ibField("General Affinity", `<select onchange="setGeneralAffinity(this.value)">
+        ${AFFINITY_LEVELS.map(a=>`<option value="${a}" ${a===e.generalAffinity?"selected":""}>${a}</option>`).join("")}
+      </select>`)}
+      ${isParty ? "" : ibField("Region", regionSelectHtml(e))}
+      ${isParty ? "" : `<label class="ib-check"><input type="checkbox" ${e.countsHeat ? "checked" : ""} onchange="updateCastField('countsHeat', this.checked); renderModal();"> Counts toward Heat</label>`}
+      ${isParty ? "" : `<label class="ib-check"><input type="checkbox" ${e.hasHoldings ? "checked" : ""} onchange="updateCastField('hasHoldings', this.checked); renderModal();"> Holds camp supplies</label>`}
+      ${isParty ? heatBoxHtml(e) : ""}
+    </aside>`;
+}
+
+function renderWikiSectionsView(e){
+  let html = "";
+  WIKI_SECTIONS.forEach(([key, label])=>{
+    if(e[key]) html += `<h3>${label}</h3><div class="wiki-text">${escapeHtml(e[key])}</div>`;
+  });
+
+  const moments = Array.isArray(e.moments) ? e.moments.filter(m => m.text || m.session) : [];
+  if(moments.length){
+    html += `<h3>Notable Moments</h3><div class="moment-list">` + moments.map(m => `
+      <div class="moment">
+        ${m.session ? `<span class="m-session">${escapeHtml(m.session)}</span>` : ""}${escapeHtml(m.text)}
+      </div>`).join("") + `</div>`;
+  }
+
+  if(e.quotes) html += `<h3>Quotes &amp; Trivia</h3><div class="wiki-text wiki-quote">${escapeHtml(e.quotes)}</div>`;
+  return html;
+}
+
+function renderWikiSectionsEdit(e){
+  let html = "";
+  WIKI_SECTIONS.forEach(([key, label])=>{
+    html += `<h3>${label}</h3><textarea onchange="updateCastField('${key}', this.value)">${escapeHtml(e[key])}</textarea>`;
+  });
+
+  const moments = Array.isArray(e.moments) ? e.moments : [];
+  html += `<h3>Notable Moments</h3><div class="entry-list">` + moments.map(m => `
+    <div class="moment-edit">
+      <input type="text" value="${escapeAttr(m.session)}" placeholder="Session" onchange="updateMoment('${m.id}','session',this.value)">
+      <input type="text" value="${escapeAttr(m.text)}" placeholder="What happened…" onchange="updateMoment('${m.id}','text',this.value)">
+      <button class="small" onclick="removeMoment('${m.id}')">Remove</button>
+    </div>`).join("") + `</div>
+    <div style="margin-top:10px;"><button class="ghost small" onclick="addMoment()">+ Add Moment</button></div>`;
+
+  html += `<h3>Quotes &amp; Trivia</h3><textarea onchange="updateCastField('quotes', this.value)">${escapeHtml(e.quotes)}</textarea>`;
+  return html;
 }
 
 function renderModal(){
@@ -636,55 +1035,14 @@ function renderModal(){
   const modal = document.getElementById("cast-modal");
   if(!e){ modal.innerHTML = ""; return; }
 
-  const others = allEntities().filter(o => !(o.type===modalTarget.type && o.id===e.id));
+  const type = modalTarget.type;
+  const others = allEntities().filter(o => !(o.type===type && o.id===e.id));
 
-  const headHtml = editMode ? `
-    <div class="modal-head">
-      ${avatarHtml(e.image, e.name, "modal-avatar")}
-      <div style="flex:1;min-width:0;">
-        <input type="text" class="modal-name-edit" value="${escapeAttr(e.name)}" placeholder="Name" onchange="updateCastField('name', this.value); renderModal();">
-        <input type="text" value="${escapeAttr(e.image)}" placeholder="Image URL" onchange="updateCastField('image', this.value); renderModal();">
-      </div>
-    </div>
-  ` : `
-    <div class="modal-head">
-      ${avatarHtml(e.image, e.name, "modal-avatar")}
+  const titleHtml = `
+    <div class="modal-title-row">
       <div class="modal-name">${escapeHtml(e.name) || "Unnamed"}</div>
-    </div>
-  `;
-
-  const detailFieldsHtml = editMode ? `
-    <div class="modal-field">
-      <label>${modalTarget.type === "party" ? "Ancestry / Archetype" : "Role / Faction"}</label>
-      <input type="text" value="${escapeAttr(e.role)}" onchange="updateCastField('role', this.value)">
-    </div>
-    ${modalTarget.type === "party" ? `
-    <div class="modal-field">
-      <label>Current Status</label>
-      <input type="text" value="${escapeAttr(e.status)}" onchange="updateCastField('status', this.value)">
-    </div>` : ``}
-    <div class="modal-field">
-      <label>Notes</label>
-      <textarea onchange="updateCastField('notes', this.value)">${escapeHtml(e.notes)}</textarea>
-    </div>
-  ` : `
-    ${e.role ? `<div class="modal-field"><label>${modalTarget.type === "party" ? "Ancestry / Archetype" : "Role / Faction"}</label><div>${escapeHtml(e.role)}</div></div>` : ``}
-    ${e.status ? `<div class="modal-field"><label>Current Status</label><div>${escapeHtml(e.status)}</div></div>` : ``}
-    ${e.notes ? `<div class="modal-field"><label>Notes</label><div class="entry-body">${escapeHtml(e.notes)}</div></div>` : ``}
-  `;
-
-  const generalAffinityHtml = editMode ? `
-    <div class="affinity-general">
-      <label style="font-family:'JetBrains Mono', monospace;font-size:10px;text-transform:uppercase;letter-spacing:0.06em;color:var(--bone-dim);">General Affinity</label>
-      <select onchange="setGeneralAffinity(this.value)">
-        ${AFFINITY_LEVELS.map(a=>`<option value="${a}" ${a===e.generalAffinity?"selected":""}>${a}</option>`).join("")}
-      </select>
-    </div>
-  ` : `
-    <div class="affinity-general">
-      <span class="badge ${badgeClassForAffinity(e.generalAffinity)}">${e.generalAffinity || "Neutral"}</span>
-    </div>
-  `;
+      ${e.epithet ? `<div class="modal-epithet">${escapeHtml(e.epithet)}</div>` : ""}
+    </div>`;
 
   const affinityRowsHtml = others.length === 0 ? `<div class="empty-note">No one else logged yet.</div>` : others.map(o => {
     const key = entityKey(o.type, o.id);
@@ -706,36 +1064,20 @@ function renderModal(){
   }).join("");
 
   modal.innerHTML = `
-    ${headHtml}
-    <h3>Overview</h3>
-    ${generalAffinityHtml}
-    ${detailFieldsHtml}
-    <h3>Individual Affinity</h3>
-    ${affinityRowsHtml}
+    ${titleHtml}
+    <div class="modal-body">
+      ${editMode ? renderInfoboxEdit(e, type) : renderInfoboxView(e, type)}
+      ${editMode ? renderWikiSectionsEdit(e) : renderWikiSectionsView(e)}
+      ${(type === "npc" && e.hasHoldings) ? holdingsHtml(e) : ""}
+      <h3>Individual Affinity</h3>
+      ${affinityHintHtml(e, type)}
+      ${affinityRowsHtml}
+    </div>
     <div class="modal-footer">
       ${editMode ? `<button class="small" onclick="removeCastFromModal()">Remove</button>` : `<span></span>`}
       <button onclick="closeCastModal()">Close</button>
     </div>
   `;
-}
-
-/*****************************************************************
- * RENDER — SUPPLIES
- *****************************************************************/
-function renderSupplies(){
-  const row = document.getElementById("supplies-row");
-  const s = state.supplies;
-  const field = (key, label) => `
-    <div class="supply-stat">
-      <label>${label}</label>
-      ${editMode
-        ? `<div class="supply-edit"><input type="number" value="${s[key]}" onchange="setSupply('${key}', this.value)"></div>`
-        : `<div class="stat-value">${s[key]}</div>`}
-    </div>`;
-  row.innerHTML = field("food","Food") + field("camp","Camp Supplies") + field("funds","Funds (gp)");
-}
-function setSupply(key, value){
-  state.supplies[key] = parseInt(value,10) || 0;
 }
 
 /*****************************************************************
@@ -807,8 +1149,8 @@ function removeSession(id){ state.sessions = state.sessions.filter(x=>x.id!==id)
 /*****************************************************************
  * HELPERS
  *****************************************************************/
-function escapeHtml(str){ return String(str||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
-function escapeAttr(str){ return String(str||"").replace(/&/g,"&amp;").replace(/"/g,"&quot;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
+function escapeHtml(str){ return String(str===0 ? "0" : (str||"")).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
+function escapeAttr(str){ return String(str===0 ? "0" : (str||"")).replace(/&/g,"&amp;").replace(/"/g,"&quot;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
 
 function renderAll(){
   document.getElementById("campaign-name").textContent = state.campaignName;
@@ -816,7 +1158,7 @@ function renderAll(){
   renderUpdatedLine();
   renderCastGrid("party");
   renderCastGrid("npc");
-  renderSupplies();
+  renderRegions();
   renderQuests();
   renderSessions();
   if(modalTarget) renderModal();
