@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Grace, Might &amp; Magicks — Campaign Tracker</title>
+<link rel="icon" type="image/x-icon" href="favicon.ico">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+SC:wght@600;700&family=Spectral:ital,wght@0,400;0,500;0,600;1,400&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
 <style>
@@ -673,7 +674,7 @@ function renderCastGrid(type){
       <div class="cast-name">${escapeHtml(e.name) || "Unnamed"}</div>
       <div class="cast-badges">
         ${type === "party" ? heatBadgeHtml(e) : `<span class="badge ${badgeClassForAffinity(e.generalAffinity)}">${e.generalAffinity || "Neutral"}</span>`}
-        ${life !== "Alive" ? `<span class="badge ${badgeClassForLife(life)}">${life}</span>` : ""}
+        <span class="badge ${badgeClassForLife(life)}">${life}</span>
       </div>
       ${hasNum(e.level) ? `<div class="cast-level">Lv ${e.level}</div>` : ""}
     </div>`;
