@@ -1138,14 +1138,16 @@ const CHANGELOG = [
       "Attuned Mind now explicitly states that you can cast a spell without using any Safe Casts regardless of cost once per Long Downtime.",
       "Beastkin Wild Instinct replaced with Predator's Mark."
     ],
+    
     version: "v0.5.0",
     date: "October 2026",
     notes: [
-	  "Added new weapons and added ability gating for new and existing weapons.",
+	    "Added new weapons and added ability gating for new and existing weapons.",
       "Added Metalloid as a new Ancestry.",
       "Added Outlaw as a new Background.",
       "Added Sellsword as a new Occupation.",
-      "Added Tinkerer as a new Archetype."
+      "Added Tinkerer as a new Archetype.",
+      "Characters with a negative Grace bonus can now move up to Melee proximity, while characters with a +0 Grace bonus can now move up to Close proximity. Each point of positive Grace bonus increases their maximum movement by one additional proximity band."
     ]
   }
 ];
@@ -1234,7 +1236,7 @@ document.addEventListener("keydown", e => {
 });
 
 /*****************************************************************
- * DATA — transcribed from Grace, Might & Magicks, Public Playtest v0.4.5
+ * DATA — transcribed from Grace, Might & Magicks, Public Playtest v0.5.0
  *****************************************************************/
 
 const SRD_NAMES = [
@@ -1248,25 +1250,280 @@ const SRD_NAMES = [
   "Ivor","Jessa","Kieran","Lyra","Merrik","Nolan","Orla","Rhea",
   "Seren","Theron","Varek","Ysran","Zephyr","Calix","Eldrin","Nyra",
   "Ethes","Lany Mynge","Folke","Riffin","Bertio","Vyncis",
-  "Gauwis Wroby","Stiny","Theny","Helrey","Geoffry","Eorhtwulf","Eamard","Symas","Harder Corby",
-  "Aebin","Gylan","Gyles","Waldu","Walda","Alwin","Beren","Cedric","Delia","Edric","Fenna","Garran","Helena","Ilan","Joren",
-"Kaela","Lennox","Maren","Nolan","Oren","Rylan","Sorin","Tavin","Vera","Willem","Hugh","Milo","Tomas","Edwin","Rolf","Nessa","Marta","Elsie","Bryn","Colm",
-"Ansel","Pippa","Tilda","Garrick","Willa","Bram","Etta","Jonas","Lina","Faris"
+  "Gauwis Wroby","Stiny","Theny","Helrey","Geoffry","Eorhtwulf",
+  "Eamard","Symas","Harder Corby","Aebin","Gylan","Gyles","Waldu",
+  "Walda","Alwin","Beren","Cedric","Delia","Edric","Fenna","Garran",
+  "Helena","Ilan","Joren","Kaela","Lennox","Maren","Oren","Rylan",
+  "Sorin","Tavin","Vera","Willem","Hugh","Milo","Tomas","Edwin",
+  "Rolf","Nessa","Marta","Elsie","Bryn","Colm","Ansel","Pippa",
+  "Tilda","Garrick","Willa","Bram","Etta","Jonas","Lina","Faris",
+  "Abel","Abner","Adela","Adelard","Agnes","Alaric","Alba","Aldous",
+  "Alfred","Amabel","Amos","Anders","Anika","Anselm","Arden","Arnold",
+  "Astrid","Aubrey","Audra","August","Aveline","Barrett","Beatrix",
+  "Benedict","Berit","Bernard","Bertram","Bess","Bodil","Bonnie",
+  "Bridget","Brooke","Calder","Callum","Cecily","Celia","Clement",
+  "Clive","Conrad","Constance","Cora","Crispin","Daisy","Daphne",
+  "Darcy","Della","Desmond","Dinah","Dorothea","Edith","Edmund",
+  "Edrin","Eleanor","Elise","Emmett","Enid","Estelle","Ethel",
+  "Eustace","Everard","Faye","Felix","Flora","Francis","Frederick",
+  "Gideon","Gilda","Godfrey","Greta","Gustav","Hannah","Harriet",
+  "Harvey","Hector","Henrik","Hilda","Hollis","Horace","Ida",
+  "Imogen","Ingrid","Iris","Irwin","Isadora","Jasper","Joan",
+  "Judith","Julian","Katherine","Kit","Lavinia","Leander","Leon",
+  "Leonora","Liesel","Linus","Lydia","Magnus","Maisie","Matilda",
+  "Maud","Miriam","Morris","Muriel","Nadine","Nell","Nicholas",
+  "Nina","Odette","Olaf","Oliver","Opal","Oswald","Otis",
+  "Percival","Phineas","Phoebe","Quentin","Ralph","Ramona",
+  "Rosalind","Rosamund","Rowena","Rupert","Sabina","Simon",
+  "Tabitha","Thea","Theobald","Tristan","Violet","Vivian",
+  "Wilfred","Winifred","Yvette","Zelda","Aderyn","Aeliana",
+  "Aelric","Amandine","Amarande","Amaris","Ambrin","Andras",
+  "Annelise","Araminta","Arcelia","Arielle","Ariane","Arista",
+  "Arius","Armand","Ashael","Asterin","Aubrielle","Aurelia",
+  "Aurelian","Avaric","Bellamy","Belora","Berenice","Brielle",
+  "Calanthe","Calista","Cambria","Cassiel","Celestine","Celandine",
+  "Cerelia","Clarimonde","Cyran","Cyrene","Damaris","Darian",
+  "Delphine","Demelza","Desirae","Elarion","Elowen","Emmeline",
+  "Esmere","Evelune","Evanthe","Fiorael","Florent","Gavriel",
+  "Genevra","Ginevra","Hadrian","Isabeau","Jessamine","Jessara",
+  "Julienne","Laziel","Leocadia","Lysandra","Marcelline","Meliora",
+  "Melisande","Mirabel","Nerissa","Odelia","Olivienne","Orielle",
+  "Ottilie","Persephone","Rosaline","Sabriel","Seraphine","Solenne",
+  "Sylvette","Valerian","Valeria","Verena","Vivienne","Yvaine",
+  "Zeraphine","Arvek","Baldric","Barek","Borgh","Braska","Brok",
+  "Brunna","Caddoc","Cairn","Caldus","Cavan","Chara","Cindra",
+  "Dag","Dagna","Dain","Dask","Derrik","Drustan","Durgan","Eld",
+  "Enna","Erik","Falk","Fennair","Flint","Frida","Garm","Garr",
+  "Gerd","Goran","Grenda","Griff","Grisel","Hakon","Haldor",
+  "Harka","Helga","Hroth","Inga","Jannik","Jorik","Kelda",
+  "Keldaine","Korr","Krag","Kressa","Lodin","Lothar","Marda",
+  "Marn","Mord","Njal","Odran","Orska","Ragna","Ragnar","Rask",
+  "Rorik","Sigrid","Skadi","Sten","Stig","Svala","Torben",
+  "Torvald","Ulf","Ulla","Viggo","Vilda","Yngvar","Yrsa",
+  "Aethon","Aevra","Aislin","Althaea","Amarin","Anora","Ariadne",
+  "Arion","Aroven","Ashira","Aven","Azara","Belisar","Caerwyn",
+  "Caldris","Calyra","Ceryn","Cyrilla","Daevon","Delyth","Eirlys",
+  "Eluned","Eryndor","Evara","Faeryn","Fenric","Galira","Gwyndolyn",
+  "Ilyra","Ilyon","Iskander","Kaelen","Kallista","Kassian","Kestia",
+  "Lethia","Lirien","Maelis","Maerwynn","Mirelle","Myrin","Naevia",
+  "Nimue","Oryn","Phaedra","Quenlan","Rhydian","Saelis","Seryn",
+  "Shael","Siora","Sorrel","Tarian","Thalia","Thessa","Vaelis",
+  "Vesper","Wystan","Xanthe","Yara","Ysol","Zaira","Zavian",
+  "Zorren","Ash","Beckett","Bex","Blue","Bo","Cai","Cal","Clem",
+  "Cove","Dax","Dell","Drew","Eli","Em","Ezra","Finnian","Fox",
+  "Gale","Gray","Hal","Hart","Ike","Jory","Jude","Kai","Kell",
+  "Kip","Lane","Lark","Leif","Lev","Lux","Mica","Nico","Noa",
+  "Ollie","Pax","Pell","Reeve","Remy","Ren","Rex","Roan","Rune",
+  "Sasha","Shay","Skye","Tess","Toll","Venn","West","Wick",
+  "Wynn","Zed","Zev","Aella","Ailith","Alina","Amaya","Anara",
+  "Ari","Asha","Asta","Avra","Bela","Brise","Calia","Carys",
+  "Cira","Dara","Demi","Eleni","Elva","Enora","Eris","Eska",
+  "Fia","Gwenna","Hali","Ilara","Indra","Juna","Kira","Lelia",
+  "Lumi","Marae","Mina","Mira","Nara","Nim","Nola","Oona","Oria",
+  "Rilla","Runa","Suri","Tamsin","Tova","Una","Vala","Vanya",
+  "Vela","Wrenna","Yuna","Zella"
 ];
+
 
 const SRD_SURNAMES = [
   "Ashford","Blackthorn","Brightwood","Crowe","Duskmere","Emberfall",
   "Fairholt","Frost","Grimward","Hawthorne","Ironvale","Kestrel",
   "Larkspur","Mournwood","Nightbrook","Oakheart","Ravencrest","Redwyne",
-  "Rook","Silvermere","Stone","Stormborn","Thorne","Vale",
-  "Voss","Wintermere","Wolfe","Dawnbringer","Greymark","Holloway",
-  "Kingsley","Ashen","Briar","Coldbrook","Darkmoor","Eldridge",
-  "Falconer","Glenwood","Harrow","Ivory","Locke","Moonfall",
-  "Norwyn","Pyre","Quickthorn","Rime","Sorrow","Thornfield","the Stubborn","the Quiet","the Old Hand","the Rough","the Patient",
-"the Scarred","the Heavy","the Tall","the Short","the Hard",
-"the Careful","the Watchful","the Steady","the Cold Eye","the Slow",
-"the Strongback","the Grizzled","the Plain","the Lucky","the Unbent","Barrow","Bramble","Carter","Cobb","Dale","Eaves","Fallow","Fletcher","Grove","Hale",
-"Harper","Hearth","Miller","Pike","Reed","Shepherd","Tanner","Wells","the Dusty","the Bent","Beck","Clay","Dyer","Fenn","Graves","Holt","Moss","Parker","Rooke","the Weathered"
+  "Rook","Silvermere","Stone","Stormborn","Thorne","Vale","Voss",
+  "Wintermere","Wolfe","Dawnbringer","Greymark","Holloway","Kingsley",
+  "Ashen","Briar","Coldbrook","Darkmoor","Eldridge","Falconer",
+  "Glenwood","Harrow","Ivory","Locke","Moonfall","Norwyn","Pyre",
+  "Quickthorn","Rime","Sorrow","Thornfield","the Stubborn","the Quiet",
+  "the Old Hand","the Rough","the Patient","the Scarred","the Heavy",
+  "the Tall","the Short","the Hard","the Careful","the Watchful",
+  "the Steady","the Cold Eye","the Slow","the Strongback","the Grizzled",
+  "the Plain","the Lucky","the Unbent","Barrow","Bramble","Carter",
+  "Cobb","Dale","Eaves","Fallow","Fletcher","Grove","Hale","Harper",
+  "Hearth","Miller","Pike","Reed","Shepherd","Tanner","Wells",
+  "the Dusty","the Bent","Beck","Clay","Dyer","Fenn","Graves","Holt",
+  "Moss","Parker","Rooke","the Weathered","Alderman","Arkwright",
+  "Atwood","Bancroft","Barclay","Barker","Barnett","Baxter","Bennett",
+  "Birch","Bishop","Blackwell","Blake","Boone","Bradshaw","Briggs",
+  "Brooks","Burke","Burnett","Butcher","Calder","Campbell","Carrow",
+  "Chandler","Chester","Churchill","Clarke","Clifton","Collier",
+  "Conway","Cooper","Corbett","Crawford","Cresswell","Cromwell",
+  "Cunningham","Davenport","Dawson","Delaney","Dempsey","Donovan",
+  "Drake","Dunbar","Dunham","Dunley","Easton","Ellery","Ellwood",
+  "Emerson","Everett","Fairfax","Farley","Farnham","Fawcett","Finch",
+  "Fisher","Fitzroy","Forrester","Foster","Foxley","Gardner","Garland",
+  "Gibbons","Gilmore","Goodwin","Granger","Greenwood","Griffith",
+  "Hadley","Hammond","Hardwick","Harrington","Hartley","Hastings",
+  "Hayward","Hendrick","Hensley","Hollister","Huxley","Ingram",
+  "Jennings","Kendall","Kerrigan","Kirkland","Langley","Latham",
+  "Lawson","Leighton","Lindley","Livingston","Lovelace","Lowell",
+  "Maddox","Marlowe","Merritt","Middleton","Montgomery","Morrison",
+  "Newbury","Newell","Northcott","Oakley","Pemberton","Pendleton",
+  "Prescott","Radcliffe","Ramsey","Redford","Ridley","Rivington",
+  "Rutherford","Salisbury","Sinclair","Somerfield","Stafford","Sutton",
+  "Talbot","Templeton","Thatcher","Thornton","Underwood","Vaughn",
+  "Wakefield","Warwick","Whitaker","Whitlock","Wickham","Wilcox",
+  "Winthrop","Wyndham","Alderbrook","Ashcombe","Ashdown","Ashenford",
+  "Barleyfield","Baywood","Bearcliff","Birchfall","Birchwater",
+  "Blackbriar","Blackfen","Blackford","Blackridge","Blackriver",
+  "Bluebell","Brackenfell","Briarcliff","Briarfield","Briarstone",
+  "Brookfield","Brookhaven","Brookstone","Broomfield","Burnside",
+  "Cairnwood","Cedarbrook","Cinderhill","Clearwater","Cliffside",
+  "Cloudmere","Copperwood","Cragmoor","Cranehill","Crowsfield",
+  "Dapplewood","Deepwell","Deerbrook","Deerfield","Dewhurst",
+  "Driftwood","Eaglewood","Eastbrook","Elderwood","Elmbridge",
+  "Elmfall","Emberwood","Everbrook","Fairbairn","Fernbrook",
+  "Fernhollow","Foxglove","Foxhollow","Foxworth","Glenfall","Goldleaf",
+  "Goldmeadow","Graniteford","Greenbriar","Greenhollow","Greyhaven",
+  "Greywater","Harewood","Hazelbrook","Hazelwood","Heatherfield",
+  "Highmeadow","Hillside","Hollowbrook","Honeystone","Juniper",
+  "Lakewood","Lindenhall","Longmeadow","Lowfield","Maplecroft",
+  "Meadowbrook","Mossbank","Mossfield","Mossvale","Mudbrook",
+  "Newfield","Northwood","Oakenfield","Oakenshield","Oakridge",
+  "Oldfield","Pinebrook","Pinehurst","Rainford","Redbrook","Redcliff",
+  "Redfern","Riversend","Riverstone","Rosebrook","Rosefield",
+  "Rushwater","Sagewood","Shadewood","Silverbrook","Silverthorn",
+  "Snowfield","Southwell","Springvale","Starling","Stillwater",
+  "Sunfield","Thistlebrook","Thornbrook","Thornwood","Underhill",
+  "Valecrest","Wheatley","Whitebrook","Whitecliff","Whitefield",
+  "Wildmere","Willowbank","Willowby","Willowmere","Windermere",
+  "Windrow","Wolfpine","Woodcroft","Woodfall","Woodhaven","Woodmere",
+  "Woodridge","Wrenfield","Ashenveil","Blackvein","Blackwater",
+  "Blightwood","Bloodmere","Bloodthorn","Bonefield","Bonewarden",
+  "Carrion","Cindergrave","Coldgrave","Crowhurst","Darkwater",
+  "Deadwick","Dreadmoor","Duskbane","Duskfall","Duskwalker","Ebonhart",
+  "Ebonmere","Ebonthorn","Fellwater","Graveborn","Graveford",
+  "Gravesend","Grimholt","Grimwater","Gloamwood","Harrowfell",
+  "Harrowmere","Hollowgrave","Hushwood","Ironshade","Mireborn",
+  "Mirewood","Mournfell","Mournvale","Nightbriar","Nightfall",
+  "Nightford","Nightshade","Palehart","Palegrave","Penumbral",
+  "Ravenshade","Ravenmoor","Ravenwood","Rotwood","Ruinfield",
+  "Sablewood","Shadeborn","Shadowend","Shadowmere","Shroud","Sickles",
+  "Skullbrook","Soulward","Stillgrave","Stormgrave","Sunderfell",
+  "Thorngrave","Umberfield","Umbermoor","Vilethorn","Wraithborne",
+  "Wraithwood","Wyrmgrave","Blackmantle","Crowsbane","Dreadthorn",
+  "Frostgrave","Grimveil","Hollowthorn","Ironcrypt","Mournshade",
+  "Neverrest","Paleveil","Ravenscar","Rothearth","Sablegrave",
+  "Sorrowmere","Thornveil","Witchwood","Wolfsbane","Alderwyn",
+  "Aldermere","Amberleigh","Arkenstone","Arkwyn","Aurelmont",
+  "Bellerose","Belvoir","Briarwyn","Caerholt","Calderwyn","Caspian",
+  "Cavendish","Cindervale","Corvenhall","D'Aubrey","D'Arquen",
+  "Davenant","Devereux","Dragonwyck","Eboncrest","Eldermere",
+  "Everwinter","Fairbourne","Fairhaven","Falkenrath","Farringdon",
+  "Fellmont","Fenwick","Frostbourne","Goldcrest","Goldwyn",
+  "Grandmere","Greycastle","Greycourt","Hallowmere","Highcastle",
+  "Highgarden","Hohenmark","Kingswell","Lionsgate","Loxley",
+  "Mandeville","Marivelle","Merrowmont","Montclair","Montrose",
+  "Noblehart","Northmarch","Orlewyn","Penhaligon","Peverell",
+  "Ravenhall","Ravenscourt","Ravenshaw","Rosemont","Rosethorne",
+  "Sablemont","Silvercrest","Silverkeep","Starhaven","Stormvale",
+  "Summerhall","Suncrest","Thornmere","Valecourt","Valemont",
+  "Velthorne","Westervale","Whitehall","Whitethorne","Winterbourne",
+  "Winterhall","Wolfsmark","Wyrmwood","Apprentice","Armiger","Baker",
+  "Bellman","Barker","Blacksmith","Boatwright","Booker","Brewer",
+  "Bridger","Buckle","Carver","Chalk","Clothier","Cook","Cooperfield",
+  "Cordwainer","Cutter","Draper","Dray","Farrier","Fielding","Fuller",
+  "Glover","Goldsmith","Gunner","Haymaker","Hodges","Joiner","Keeler",
+  "Loomer","Mason","Mercer","Minter","Nailer","Patcher","Peddler",
+  "Potter","Sawyer","Scrivener","Shipley","Slater","Spinner","Tinker",
+  "Turner","Wainwright","Weaver","Webber","Wheelwright","Whitestone",
+  "Wooler","Wright","Yardley","Millward","Shearman","Ashtrail",
+  "Backwater","Barrowfield","Bridgeford","Caravan","Crossroads",
+  "Dustford","Dustwell","Farstrider","Ferry","Fordham","Gateward",
+  "Greytrail","Hardway","Hearthside","Highroad","Longford","Longstride",
+  "Milemark","Moorcross","Passguard","Pennyworth","Roadstead",
+  "Roughford","Saltmere","Sandford","Stonebridge","Stonepath",
+  "Tolliver","Wayfarer","Westmarch","Wildford","Waymark","Trailborn",
+  "Farfield","Crossfield","Hearthford","Ridgeway","Southgate",
+  "Turnpike","Bale","Bates","Benn","Bett","Blythe","Booth","Brant",
+  "Brock","Brune","Cade","Carr","Clegg","Cline","Coates","Crane",
+  "Cross","Dane","Dunn","Eck","Edge","Elder","Fane","Firth","Fleet",
+  "Flint","Flynn","Ford","Gage","Gant","Garth","Giles","Gill","Glass",
+  "Goff","Goss","Greer","Hatch","Hayes","Hobbs","Hood","Hook","Howe",
+  "Hunt","Jett","Kane","Knott","Lamb","Lance","Lowe","March","Marsh",
+  "Mercy","Mills","Nash","Noble","Page","Penn","Pond","Pratt","Price",
+  "Quill","Raine","Redd","Renn","Rigg","Roach","Rookwood","Rudd",
+  "Sayer","Sedge","Shaw","Slade","Sloane","Sly","Snell","Spence",
+  "Stern","Swift","Tait","Teague","Thatch","Trent","Vane","Vossler",
+  "Ward","Webb","Wellspring","Wilde","Woolf","the Ashen","the Aimless",
+  "the Awakened","the Badger","the Bellringer","the Bitter",
+  "the Blackhand","the Bleak","the Blind","the Bloodied","the Blue",
+  "the Boar","the Bonepicker","the Breaker","the Brisk","the Broken",
+  "the Candlekeeper","the Canker","the Careless","the Cautious",
+  "the Chainbreaker","the Chalk-Faced","the Chosen","the Clever",
+  "the Clockmaker","the Crooked","the Crow","the Crow-Eyed","the Cursed",
+  "the Daring","the Dead Calm","the Deathless","the Deep-Walker",
+  "the Defiant","the Delver","the Dire","the Disgraced","the Dogged",
+  "the Doubtful","the Drifter","the Drowned","the Dry","the Dull",
+  "the Eagle","the Earthbound","the Empty","the Errant","the Exile",
+  "the Faded","the Faint","the Faithless","the Far-Seer","the Fearless",
+  "the Fell","the Fetch","the Fevered","the Fierce","the Filthy",
+  "the Firebrand","the First","the Fishwife","the Fist",
+  "the Flat-Nosed","the Flea","the Flinthearted","the Floodborn",
+  "the Fool","the Forgotten","the Fox","the Frayed","the Friendless",
+  "the Gallows-Born","the Gambler","the Gatekeeper","the Gentle",
+  "the Ghost","the Giant","the Gilded","the Glass-Eyed","the Gleaner",
+  "the Glum","the Goat","the Gold-Tongued","the Good","the Greedy",
+  "the Grim","the Grinning","the Grounded","the Gull","the Hag",
+  "the Half-Dead","the Hammer","the Hangman","the Hardcase","the Hare",
+  "the Harrower","the Hasty","the Hound","the Housebreaker",
+  "the Hungry","the Hushed","the Idle","the Ill-Starred","the Imp",
+  "the Iron-Bellied","the Ironbound","the Jackal","the Jester",
+  "the Kindly","the Knave","the Knife","the Knotted","the Last",
+  "the Laughing","the Leech","the Left-Handed","the Liar",
+  "the Lightfingered","the Lion","the Lonesome","the Lost","the Loud",
+  "the Lurch","the Mad","the Maimed","the Malleable","the Marsh-Born",
+  "the Mask","the Mean","the Midden","the Moth","the Mute",
+  "the Nameless","the Narrow","the Needle","the Neverborn","the Noose",
+  "the Oathbreaker","the Odd","the One-Eyed","the Outcast",
+  "the Outsider","the Pale","the Parchment","the Penniless",
+  "the Pilgrim","the Pious","the Pitiless","the Plague","the Poor",
+  "the Proud","the Ragged","the Rake","the Rat","the Red",
+  "the Relentless","the Restless","the Returned","the Righteous",
+  "the Roamer","the Rusted","the Salt","the Salt-Bitten","the Sapper",
+  "the Savage","the Scoundrel","the Scrapper","the Seer","the Shamed",
+  "the Shambling","the Shattered","the Shepherd","the Shifty",
+  "the Shipwreck","the Shivering","the Shrewd","the Silent",
+  "the Simple","the Skinner","the Sleepless","the Sly Fox","the Small",
+  "the Smiling","the Smuggler","the Snake","the Snare",
+  "the Soot-Stained","the Sparrow","the Spiteful","the Split-Lip",
+  "the Stalwart","the Starved","the Stone-Faced","the Storyteller",
+  "the Stray","the Sun-Burned","the Swindler","the Tallyman",
+  "the Tallowman","the Tarnished","the Thief","the Thin","the Thorn",
+  "the Threadbare","the Tide-Turner","the Timekeeper","the Tired",
+  "the Toothless","the Torch","the Traitor","the Trapper","the Trickster",
+  "the Unbowed","the Unclean","the Unlucky","the Unquiet","the Unseen",
+  "the Unwashed","the Vagrant","the Vain","the Viper","the Wanderer",
+  "the Wanting","the Warhound","the Watchman","the Waterlogged",
+  "the Wayward","the Weak","the Weeper","the Well-Born","the Whistler",
+  "the White","the Wild","the Wind-Bitten","the Worn","the Wronged",
+  "the Bellows","the Bitterroot","the Black Candle","the Black Dog",
+  "the Blue Fox","the Brass Jack","the Broken Bell","the Candle-Thief",
+  "the Copper Saint","the Crooked Coin","the Dead Man's Friend",
+  "the Devil's Due","the Dirt-Eater","the Door-Knocker","the Downpour",
+  "the Empty Cup","the False Knight","the Farrier's Ghost",
+  "the Featherless","the Final Word","the Fool's Gold",
+  "the Four-Fingered","the Frost-Kissed","the Gallows Bird",
+  "the Gravedigger","the Green Knife","the Half-Crown","the Hangnail",
+  "the Hearth Thief","the Hollow Man","the Hundred-Mile",
+  "the Ink-Stained","the King's Mistake","the Last Lantern",
+  "the Last Witness","the Little Wolf","the Long Goodbye","the Lost Heir",
+  "the Low Candle","the Man from Nowhere","the Midnight Bell",
+  "the Nine-Lives","the Old Crow","the Old Fox","the One Who Waits",
+  "the Open Hand","the Pale Rider","the Penny Saint","the Ragpicker",
+  "the Red Hound","the Roadside King","the Rusty Nail",
+  "the Saint of Nothing","the Seven-Toed","the Shattered Crown",
+  "the Shepherd's Knife","the Silver Rat","the Smoke Eater",
+  "the Sparrowhawk","the Splinter","the Three-Times-Damned",
+  "the Tin Saint","the Twice-Buried","the Uninvited","the Velvet Knife",
+  "the Widowmaker","the Wolf at the Door","the Worm","the Wound",
+  "the Yellow Dog","the Last Honest Man","the Unpaid Debt",
+  "the Broken Promise","the Crooked Saint","the Nameless Guest",
+  "the Forgotten Son","the King's Hound","the Winter Guest",
+  "the Candle in the Rain","the Man Who Stayed","the Woman Who Knows",
+  "the Friend of Crows","the Keeper of Keys","the Last to Leave",
+  "the One-Eyed King","the Red Widow","the Unburied","the Grave's Due",
+  "the Moon's Fool","the Bear's Brother","the Ragged Prince",
+  "the Orchard Thief","the Silent Knife"
 ];
 
 const SRD_ANCESTRIES = [
@@ -1278,7 +1535,7 @@ const SRD_ANCESTRIES = [
   { name:"Goblin", featureName:"Skittish", featureText:"Whenever you examine wreckage, ruins, refuse heap, or spoils of war, you know if it is poisoned or trapped. If someone else triggers a trap from those, you can immediately move out of the way.", hpTag:"Lean", hp:2 },
   { name:"Gnome", featureName:"Analytical", featureText:"Once per scene, you may ask the GM one yes/no question about a creature's nature, intent, or weakness.", hpTag:"Lean", hp:2 },
   { name:"Beastkin", featureName:"Predator's Mark", featureText:"The first successfully hit you land in a scene marks your target. The next attack an ally makes against the marked target has Advantage. This is lost the moment that attack is made, hit or miss, or when the spotlight returns to you, whichever comes first.", hpTag:"Sturdy", hp:3 },
-  { name:"Metalloid", featureName:"Metal Body", featureText:"You have a natural Armor of 1. Worn armor gives you nothing, but all of its penalties still apply to you. Healing magicks, potions and medicine have no effect on you, though bandages can still staunch Bleeding and Burning. Only Downtime restores your Hit Points. You do not need to eat or breathe.", hpTag:"Sturdy", hp:3 }
+  { name:"Metalloid", featureName:"Metal Body", featureText:"You have a natural Armor of 1. Worn armor gives you nothing, but all of its penalties still apply to you. Healing magicks, potions and medicine have no effect on you, though bandages can still staunch Bleeding and Burning. Only Downtime restores your Hit Points. You do not need to eat or breathe.", hpTag:"Sturdy", hp:3, naturalArmor: 1 }
 ];
 
 const SRD_BACKGROUNDS = [
@@ -1343,7 +1600,7 @@ const SRD_WEAPON_TYPES = {
   // that's their trade-off. Martial Magicks are real weapons and don't.
   "Arcane Focus": { damage:"+2", bonus:"Magicks", tag:"Focus, Improvised", damageType:"Physical" },
   "Charged Weapon": { damage:"+2", bonus:"Magicks", tag:"Charged, Improvised", damageType:"Physical" },
-  "Martial Magicks": { damage:"+3", bonus:"Magicks", tag:"Martial Magicks", damageType:"Magical" }
+  "Martial Magicks": { damage:"+3", bonus:"Magicks", tag:"Martial Magicks", damageType:"Physical" }
 };
 
 const SRD_WEAPONS = [
@@ -1397,13 +1654,13 @@ const SRD_WEAPONS = [
   // Long Downtime. Every bound spell is cantrip-sized (about a 1 Safe
   // Cast effect) and unique to its weapon — add new ones here.
   { name:"Cinder Wand", type:"Charged Weapon", charge:{
-      name:"Fire Mote", tradition:"Pyromancy", damageType:"Magical",
+      name:"Cinder Flick", tradition:"Pyromancy", damageType:"Magical",
       statLabel:"Damage", statValue:"2", proximity:"Near", roll:"Spellcast",
       description:"You make a Spellcast Roll to flick a spark of living ember at a target you can see within reasonable Proximity. On a crit, the target also suffers Burning." } },
   { name:"Sentinel Staff", type:"Charged Weapon", charge:{
       name:"Sentinel's Veil", tradition:"Arcanomancy", damageType:"Magical",
       statLabel:"Damage", statValue:"—", proximity:"Self", roll:"—",
-      description:"You draw a thin ward of magicks close around you. You gain +1 Armor against the next attack that hits you before your next action. The bonus ends as soon as that attack resolves or as soon as you do your next action, whichever comes first." } },
+      description:"You draw a thin ward of magicks close around you. You gain +1 Armor against the next attack that hits you before your next action. The bonus ends as soon as that attack resolves." } },
   { name:"Thornroot Wand", type:"Charged Weapon", charge:{
       name:"Snaring Thorns", tradition:"Biomancy", damageType:"Magical",
       statLabel:"Damage", statValue:"—", proximity:"Close", roll:"Spell Resist",
@@ -1420,7 +1677,7 @@ const SRD_WEAPONS = [
 ];
 
 const SRD_WEAPON_TAGS = {
-  "Improvised": "After you successfully land a weapon attack with this weapon, if there are any 1s on the dice roll, this weapon breaks permanently and cannot be repaired.",
+  "Improvised": "After you successfully land a hit with this weapon, if there are any 1s on the dice roll, this weapon breaks permanently and cannot be repaired.",
   "Concealable": "You can easily hide this weapon and bring it to places where weapons are otherwise forbidden.",
   "Versatile": "You can choose to one-hand (Grace) or two-hand (Might) this weapon.",
   "Heavy": "On a critical hit, the target is made Prone.",
@@ -1461,8 +1718,7 @@ const SRD_ARMORS = [
 
 const SRD_EQUIPMENT_SETS = [
   { name:"Set A", items:["Backpack","Bedroll","Mess kit","Tinderbox","Torch","5 rations","Waterskin","Healing potion (2 HP)","5 gold pieces"] },
-  { name:"Set B", items:["Backpack","Crowbar","Hammer","10 pitons","Torch","5 rations","Waterskin","50 feet of hempen rope","5 gold pieces"] },
-  { name:"Set C", items:["Backpack","25 gold pieces"] }
+  { name:"Set B", items:["Backpack","Crowbar","Hammer","10 pitons","Torch","5 rations","Waterskin","50 feet of hempen rope","5 gold pieces"] }
 ];
 
 const SRD_SPELLS = [
@@ -1483,7 +1739,7 @@ const SRD_SPELLS = [
   { name:'Smoke Cover', tradition:'Aeromancy', damageType:'Magical', statLabel:'Heal', statValue:'—', proximity:'Melee', roll:'—', cost:'1 Safe Cast', description:'You touch one creature you can see within Melee Proximity and cover them with a temporary smoke cover. They are hidden until they act.' },
   { name:'Light', tradition:'Lumomancy', damageType:'Magical', statLabel:'Heal', statValue:'—', proximity:'Melee', roll:'—', cost:'1 Safe Cast', description:'You touch one object you can see within Melee Proximity. That object emits a bright light that extends up to Far Proximity and can be seen by creatures far out the Distant Proximity.' },
   { name:'Darkness', tradition:'Lumomancy', damageType:'Magical', statLabel:'Damage', statValue:'—', proximity:'Melee', roll:'—', cost:'1 Safe Cast', description:'You create an area of pure magical darkness in an area around you snuffing out any non-magical light. Magical light effects are temporarily suspended within the area. snuf Creatures inside the darkness have Disadvantage in melee attacks and cannot perform features like Attack of Opportunity. s Additionally, they cannot make Ranged attacks beyond Melee Proximity. They are also hidden from other creatures outside the darkness.' },
-  { name:'Silence', tradition:'Desmomancy', damageType:'Magical', statLabel:'Damage', statValue:'—', proximity:'Far', roll:'Spell Resist', cost:'1 Safe Cast', description:'A target you can see within reasonable Proximity must make a Spell Resist against your Magicks bonus. When they fail to resist the spell, they cannot cast spells until they finish their action.' },
+  { name:'Silence', tradition:'Desmomancy', damageType:'Magical', statLabel:'Damage', statValue:'—', proximity:'Far', roll:'Spell Resist', cost:'1 Safe Cast', description:'A target you can see within reasonable Proximity must make a Spell Resist against your Magicks bonus. When they fail to resist the spell, they are cannot cast spells until they finish their action.' },
   { name:'Dispel', tradition:'Arcanomancy', damageType:'Magical', statLabel:'Damage', statValue:'—', proximity:'Near', roll:'—', cost:'1 Safe Cast', description:'You may remove one active magical effect on a creature or you can see within reasonable Proximity.' },
   { name:'Magicks Sense', tradition:'Arcanomancy', damageType:'Magical', statLabel:'Heal', statValue:'—', proximity:'Near', roll:'—', cost:'1 Safe Cast', description:'Until your next action, you sense the presence of magicks within Near Proximity. If you sense magicks in this way, you can use your action to see a faint aura around any visible creature or object in the area that bears magicks, and you learn the nature of its magicks.' },
   { name:'Telekinesis', tradition:'Arcanomancy', damageType:'Magical', statLabel:'Damage', statValue:'—', proximity:'Near', roll:'Spell Resist', cost:'1 Safe Cast', description:'A target you can see within reasonable Proximity must make a Spell Resist against your Magicks bonus. When they fail to resist the spell, you can move them one Proximity closer or farther. You can freely move unbound objects this way if they weigh less than 100 x your Magicks bonus in lbs.' },
@@ -1883,6 +2139,7 @@ function renderFeatureBox(elId, entry){
   document.getElementById(elId).innerHTML =
     `<span class="fname">${entry.featureName}</span>${entry.featureText}<br>` +
     (entry.hpTag ? `<span class="badge">${entry.hpTag} · ${entry.hp} Max HP</span>` : "") +
+    (entry.naturalArmor ? `<span class="badge">Natural Armor · ${entry.naturalArmor} Armor</span>` : "") +
     (entry.bonusTag ? `<span class="badge">${entry.bonusTag} · ${entry.hpBonus ? "+"+entry.hpBonus+" Max HP" : "+"+entry.evasionBonus+" Evasion"}</span>` : "");
 }
 
@@ -2229,6 +2486,14 @@ function currentExpertise(){
  * DERIVED STATS
  *****************************************************************/
 
+// Ancestries with a `naturalArmor` value (e.g. Metalloid) have a fixed
+// Armor rating and gain no Armor Rating or Evasion bonuses from worn
+// armor — but armor drawbacks (Medium's Grace cap, Heavy's Evasion 0)
+// still apply. Returns 0 for every other ancestry.
+function naturalArmorOf(ancestry){
+  return ancestry && ancestry.naturalArmor ? ancestry.naturalArmor : 0;
+}
+
 function computeDerived(){
   const ancestry = findBy(ANCESTRIES, document.getElementById("ancestry").value);
   const archetype = findBy(ARCHETYPES, document.getElementById("archetype").value);
@@ -2240,7 +2505,7 @@ function computeDerived(){
 
   let graceContribution = graceBonus;
   if(armor.type === "Medium Armor") graceContribution = Math.min(graceContribution, 2);
-  const armorFlatBonus = armor.type === "Clothing" ? 1 : 0;
+  const armorFlatBonus = (armor.type === "Clothing" && !naturalArmorOf(ancestry)) ? 1 : 0;
   let evasion = graceContribution + archetype.evasionBonus + armorFlatBonus;
   if(armor.type === "Heavy Armor") evasion = 0;
 
@@ -2504,6 +2769,8 @@ function renderDossier(derived){
   const weaponType = WEAPON_TYPES[weapon.type] || {};
   const armor = findBy(ARMORS, document.getElementById("armor").value);
   const armorClass = ARMOR_CLASSES[armor.type] || {};
+  const natural = naturalArmorOf(ancestry);
+  const armorRating = natural || armorClass.rating;
   const equipmentSet = findBy(EQUIPMENT_SETS, document.getElementById("equipmentSet").value);
   const expertise = currentExpertise();
 
@@ -2541,8 +2808,8 @@ function renderDossier(derived){
     </div>
     <div class="dossier-stat"><div class="v">${derived.evasion}</div><div class="l">Evasion</div></div>
     <div class="dossier-stat">
-      <div class="v">${armorClass.rating}</div><div class="l">Armor</div>
-      ${makeCircleTrack(armorClass.rating)}
+      <div class="v">${armorRating}</div><div class="l">Armor</div>
+      ${makeCircleTrack(armorRating)}
     </div>
     <div class="dossier-stat">
       <div class="v">${derived.safeCasts}</div><div class="l">Safe Casts</div>
@@ -2553,7 +2820,7 @@ function renderDossier(derived){
   document.getElementById("d-origin").innerHTML = `
     <div class="dossier-entry">
       <span class="fname">${ancestry.name} — ${ancestry.featureName}</span>${ancestry.featureText}<br>
-      <span class="badge">${ancestry.hpTag} · ${ancestry.hp} Max HP</span>
+      <span class="badge">${ancestry.hpTag} · ${ancestry.hp} Max HP</span>${ancestry.naturalArmor ? '<span class="badge">Natural Armor · ' + ancestry.naturalArmor + ' Armor</span>' : ""}
     </div>
     <div class="dossier-entry">
       <span class="fname">${background.name} — ${background.featureName}</span>${background.featureText}<br>
