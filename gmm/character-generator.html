@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -560,6 +561,11 @@
   .saved-char-row button{padding:5px 9px;font-size:10.5px;}
   .modal-close{margin-top:14px;}
 
+  /* ---------- Weapon gating ---------- */
+  select option:disabled{color:#6f6552;}
+  .weapon-note{margin:-6px 0 16px 130px;}
+  @media(max-width:640px){ .weapon-note{margin-left:0;} }
+
   /* ---------- What's New ---------- */
   #btn-whatsnew{position:relative;}
   .notify-dot{
@@ -844,7 +850,7 @@
     </div>
     <div class="title-block">
       <h1>Grace, Might &amp; Magicks</h1>
-      <div class="subtitle">Quick Character Generator · Public Playtest <span id="version-label">v0.4.5</span></div>
+      <div class="subtitle">Quick Character Generator · Public Playtest <span id="version-label">v0.5.0</span></div>
     </div>
   </header>
 
@@ -1005,6 +1011,7 @@
       <button class="die" onclick="rerollField('weapon')">🎲</button>
     </div>
     <div class="feature-box" id="weapon-feature"></div>
+    <div class="fine weapon-note no-print" id="weapon-note">Greyed-out weapons need at least +1 in the ability they roll with.</div>
 
     <div class="field">
       <label>Armor</label>
@@ -1131,18 +1138,15 @@ const CHANGELOG = [
       "Attuned Mind now explicitly states that you can cast a spell without using any Safe Casts regardless of cost once per Long Downtime.",
       "Beastkin Wild Instinct replaced with Predator's Mark."
     ],
-    
-    /*
-    version: "v0.4.6",
+    version: "v0.5.0",
     date: "October 2026",
     notes: [
-      "Short Downtime takes 1 hour of in-game time. You can gain benefits from this type of rest as much as your level per day. Refreshes after a Long Downtime.",
-      "Long Downtime takes 8 hours of in-game time. You can only benefit from this type of rest once every 24 hours.",
-      "Efficient Casting now explicitly states that the first spell you cast each scene costs one fewer Safe Cast.",
-      "Attuned Mind now explicitly states that you can cast a spell without using any Safe Casts regardless of cost once per Long Downtime.",
-      "Beastkin Wild Instinct replaced with Predator's Mark."
+	  "Added new weapons and added ability gating for new and existing weapons.",
+      "Added Metalloid as a new Ancestry.",
+      "Added Outlaw as a new Background.",
+      "Added Sellsword as a new Occupation.",
+      "Added Tinkerer as a new Archetype."
     ]
-    */
   }
 ];
 
@@ -1273,7 +1277,8 @@ const SRD_ANCESTRIES = [
   { name:"Orc", featureName:"Marked by War", featureText:"Once per scene, the first time you hit a target that has a history of war or battle, you deal 1 more damage.", hpTag:"Sturdy", hp:3 },
   { name:"Goblin", featureName:"Skittish", featureText:"Whenever you examine wreckage, ruins, refuse heap, or spoils of war, you know if it is poisoned or trapped. If someone else triggers a trap from those, you can immediately move out of the way.", hpTag:"Lean", hp:2 },
   { name:"Gnome", featureName:"Analytical", featureText:"Once per scene, you may ask the GM one yes/no question about a creature's nature, intent, or weakness.", hpTag:"Lean", hp:2 },
-  { name:"Beastkin", featureName:"Predator's Mark", featureText:"The first successfully hit you land in a scene marks your target. The next attack an ally makes against the marked target has Advantage. This is lost the moment that attack is made, hit or miss, or when the spotlight returns to you, whichever comes first.", hpTag:"Sturdy", hp:3 }
+  { name:"Beastkin", featureName:"Predator's Mark", featureText:"The first successfully hit you land in a scene marks your target. The next attack an ally makes against the marked target has Advantage. This is lost the moment that attack is made, hit or miss, or when the spotlight returns to you, whichever comes first.", hpTag:"Sturdy", hp:3 },
+  { name:"Metalloid", featureName:"Metal Body", featureText:"You have a natural Armor of 1. Worn armor gives you nothing, but all of its penalties still apply to you. Healing magicks, potions and medicine have no effect on you, though bandages can still staunch Bleeding and Burning. Only Downtime restores your Hit Points. You do not need to eat or breathe.", hpTag:"Sturdy", hp:3 }
 ];
 
 const SRD_BACKGROUNDS = [
@@ -1284,7 +1289,8 @@ const SRD_BACKGROUNDS = [
   { name:"Criminal", featureName:"Knows a Guy", featureText:"In any settlement of reasonable size, you always have connections to people from down under. Whether they'll want to strike a deal with you or not is a separate matter." },
   { name:"Pilgrim", featureName:"Faith on the Road", featureText:"You are always welcome to rest, eat, and shelter for at least one night at any shrine, temple, or religious site of any faith, provided you come in peace." },
   { name:"Scholar", featureName:"Always Prepared", featureText:"Once per session, declare that you've already read about something in the current scene — you can ask the GM one factual question about a monster, a well-known NPC, an event, or an enemy." },
-  { name:"Orphan", featureName:"Raised by Circumstance", featureText:"You always know how to find food, shelter, or safety for one night in any settlement, no matter how hostile." }
+  { name:"Orphan", featureName:"Raised by Circumstance", featureText:"You always know how to find food, shelter, or safety for one night in any settlement, no matter how hostile." },
+  { name:"Outlaw", featureName:"Known to the Law", featureText:"You always notice when the law takes an interest in you. You also know where a settlement's watch walks and where it doesn't." }
 ];
 
 const SRD_OCCUPATIONS = [
@@ -1295,7 +1301,8 @@ const SRD_OCCUPATIONS = [
   { name:"Innkeeper", featureName:"Social Awareness", featureText:"Within moments of entering a public gathering space, you know who's in charge, who's dangerous, and who's about to cause trouble." },
   { name:"Mason", featureName:"Master Builder", featureText:"You can always tell whether a wall, floor, or ceiling is load-bearing, unstable, or hollow, and identify the fastest way to bring it down if needed." },
   { name:"Scribe", featureName:"Trained Hand", featureText:"Given a few minutes to study a sample, you can forge, copy, or recognize a forgery of any handwriting or document." },
-  { name:"Merchant", featureName:"Knows the Price", featureText:"You always know the fair market value of any mundane item, and can tell when someone is lying to you about price, quality, or origin. You immediately know if someone is ripping you off." }
+  { name:"Merchant", featureName:"Knows the Price", featureText:"You always know the fair market value of any mundane item, and can tell when someone is lying to you about price, quality, or origin. You immediately know if someone is ripping you off." },
+  { name:"Sellsword", featureName:"Hired Hand", featureText:"In any settlement of reasonable size, you know who is hiring blades and what the work pays. You also recognize banners and repuation of most armed companies you meet." }
 ];
 
 const SRD_ARCHETYPES = [
@@ -1306,7 +1313,8 @@ const SRD_ARCHETYPES = [
   { name:"Envoy", featureName:"Silver Accord", featureText:"When a conflict is about to lead to inevitable violence, attempt to talk down one specific individual. Once per scene, you can treat one failed roll as a success this way.", bonusTag:"Slick", hpBonus:0, evasionBonus:1 },
   { name:"Trickster", featureName:"Sleight of Circumstance", featureText:"Create a distraction that draws a target's attention onto you. Once per scene, you can immediately roll your Help die to any ally you can see after they roll.", bonusTag:"Slick", hpBonus:0, evasionBonus:1 },
   { name:"Herbalist", featureName:"Practiced Remedy", featureText:"When you perform a Healing action, heal an additional HP.", bonusTag:"Tough", hpBonus:2, evasionBonus:0 },
-  { name:"Adept", featureName:"Attuned Mind", featureText:"Once per Long Downtime, you can safely cast one spell without spending any Safe Casts, whatever its cost.", bonusTag:"Tough", hpBonus:2, evasionBonus:0 }
+  { name:"Adept", featureName:"Attuned Mind", featureText:"Once per Long Downtime, you can safely cast one spell without spending any Safe Casts, whatever its cost.", bonusTag:"Tough", hpBonus:2, evasionBonus:0 },
+  { name:"Tinkerer", featureName:"Field Repair", featureText:"Once per scene, you can spend your action to return one broken, non-Improvised weapon to use, or restore 1 point of Armor Durability to a creature within Melee Proximity.", bonusTag:"Tough", hpBonus:2, evasionBonus:0 }
 ];
 
 const SRD_EXPERTISE_EXAMPLES = [
@@ -1326,7 +1334,16 @@ const SRD_WEAPON_TYPES = {
   "Shortbow": { damage:"+3", bonus:"Grace", tag:"Ranged", damageType:"Physical" },
   "Longbow": { damage:"+5", bonus:"Might", tag:"Heavy", damageType:"Physical" },
   "Crossbow": { damage:"+4", bonus:"Grace", tag:"Ranged, Reload", damageType:"Physical" },
-  "Firearm": { damage:"+6", bonus:"Grace", tag:"Ranged, Reload, Sundering, Misfire", damageType:"Physical" }
+  "Firearm": { damage:"+6", bonus:"Grace", tag:"Ranged, Reload, Sundering, Misfire", damageType:"Physical" },
+
+  // ---- Magical weapon types ----
+  // Their Bonus is Magicks, so the weapon gating rule means a character
+  // needs at least +1 Magicks to wield one. Focus and Charged weapons
+  // carry Improvised, so they can break after a hit that shows any 1s —
+  // that's their trade-off. Martial Magicks are real weapons and don't.
+  "Arcane Focus": { damage:"+2", bonus:"Magicks", tag:"Focus, Improvised", damageType:"Physical" },
+  "Charged Weapon": { damage:"+2", bonus:"Magicks", tag:"Charged, Improvised", damageType:"Physical" },
+  "Martial Magicks": { damage:"+3", bonus:"Magicks", tag:"Martial Magicks", damageType:"Magical" }
 };
 
 const SRD_WEAPONS = [
@@ -1368,11 +1385,42 @@ const SRD_WEAPONS = [
 
   { name:"Matchlock Pistol", type:"Firearm" },
   { name:"Wheellock Pistol", type:"Firearm" },
-  { name:"Hand Cannon", type:"Firearm" }
+  { name:"Hand Cannon", type:"Firearm" },
+
+  // ---- Magical weapons (need +1 Magicks) ----
+  // Arcane Focus: +1 die to Spellcast and Spell Resist Rolls.
+  { name:"Channeler's Staff", type:"Arcane Focus" },
+  { name:"Spellwright's Rod", type:"Arcane Focus" },
+  { name:"Crystal Scepter", type:"Arcane Focus" },
+
+  // Charged Weapon: carries one bound spell, castable free once per
+  // Long Downtime. Every bound spell is cantrip-sized (about a 1 Safe
+  // Cast effect) and unique to its weapon — add new ones here.
+  { name:"Cinder Wand", type:"Charged Weapon", charge:{
+      name:"Fire Mote", tradition:"Pyromancy", damageType:"Magical",
+      statLabel:"Damage", statValue:"2", proximity:"Near", roll:"Spellcast",
+      description:"You make a Spellcast Roll to flick a spark of living ember at a target you can see within reasonable Proximity. On a crit, the target also suffers Burning." } },
+  { name:"Sentinel Staff", type:"Charged Weapon", charge:{
+      name:"Sentinel's Veil", tradition:"Arcanomancy", damageType:"Magical",
+      statLabel:"Damage", statValue:"—", proximity:"Self", roll:"—",
+      description:"You draw a thin ward of magicks close around you. You gain +1 Armor against the next attack that hits you before your next action. The bonus ends as soon as that attack resolves or as soon as you do your next action, whichever comes first." } },
+  { name:"Thornroot Wand", type:"Charged Weapon", charge:{
+      name:"Snaring Thorns", tradition:"Biomancy", damageType:"Magical",
+      statLabel:"Damage", statValue:"—", proximity:"Close", roll:"Spell Resist",
+      description:"A target you can see within Close Proximity must make a Spell Resist against your Magicks bonus. When they fail to resist the spell, thorned roots snag their legs and they are slowed until they finish their next action." } },
+  { name:"Lantern Staff", type:"Charged Weapon", charge:{
+      name:"Revealing Light", tradition:"Lumomancy", damageType:"Magical",
+      statLabel:"Damage", statValue:"—", proximity:"Near", roll:"Spell Resist",
+      description:"A hidden creature within Near Proximity must make a Spell Resist against your Magicks bonus. When it fails to resist the spell, a pale light finds it and it is no longer hidden." } },
+
+  // Martial Magicks: the magical version of a Sidearm (+3), rolled with Magicks.
+  { name:"Runeblade", type:"Martial Magicks" },
+  { name:"Sigil Cutlass", type:"Martial Magicks" },
+  { name:"Witchsteel Falchion", type:"Martial Magicks" }
 ];
 
 const SRD_WEAPON_TAGS = {
-  "Improvised": "After you successfully land a hit with this weapon, if there are any 1s on the dice roll, this weapon breaks.",
+  "Improvised": "After you successfully land a weapon attack with this weapon, if there are any 1s on the dice roll, this weapon breaks permanently and cannot be repaired.",
   "Concealable": "You can easily hide this weapon and bring it to places where weapons are otherwise forbidden.",
   "Versatile": "You can choose to one-hand (Grace) or two-hand (Might) this weapon.",
   "Heavy": "On a critical hit, the target is made Prone.",
@@ -1380,7 +1428,10 @@ const SRD_WEAPON_TAGS = {
   "Ranged": "You can attack creatures from Distant Proximity.",
   "Reload": "After attacking, the weapon must be reloaded before it can attack again. Reloading requires one Action.",
   "Sundering": "The attack reduces Armor Durability by 1 if it deals damage.",
-  "Misfire": "Rolling a 1 counts against your successes. If this makes you miss your attack, the weapon misfires and you receive 1 HP damage. The weapon is now broken and cannot be used until repaired during Downtime."
+  "Misfire": "Rolling a 1 counts against your successes. If this makes you miss your attack, the weapon misfires and you receive 1 HP damage. The weapon is now broken and cannot be used until repaired during Downtime.",
+  "Focus": "While you wield this weapon, you gain +1 die to your Spellcast Rolls and to the Spell Resist Rolls you make to resist spell effects.",
+  "Charged": "Once per Long Downtime, you can cast the spell bound to this weapon without spending any Safe Casts. It isn't one of the spells you know.",
+  "Martial Magicks": "You use your Magicks bonus for Attack Rolls with this weapon."
 };
 
 const SRD_ARMOR_CLASSES = {
@@ -1410,7 +1461,8 @@ const SRD_ARMORS = [
 
 const SRD_EQUIPMENT_SETS = [
   { name:"Set A", items:["Backpack","Bedroll","Mess kit","Tinderbox","Torch","5 rations","Waterskin","Healing potion (2 HP)","5 gold pieces"] },
-  { name:"Set B", items:["Backpack","Crowbar","Hammer","10 pitons","Torch","5 rations","Waterskin","50 feet of hempen rope","5 gold pieces"] }
+  { name:"Set B", items:["Backpack","Crowbar","Hammer","10 pitons","Torch","5 rations","Waterskin","50 feet of hempen rope","5 gold pieces"] },
+  { name:"Set C", items:["Backpack","25 gold pieces"] }
 ];
 
 const SRD_SPELLS = [
@@ -1431,7 +1483,7 @@ const SRD_SPELLS = [
   { name:'Smoke Cover', tradition:'Aeromancy', damageType:'Magical', statLabel:'Heal', statValue:'—', proximity:'Melee', roll:'—', cost:'1 Safe Cast', description:'You touch one creature you can see within Melee Proximity and cover them with a temporary smoke cover. They are hidden until they act.' },
   { name:'Light', tradition:'Lumomancy', damageType:'Magical', statLabel:'Heal', statValue:'—', proximity:'Melee', roll:'—', cost:'1 Safe Cast', description:'You touch one object you can see within Melee Proximity. That object emits a bright light that extends up to Far Proximity and can be seen by creatures far out the Distant Proximity.' },
   { name:'Darkness', tradition:'Lumomancy', damageType:'Magical', statLabel:'Damage', statValue:'—', proximity:'Melee', roll:'—', cost:'1 Safe Cast', description:'You create an area of pure magical darkness in an area around you snuffing out any non-magical light. Magical light effects are temporarily suspended within the area. snuf Creatures inside the darkness have Disadvantage in melee attacks and cannot perform features like Attack of Opportunity. s Additionally, they cannot make Ranged attacks beyond Melee Proximity. They are also hidden from other creatures outside the darkness.' },
-  { name:'Silence', tradition:'Desmomancy', damageType:'Magical', statLabel:'Damage', statValue:'—', proximity:'Far', roll:'Spell Resist', cost:'1 Safe Cast', description:'A target you can see within reasonable Proximity must make a Spell Resist against your Magicks bonus. When they fail to resist the spell, they are cannot cast spells until they finish their action.' },
+  { name:'Silence', tradition:'Desmomancy', damageType:'Magical', statLabel:'Damage', statValue:'—', proximity:'Far', roll:'Spell Resist', cost:'1 Safe Cast', description:'A target you can see within reasonable Proximity must make a Spell Resist against your Magicks bonus. When they fail to resist the spell, they cannot cast spells until they finish their action.' },
   { name:'Dispel', tradition:'Arcanomancy', damageType:'Magical', statLabel:'Damage', statValue:'—', proximity:'Near', roll:'—', cost:'1 Safe Cast', description:'You may remove one active magical effect on a creature or you can see within reasonable Proximity.' },
   { name:'Magicks Sense', tradition:'Arcanomancy', damageType:'Magical', statLabel:'Heal', statValue:'—', proximity:'Near', roll:'—', cost:'1 Safe Cast', description:'Until your next action, you sense the presence of magicks within Near Proximity. If you sense magicks in this way, you can use your action to see a faint aura around any visible creature or object in the area that bears magicks, and you learn the nature of its magicks.' },
   { name:'Telekinesis', tradition:'Arcanomancy', damageType:'Magical', statLabel:'Damage', statValue:'—', proximity:'Near', roll:'Spell Resist', cost:'1 Safe Cast', description:'A target you can see within reasonable Proximity must make a Spell Resist against your Magicks bonus. When they fail to resist the spell, you can move them one Proximity closer or farther. You can freely move unbound objects this way if they weigh less than 100 x your Magicks bonus in lbs.' },
@@ -1834,6 +1886,97 @@ function renderFeatureBox(elId, entry){
     (entry.bonusTag ? `<span class="badge">${entry.bonusTag} · ${entry.hpBonus ? "+"+entry.hpBonus+" Max HP" : "+"+entry.evasionBonus+" Evasion"}</span>` : "");
 }
 
+/*****************************************************************
+ * WEAPON GATING
+ *
+ * A weapon is only selectable when the character has at least +1
+ * (WEAPON_MIN_BONUS) in the ability its type rolls with — the "bonus"
+ * field of its weapon type ("Grace or Might" means either will do).
+ * Weapons that fail the check stay in the list but are greyed out
+ * and can't be chosen. The check uses the effective bonus, so
+ * Ability Score Improvements count.
+ *****************************************************************/
+
+const WEAPON_MIN_BONUS = 1;
+const WEAPON_HINT = "Greyed-out weapons need at least +1 in the ability they roll with.";
+
+function weaponAbilities(weapon){
+  const type = WEAPON_TYPES[weapon.type] || {};
+  return String(type.bonus || "").split(/\s+or\s+/i)
+    .map(function(a){ return a.trim(); })
+    .filter(function(a){ return a in stats; });
+}
+
+function weaponUsable(weapon){
+  const abilities = weaponAbilities(weapon);
+  if(!abilities.length) return true;
+  return abilities.some(function(a){ return effectiveBonus(a) >= WEAPON_MIN_BONUS; });
+}
+
+function weaponRequirementText(weapon){
+  const abilities = weaponAbilities(weapon);
+  if(!abilities.length) return "";
+  return "needs " + abilities.join(" or ") + " " + formatBonus(WEAPON_MIN_BONUS);
+}
+
+function setWeaponNote(message){
+  const el = document.getElementById("weapon-note");
+  if(el) el.textContent = message || WEAPON_HINT;
+}
+
+// Picks a replacement when the current weapon stops being usable
+// (e.g. a stat swap or level-up change). Avoids falling back to
+// Bare Fists / an Improvised weapon unless nothing else is usable.
+function pickFallbackWeapon(){
+  const usable = WEAPONS.filter(weaponUsable);
+  const real = usable.filter(function(w){ return w.type !== "Unarmed" && w.type !== "Improvised"; });
+  const pool = real.length ? real : usable;
+  return pool.length ? randomItem(pool) : null;
+}
+
+// Re-evaluates every option in the weapon dropdown against the current
+// stats: greys out the ones that can't be used and, if the selected
+// weapon just became unusable, swaps to a usable one with a note.
+function refreshWeaponOptions(){
+  const select = document.getElementById("weapon");
+  if(!select || !WEAPONS) return;
+
+  const anyUsable = WEAPONS.some(weaponUsable);
+  Array.prototype.forEach.call(select.options, function(opt){
+    const w = findBy(WEAPONS, opt.value);
+    if(!w) return;
+    const blocked = anyUsable && !weaponUsable(w);
+    opt.disabled = blocked;
+    opt.textContent = blocked ? (w.name + " (" + weaponRequirementText(w) + ")") : w.name;
+  });
+
+  const current = findBy(WEAPONS, select.value);
+  if(current && anyUsable && !weaponUsable(current)){
+    const replacement = pickFallbackWeapon();
+    if(replacement){
+      select.value = replacement.name;
+      renderWeaponTable(replacement.name);
+      setWeaponNote(current.name + " " + weaponRequirementText(current) + " — switched to " + replacement.name + ".");
+    }
+  }
+}
+
+// Bound spell of a Charged weapon, as a small block for the weapon box
+// and the printed dossier. Returns "" for weapons without one.
+function chargedSpellHtml(weapon){
+  const s = weapon && weapon.charge;
+  if(!s) return "";
+  let html = '<div style="margin-top:8px;">';
+  html += '<span class="fname" style="margin-bottom:0px">Bound Spell — ' + s.name + ' · ' + s.tradition + '</span>';
+  if(spellDealsDamage(s)) html += '<span class="badge">' + s.statLabel + ': ' + s.statValue + '</span>';
+  html += '<span class="badge">Proximity: ' + s.proximity + '</span>';
+  html += '<span class="badge">Roll: ' + s.roll + '</span>';
+  if(spellDealsDamage(s)) html += '<span class="badge">' + s.damageType + ' Damage</span>';
+  html += '<span class="badge" style="margin-bottom:16px">Cost: Free · once per Long Downtime</span><br>';
+  html += s.description + '</div>';
+  return html;
+}
+
 function renderWeaponTable(selected){
   const weapon = findBy(WEAPONS, selected);
   const type = WEAPON_TYPES[weapon.type] || {};
@@ -1851,7 +1994,7 @@ function renderWeaponTable(selected){
       <span class="fname">${tag}</span>${WEAPON_TAGS[tag] || ""}
     </div>
   `).join("");
-  box.innerHTML = `<span class="fname">${weapon.name}</span>${statLine}${tagDefs}`;
+  box.innerHTML = `<span class="fname">${weapon.name}</span>${statLine}${tagDefs}${chargedSpellHtml(weapon)}`;
 }
 
 function renderArmorTable(selected){
@@ -2036,7 +2179,7 @@ function onFieldChange(field){
   if(field==="background") renderFeatureBox("background-feature", findBy(BACKGROUNDS,value));
   if(field==="occupation") renderFeatureBox("occupation-feature", findBy(OCCUPATIONS,value));
   if(field==="archetype") renderFeatureBox("archetype-feature", findBy(ARCHETYPES,value));
-  if(field==="weapon") renderWeaponTable(value);
+  if(field==="weapon"){ renderWeaponTable(value); setWeaponNote(""); }
   if(field==="armor") renderArmorTable(value);
   if(field==="equipmentSet") { renderEquipmentSetBox(value); resetInventoryFromSet(value); }
 
@@ -2049,7 +2192,12 @@ function rerollField(field){
     onExpertiseChange();
     return;
   }
-  const picked = randomItem(FIELD_DATA[field]);
+  let pool = FIELD_DATA[field];
+  if(field === "weapon"){
+    const usable = WEAPONS.filter(weaponUsable);
+    if(usable.length) pool = usable;
+  }
+  const picked = randomItem(pool);
   document.getElementById(field).value = picked.name;
   onFieldChange(field);
 }
@@ -2115,13 +2263,20 @@ function generateCharacter(){
   document.getElementById("d-backstory").value = "";
   syncBackstoryDisplay();
 
+  // Stats are rolled first so the weapon pick can respect the +1 gating.
+  assignStats();
+
   ["ancestry","background","occupation","archetype","weapon","armor","equipmentSet"].forEach(field=>{
-    document.getElementById(field).value = randomItem(FIELD_DATA[field]).name;
+    let pool = FIELD_DATA[field];
+    if(field === "weapon"){
+      const usable = WEAPONS.filter(weaponUsable);
+      if(usable.length) pool = usable;
+    }
+    document.getElementById(field).value = randomItem(pool).name;
     onFieldChange(field);
   });
 
   rerollField("expertise");
-  assignStats();
   renderSpells();
 
   chosenSpells = [];
@@ -2133,6 +2288,7 @@ function generateCharacter(){
 }
 
 function updateCharacter(){
+  refreshWeaponOptions(); // grey out / swap weapons the current stats can't wield
   const derived = computeDerived();
   renderSpells(); 
 
@@ -2444,7 +2600,7 @@ function renderDossier(derived){
     <div class="dossier-entry">
       <span class="fname">Weapon — ${weapon.name} (${weapon.type})</span>
       <span class="badge">Damage: ${weaponType.damage}</span><span class="badge">Bonus: ${weaponType.bonus}</span><span class="badge">Tag: ${weaponType.tag}</span><span class="badge">${weaponType.damageType} Damage</span>
-      <br>${weaponTagDefs}
+      <br>${weaponTagDefs}${chargedSpellHtml(weapon)}
     </div>
     <div class="dossier-entry">
       <span class="fname">Armor — ${armor.name} (${armor.type})</span>
@@ -2615,14 +2771,15 @@ function restoreSaveState(data){
   document.getElementById("name").value = data.name || "";
   document.getElementById("level").value = data.level || "1";
 
+  // Stats and level-up picks go in first: weapon gating reads them.
+  stats = data.stats ? { ...data.stats } : { Grace:"+2", Might:"+1", Magicks:"-1" };
+  buildStatDropdowns();
+  levelUpPicks = levelUpPicksFromNames(data.levelUp);
+
   ["ancestry","background","occupation","archetype","weapon","armor","equipmentSet"].forEach(field=>{
     if(data[field]) document.getElementById(field).value = data[field];
     onFieldChange(field);
   });
-
-  stats = data.stats ? { ...data.stats } : { Grace:"+2", Might:"+1", Magicks:"-1" };
-  buildStatDropdowns();
-  levelUpPicks = levelUpPicksFromNames(data.levelUp);
 
   document.getElementById("expertise").value = data.expertiseSelect || "";
   document.getElementById("expertise-custom").value = data.expertiseCustom || "";
