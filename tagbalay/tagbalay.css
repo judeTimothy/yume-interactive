@@ -1,10 +1,6 @@
 /* Tagbalay page — extends ../styles.css, uses its tokens (--accent, --bg, etc.) */
-.tb-nav{display:flex;gap:clamp(.9rem,2.5vw,1.8rem);font-size:var(--small)}
-.tb-nav a{color:var(--text-soft);text-decoration:none}
-.tb-nav a:hover,.tb-nav a:focus-visible{color:var(--text)}
-@media (max-width:560px){.site-header .brand__meta{display:none}}
 
-.tb-hero{position:relative;overflow:hidden;background:#000;padding-top:var(--header-height);isolation:isolate}
+.tb-hero{position:relative;overflow:hidden;background:#000;isolation:isolate}
 .tb-hero__bg{position:absolute;inset:-6%;background:url("assets/tagbalay-bg.webp") center/cover;z-index:-3;animation:tb-drift 28s ease-in-out infinite alternate;will-change:transform}
 .tb-hero__fog{position:absolute;inset:-20% -30%;z-index:-2;pointer-events:none;opacity:.55;
   background:radial-gradient(40% 30% at 25% 60%,rgba(209,59,47,.22),transparent 70%),radial-gradient(45% 35% at 75% 40%,rgba(120,20,30,.26),transparent 70%);
