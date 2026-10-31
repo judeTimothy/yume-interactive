@@ -30,9 +30,21 @@
 
 .tb-download{max-width:var(--content-width)}
 .tb-h3{font-size:var(--h3);margin:2rem 0 .6rem}
+.tb-dl{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1.25rem;margin:1.75rem 0 0;align-items:start}
+@media (max-width:760px){.tb-dl{grid-template-columns:1fr}}
+.tb-card{display:flex;flex-direction:column;gap:.8rem;padding:1.4rem 1.5rem;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow-md)}
+.tb-card__title{font-size:var(--h3);margin:0}
+.tb-card__meta{margin:-.4rem 0 .2rem;color:var(--text-soft);font-size:var(--small)}
+.tb-help{margin:0;color:var(--text-soft);font-size:var(--small);line-height:1.55}
+.tb-more{border-top:1px solid var(--border);padding-top:.8rem}
+.tb-more summary{cursor:pointer;font-weight:600;font-size:var(--small)}
+.tb-more[open] summary{color:var(--accent)}
+.tb-more__body{display:grid;gap:.6rem;margin-top:.8rem;font-size:var(--small)}
+.tb-more__body p{margin:0}
+.tb-steps{margin:0;padding-left:1.2rem;display:grid;gap:.4rem;color:var(--text-soft)}
 .tb-hash-label{margin:0;color:var(--text-soft);font-size:var(--small)}
 .tb-hash,.tb-download code{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
-.tb-hash{display:block;overflow-x:auto;padding:.8rem 1rem;margin:.4rem 0 1rem;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-sm);font-size:.85rem;word-break:break-all}
+.tb-hash{display:block;overflow-x:auto;padding:.7rem .9rem;margin:0;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-sm);font-size:.85rem;word-break:break-all}
 
 .tb-faq{max-width:900px}
 .tb-faq details{border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--surface);margin:.7rem 0;padding:.9rem 1.1rem}

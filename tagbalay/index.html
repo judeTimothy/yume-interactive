@@ -46,10 +46,10 @@
       "genre": ["Horror", "Psychological horror", "Survival horror"],
       "inLanguage": "hil",
       "applicationCategory": "Game",
-      "operatingSystem": "Windows",
+      "operatingSystem": ["Windows", "Android"],
       "softwareVersion": "0.5.0",
       "award": ["2nd place, Sound Design, Filipino Horror Game Jam 2026", "3rd place, most ratings received with 37 ratings, Filipino Horror Game Jam 2026", "Top 10 in all other judging criteria, Filipino Horror Game Jam 2026"],
-      "downloadUrl": "https://github.com/judeTimothy/Tagbalay/releases/latest/download/Tagbalay-Windows.zip",
+      "downloadUrl": ["https://github.com/judeTimothy/Tagbalay/releases/latest/download/Tagbalay-Windows.zip", "https://github.com/judeTimothy/Tagbalay/releases/latest/download/Tagbalay-Android.apk"],
       "publisher": { "@id": "https://judetimothy.github.io/yume-interactive/#organization" },
       "author": { "@id": "https://judetimothy.github.io/yume-interactive/#organization" }
     },
@@ -67,7 +67,8 @@
         { "@type": "Question", "name": "What language is Tagbalay in?", "acceptedAnswer": { "@type": "Answer", "text": "Tagbalay is fully voiced in Hiligaynon, with subtitles." } },
         { "@type": "Question", "name": "Who made Tagbalay?", "acceptedAnswer": { "@type": "Answer", "text": "Tagbalay is developed by YUME Interactive, an indie game studio." } },
         { "@type": "Question", "name": "How did Tagbalay do in the Filipino Horror Game Jam 2026?", "acceptedAnswer": { "@type": "Answer", "text": "Tagbalay placed #2 in Sound Design and #3 in most ratings received, with 37 ratings. It finished in the top 10 in every other judging criterion. The jam ran from September 1 to October 5, 2026, with voting open until October 17." } },
-        { "@type": "Question", "name": "How do I check that the Tagbalay download is safe?", "acceptedAnswer": { "@type": "Answer", "text": "Compare the SHA-256 checksum of your downloaded file with the one published on this page, and review the public VirusTotal report linked next to it." } }
+        { "@type": "Question", "name": "What platforms is Tagbalay available on?", "acceptedAnswer": { "@type": "Answer", "text": "Tagbalay is available for Windows and as an Android debug build, both downloadable from this page." } },
+        { "@type": "Question", "name": "How do I check that the Tagbalay download is safe?", "acceptedAnswer": { "@type": "Answer", "text": "Each download has a public virus scan report on VirusTotal and a SHA-256 fingerprint, both listed in the download section. If the fingerprint of your file matches the one shown, the file is genuine and hasn’t been changed." } }
       ]
     }
   ]
@@ -126,25 +127,11 @@
         <p class="tb-tagline">Who you let in could cost you everything.</p>
         <div class="hero__actions">
           <a class="btn btn-primary" href="https://github.com/judeTimothy/Tagbalay/releases/latest/download/Tagbalay-Windows.zip" rel="noopener">Download for Windows</a>
-          <a class="btn btn-secondary" href="#about">About the game</a>
+          <a class="btn btn-secondary" href="https://github.com/judeTimothy/Tagbalay/releases/latest/download/Tagbalay-Android.apk" rel="noopener">Download for Android</a>
         </div>
         <p class="tb-note">Fully voiced in Hiligaynon, with subtitles.</p>
       </div>
     </section>
-    
-<!--
-    <section class="section tb-section tb-results-wrap" id="results" aria-labelledby="resultsTitle">
-      <div class="wide">
-        <h2 class="section-title" id="resultsTitle">Game jam results</h2>
-        <p class="section-copy">Tagbalay was entered in the <strong>Filipino Horror Game Jam 2026</strong>. The jam ran from September 1 to October 5, with voting open until October 17.</p>
-        <ul class="tb-results">
-          <li class="tb-result"><span class="tb-result__rank">#2</span><span class="tb-result__label">Sound Design</span></li>
-          <li class="tb-result"><span class="tb-result__rank">#3</span><span class="tb-result__label">Most ratings received<small>37 ratings</small></span></li>
-          <li class="tb-result"><span class="tb-result__rank">Top 10</span><span class="tb-result__label">In every other judging criterion</span></li>
-        </ul>
-      </div>
-    </section> 
--->
 
     <section class="section tb-section" id="about">
       <div class="wide tb-grid">
@@ -162,7 +149,7 @@
             <dt>Developer</dt><dd><a href="../">YUME Interactive</a></dd>
             <dt>Voice</dt><dd>Fully voiced in Hiligaynon</dd>
             <dt>Subtitles</dt><dd>Yes</dd>
-            <dt>Platform</dt><dd>Windows</dd>
+            <dt>Platforms</dt><dd>Windows, Android (debug build)</dd>
           </dl>
         </aside>
       </div>
@@ -171,12 +158,50 @@
     <section class="section tb-section tb-section--alt" id="download">
       <div class="wide tb-download">
         <h2 class="section-title">Download Tagbalay</h2>
-        <p class="section-copy">Early access: Tagbalay is in active development, so expect bugs and changes. Current build: v0.5.0 (Filipino Horror Game Jam 2026 release). Download it directly from the official release and verify the file before you run it.</p>
-        <p><a class="btn btn-primary" href="https://github.com/judeTimothy/Tagbalay/releases/latest/download/Tagbalay-Windows.zip" rel="noopener">Download for Windows</a></p>
-        <h3 class="tb-h3">Verify your download</h3>
-        <p class="tb-hash-label">SHA-256</p>
-        <code class="tb-hash">01965D8AA5D7604A5905AE33DD1E0DBF9CADBE23BE039644732F9DC3A5B490DE</code>
-        <p class="section-copy">On Windows, run <code>certutil -hashfile Tagbalay-Windows.zip SHA256</code> in a terminal and compare the result. You can also read the <a href="https://www.virustotal.com/gui/file/01965d8aa5d7604a5905ae33dd1e0dbf9cadbe23be039644732f9dc3a5b490de/details" rel="noopener noreferrer">public VirusTotal report</a>.</p>
+        <p class="section-copy">Early access: Tagbalay is in active development, so expect bugs and changes. Current build: v0.5.0 (Filipino Horror Game Jam 2026 release).</p>
+
+        <div class="tb-dl">
+          <article class="tb-card">
+            <h3 class="tb-card__title">Windows</h3>
+            <p class="tb-card__meta">PC · ZIP file</p>
+            <a class="btn btn-primary btn-block" href="https://github.com/judeTimothy/Tagbalay/releases/latest/download/Tagbalay-Windows.zip" rel="noopener">Download for Windows</a>
+            <details class="tb-more">
+              <summary>Check that the file is safe</summary>
+              <div class="tb-more__body">
+                <p><a href="https://www.virustotal.com/gui/file/01965d8aa5d7604a5905ae33dd1e0dbf9cadbe23be039644732f9dc3a5b490de/details" rel="noopener noreferrer">View the virus scan report</a>, from VirusTotal, an independent scanner.</p>
+                <p class="tb-hash-label">File fingerprint (SHA-256)</p>
+                <code class="tb-hash">01965D8AA5D7604A5905AE33DD1E0DBF9CADBE23BE039644732F9DC3A5B490DE</code>
+                <p class="tb-help">A fingerprint is a unique code for this exact file. If your download shows the same code, it hasn't been changed. On Windows, open Command Prompt in your Downloads folder and run <code>certutil -hashfile Tagbalay-Windows.zip SHA256</code>.</p>
+              </div>
+            </details>
+          </article>
+
+          <article class="tb-card">
+            <h3 class="tb-card__title">Android</h3>
+            <p class="tb-card__meta">Phone or tablet · APK file · Debug build</p>
+            <a class="btn btn-secondary btn-block" href="https://github.com/judeTimothy/Tagbalay/releases/latest/download/Tagbalay-Android.apk" rel="noopener">Download for Android</a>
+            <p class="tb-help">This is a debug build made for testing. It may run slower than a final version, and you might need to uninstall an older version before updating.</p>
+            <details class="tb-more">
+              <summary>How to install on Android</summary>
+              <div class="tb-more__body">
+                <ol class="tb-steps">
+                  <li>Open the downloaded file from your notifications or Downloads.</li>
+                  <li>If Android asks, allow your browser or file manager to install apps, just this once.</li>
+                  <li>If Google Play Protect warns about an unfamiliar app, tap "More details", then "Install anyway".</li>
+                </ol>
+              </div>
+            </details>
+            <details class="tb-more">
+              <summary>Check that the file is safe</summary>
+              <div class="tb-more__body">
+                <p><a href="https://www.virustotal.com/gui/file/ea8f1ba946dffefae7734c69e633cc1615103495e515d0dfad059bd3daf82d23/details" rel="noopener noreferrer">View the virus scan report</a>, from VirusTotal, an independent scanner.</p>
+                <p class="tb-hash-label">File fingerprint (SHA-256)</p>
+                <code class="tb-hash">EA8F1BA946DFFEFAE7734C69E633CC1615103495E515D0DFAD059BD3DAF82D23</code>
+                <p class="tb-help">A fingerprint is a unique code for this exact file. Most people can skip it, since the scan report is the easiest check.</p>
+              </div>
+            </details>
+          </article>
+        </div>
       </div>
     </section>
 
@@ -187,7 +212,8 @@
         <details><summary>What language is Tagbalay in?</summary><p>Tagbalay is fully voiced in Hiligaynon, with subtitles.</p></details>
         <details><summary>Who made Tagbalay?</summary><p>Tagbalay is developed by <a href="../">YUME Interactive</a>, an indie game studio.</p></details>
         <details><summary>How did Tagbalay do in the Filipino Horror Game Jam 2026?</summary><p>Tagbalay placed #2 in Sound Design and #3 in most ratings received, with 37 ratings. It finished in the top 10 in every other judging criterion. The jam ran from September 1 to October 5, 2026, with voting open until October 17.</p></details>
-        <details><summary>How do I check that the download is safe?</summary><p>Compare the SHA-256 checksum of your file with the one listed above, and review the public VirusTotal report linked in the download section.</p></details>
+        <details><summary>What platforms is Tagbalay available on?</summary><p>Tagbalay is available for Windows and as an Android debug build, both downloadable from this page.</p></details>
+        <details><summary>How do I check that the download is safe?</summary><p>Each download has a public virus scan report on VirusTotal and a SHA-256 fingerprint, both listed in the download section. If the fingerprint of your file matches the one shown, the file is genuine and hasn't been changed.</p></details>
       </div>
     </section>
   </main>
