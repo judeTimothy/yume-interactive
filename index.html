@@ -96,9 +96,15 @@
             <a href="#capabilities">Capabilities</a>
             <a href="#case-study">Case Study</a>
             <a href="#contact">Contact</a>
+            <!-- TEMP: Tagbalay button (mobile menu). Delete this line to remove it. -->
+            <a class="site-nav__cta" href="tagbalay/">Play Tagbalay</a>
           </div>
         </div>
       </nav>
+
+      <!-- TEMP: Tagbalay header button (desktop). Delete this block to remove it. -->
+      <a class="btn btn-primary header-cta" href="tagbalay/">Play Tagbalay</a>
+      <!-- /TEMP -->
     </div>
   </header>
 
@@ -134,16 +140,16 @@
         <button class="chip" type="button" data-filter="branding" aria-pressed="false">Branding</button>
         </div>
         <div class="portfolio-grid" id="portfolioGrid">
-        <article class="portfolio-card" data-categories="game design|game development|ui/ux" data-featured="true">
-          <a class="portfolio-card__link" href="https://yumeindie.itch.io/go-on-campaign" target="_blank" rel="noopener noreferrer" aria-label="Open project: Go ON">
-            <div class="portfolio-card__media" style="--thumb-a: #1a1d27; --thumb-b: #d13b2f">
-              <img src="assets/go-on-splash.webp" srcset="assets/go-on-splash-800.webp 800w, assets/go-on-splash.webp 1600w" sizes="(max-width: 720px) 100vw, (max-width: 1080px) 50vw, 33vw" width="1600" height="1000" alt="Go ON project preview" loading="lazy" decoding="async">
-              <span class="portfolio-card__label">Playable Prototype</span>
+        <article class="portfolio-card" data-categories="game design|game development" data-featured="true">
+          <a class="portfolio-card__link" href="tagbalay/" aria-label="Open project: Tagbalay">
+            <div class="portfolio-card__media" style="--thumb-a: #1a0d0f; --thumb-b: #d13b2f">
+              <img src="assets/tagbalay-splash.webp" srcset="assets/tagbalay-splash-800.webp 800w, assets/tagbalay-splash.webp 1152w" sizes="(max-width: 720px) 100vw, (max-width: 1080px) 50vw, 33vw" width="1152" height="720" alt="Tagbalay project preview" loading="lazy" decoding="async">
+              <span class="portfolio-card__label">Early Access</span>
             </div>
             <div class="portfolio-card__body">
-              <h3>Go ON</h3>
-              <div class="portfolio-meta">Combat loop · active development · systems UX</div>
-              <p>A systems-forward prototype focused on readable feedback, progression clarity, strong interaction design, and mobile-friendly flow.</p>
+              <h3>Tagbalay</h3>
+              <div class="portfolio-meta">Survival horror · Hiligaynon voiced · #2 Sound Design</div>
+              <p>A social, psychological survival horror game about poverty and desperation. Care for your sick mother, and decide who to let in when strangers knock at night.</p>
             </div>
           </a>
         </article>
@@ -160,16 +166,16 @@
             </div>
           </a>
         </article>
-        <article class="portfolio-card" data-categories="game design|game development|branding" data-featured="true">
-          <a class="portfolio-card__link" href="projects/generic.html" aria-label="Open project: Araling Panlipunan Game-based Interactive Learning">
-            <div class="portfolio-card__media" style="--thumb-a: #24242d; --thumb-b: #ff3ea8">
-              <img src="assets/agila-splash.webp" srcset="assets/agila-splash-800.webp 800w, assets/agila-splash.webp 1600w" sizes="(max-width: 720px) 100vw, (max-width: 1080px) 50vw, 33vw" width="1600" height="1000" alt="Araling Panlipunan Game-based Interactive Learning project preview" loading="lazy" decoding="async">
-              <span class="portfolio-card__label">Interactive Learning</span>
+        <article class="portfolio-card" data-categories="web design|web development|branding" data-featured="true">
+          <a class="portfolio-card__link" href="https://nbcs-envi.com/" target="_blank" rel="noopener noreferrer" aria-label="Open project: NBCS">
+            <div class="portfolio-card__media" style="--thumb-a: #111114; --thumb-b: #ff3ea8">
+              <img src="assets/nbcs-splash.webp" srcset="assets/nbcs-splash-800.webp 800w, assets/nbcs-splash.webp 1600w" sizes="(max-width: 720px) 100vw, (max-width: 1080px) 50vw, 33vw" width="1600" height="1000" alt="NBCS project preview" loading="lazy" decoding="async">
+              <span class="portfolio-card__label">Environmental</span>
             </div>
             <div class="portfolio-card__body">
-              <h3>Araling Panlipunan Game-based Interactive Learning</h3>
-              <div class="portfolio-meta">Worldbuilding · narrative framing</div>
-              <p>An interactive game-based learning tool built to make education more memorable, clear, and visually entertaining.</p>
+              <h3>NBCS</h3>
+              <div class="portfolio-meta">Brand identity · Environmental</div>
+              <p>An environmental consultancy and business services company that helps with commercial, residential, agricultural, industrial and government projects prepare necessary reports and environmental studies to ensure project sustainability and compliance.</p>
             </div>
           </a>
         </article>
@@ -238,16 +244,29 @@
             </div>
           </a>
         </article>
-        <article class="portfolio-card is-hidden" data-categories="web design|web development|branding" data-featured="false">
-          <a class="portfolio-card__link" href="https://nbcs-envi.com/" target="_blank" rel="noopener noreferrer" aria-label="Open project: NBCS">
-            <div class="portfolio-card__media" style="--thumb-a: #111114; --thumb-b: #ff3ea8">
-              <img src="assets/nbcs-splash.webp" srcset="assets/nbcs-splash-800.webp 800w, assets/nbcs-splash.webp 1600w" sizes="(max-width: 720px) 100vw, (max-width: 1080px) 50vw, 33vw" width="1600" height="1000" alt="NBCS project preview" loading="lazy" decoding="async">
-              <span class="portfolio-card__label">Environmental</span>
+        <article class="portfolio-card is-hidden" data-categories="game design|game development|branding" data-featured="false">
+          <a class="portfolio-card__link" href="projects/generic.html" aria-label="Open project: Araling Panlipunan Game-based Interactive Learning">
+            <div class="portfolio-card__media" style="--thumb-a: #24242d; --thumb-b: #ff3ea8">
+              <img src="assets/agila-splash.webp" srcset="assets/agila-splash-800.webp 800w, assets/agila-splash.webp 1600w" sizes="(max-width: 720px) 100vw, (max-width: 1080px) 50vw, 33vw" width="1600" height="1000" alt="Araling Panlipunan Game-based Interactive Learning project preview" loading="lazy" decoding="async">
+              <span class="portfolio-card__label">Interactive Learning</span>
             </div>
             <div class="portfolio-card__body">
-              <h3>NBCS</h3>
-              <div class="portfolio-meta">Brand identity · Environmental</div>
-              <p>An environmental consultancy and business services company that helps with commercial, residential, agricultural, industrial and government projects prepare necessary reports and environmental studies to ensure project sustainability and compliance.</p>
+              <h3>Araling Panlipunan Game-based Interactive Learning</h3>
+              <div class="portfolio-meta">Worldbuilding · narrative framing</div>
+              <p>An interactive game-based learning tool built to make education more memorable, clear, and visually entertaining.</p>
+            </div>
+          </a>
+        </article>
+        <article class="portfolio-card is-hidden" data-categories="game design|game development|ui/ux" data-featured="false">
+          <a class="portfolio-card__link" href="https://yumeindie.itch.io/go-on-campaign" target="_blank" rel="noopener noreferrer" aria-label="Open project: Go ON">
+            <div class="portfolio-card__media" style="--thumb-a: #1a1d27; --thumb-b: #d13b2f">
+              <img src="assets/go-on-splash.webp" srcset="assets/go-on-splash-800.webp 800w, assets/go-on-splash.webp 1600w" sizes="(max-width: 720px) 100vw, (max-width: 1080px) 50vw, 33vw" width="1600" height="1000" alt="Go ON project preview" loading="lazy" decoding="async">
+              <span class="portfolio-card__label">Playable Prototype</span>
+            </div>
+            <div class="portfolio-card__body">
+              <h3>Go ON</h3>
+              <div class="portfolio-meta">Combat loop · active development · systems UX</div>
+              <p>A systems-forward prototype focused on readable feedback, progression clarity, strong interaction design, and mobile-friendly flow.</p>
             </div>
           </a>
         </article>

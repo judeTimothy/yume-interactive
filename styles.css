@@ -935,3 +935,19 @@ button:focus-visible {
   .brand__name { font-size: 1rem; }
   .brand { gap: .65rem; }
 }
+
+
+/* TEMP: Tagbalay header button. Delete this whole block (and the two TEMP spots in index.html) to remove it. */
+.site-header__inner { grid-template-columns: max-content minmax(0, 1fr) max-content; }
+.header-cta { padding: .55rem 1.15rem; min-height: 44px; white-space: nowrap; }
+.site-nav__cta { display: none; }
+@media (max-width: 900px) {
+  .site-header__inner { grid-template-columns: 1fr auto; }
+  .header-cta { display: none; }
+  .site-nav__links a.site-nav__cta {
+    display: flex; justify-content: center; margin-top: .4rem;
+    background: var(--accent); color: #fff; font-weight: 700;
+  }
+  .site-nav__links a.site-nav__cta:hover { background: var(--accent); filter: brightness(1.08); }
+}
+/* END TEMP */
