@@ -57,3 +57,19 @@
 @keyframes tb-grain{to{transform:translate3d(-6%,4%,0)}}
 @keyframes tb-flicker{0%,93%,96%,100%{opacity:1}94%{opacity:.82}95%{opacity:.96}97%{opacity:.88}}
 @media (prefers-reduced-motion:reduce){.tb-hero__bg,.tb-hero__fog,.tb-hero__card,.tb-hero__fx::after{animation:none}}
+
+/* Music toggle */
+.tb-music{position:fixed;right:max(1rem,env(safe-area-inset-right,0px));bottom:max(1rem,env(safe-area-inset-bottom,0px));z-index:30;width:48px;height:48px;padding:0;display:grid;place-items:center;border-radius:50%;border:1px solid rgba(209,59,47,.55);background:rgba(13,13,15,.55);color:var(--text);cursor:pointer;box-shadow:0 8px 24px rgba(0,0,0,.45);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);transition:border-color .2s ease,transform .2s ease,box-shadow .2s ease}
+.tb-music[hidden]{display:none}
+.tb-music:hover{transform:translateY(-1px);border-color:var(--accent)}
+.tb-music:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+.tb-music__bars{display:none;align-items:flex-end;gap:3px;height:16px}
+.tb-music__bars i{display:block;width:3px;height:100%;border-radius:2px;background:var(--accent);transform-origin:bottom;transform:scaleY(.35);animation:tb-bar 1.1s ease-in-out infinite}
+.tb-music__bars i:nth-child(2){animation-delay:-.4s}.tb-music__bars i:nth-child(3){animation-delay:-.8s}.tb-music__bars i:nth-child(4){animation-delay:-.2s}
+.tb-music.is-playing{box-shadow:0 0 18px rgba(209,59,47,.45),0 8px 24px rgba(0,0,0,.45)}
+.tb-music.is-playing .tb-music__off{display:none}
+.tb-music.is-playing .tb-music__bars{display:flex}
+.tb-music.is-hint:not(.is-playing)::after{content:"";position:absolute;inset:-5px;border-radius:50%;border:1px solid var(--accent);opacity:0;animation:tb-ring 2.4s ease-out infinite}
+@keyframes tb-bar{0%,100%{transform:scaleY(.3)}50%{transform:scaleY(1)}}
+@keyframes tb-ring{0%{opacity:.7;transform:scale(.9)}100%{opacity:0;transform:scale(1.35)}}
+@media (prefers-reduced-motion:reduce){.tb-music__bars i,.tb-music.is-hint::after{animation:none}.tb-music__bars i{transform:scaleY(.7)}}
