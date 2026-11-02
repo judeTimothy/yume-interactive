@@ -130,33 +130,59 @@ svg{fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-lin
 /* PREVIEW: yellow dashed boxes on placeholders. Remove class="preview" from <body> to hide them. */
 .preview [data-ph]{outline:2px dashed rgba(255,200,0,.75);outline-offset:3px}
 
+
+/* Individual platform download statistics */
 .tn-download-stats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  align-items: start;
+  justify-content: center;
+  gap: clamp(1rem, 4vw, 3rem);
+  width: min(100%, 680px);
+  margin: 28px auto 12px;
+  text-align: center;
+}
+
+.tn-download-stat {
   display: flex;
   flex-direction: column;
   align-items: center;
-  text-align: center;
-  margin: 28px auto 12px;
+  justify-content: center;
   gap: 5px;
+  min-width: 0;
 }
 
 .tn-download-stats__number {
-  font-size: clamp(2rem, 5vw, 3rem);
+  font-size: clamp(1.7rem, 5vw, 3rem);
   font-weight: 800;
   letter-spacing: -0.04em;
+  line-height: 1.2;
   color: #fff;
   font-variant-numeric: tabular-nums;
 }
 
 .tn-download-stats__label {
-  font-size: 0.9rem;
+  font-size: clamp(.65rem, 1.8vw, .9rem);
   font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.12em;
+  letter-spacing: .1em;
+  color: var(--text-soft);
 }
 
-.tn-download-stats__note {
-  font-size: 0.8rem;
-  opacity: 0.6;
+@media (max-width: 420px) {
+  .tn-download-stats {
+    gap: .5rem;
+  }
+
+  .tn-download-stats__number {
+    font-size: 1.65rem;
+  }
+
+  .tn-download-stats__label {
+    font-size: .62rem;
+    letter-spacing: .06em;
+  }
 }
+
 
 @media (prefers-reduced-motion:reduce){body::before,.tb-music__bars i,.tb-music.is-hint::after{animation:none}html{scroll-behavior:auto}.tb-music__bars i{transform:scaleY(.7)}}
