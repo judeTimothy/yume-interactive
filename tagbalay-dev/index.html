@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src https://formspree.io; frame-src https://www.youtube-nocookie.com; form-action https://formspree.io; base-uri 'self'; object-src 'none'" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src https://formspree.io https://api.github.com; frame-src https://www.youtube-nocookie.com; form-action https://formspree.io; base-uri 'self'; object-src 'none'" />
   <meta name="theme-color" content="#0d0d0f" />
   <meta name="robots" content="noindex, nofollow" />
   <title>Tagbalay — Psychological Survival Horror Game by YUME Interactive</title>
@@ -37,7 +37,7 @@
       "applicationCategory": "Game",
       "operatingSystem": ["Windows", "Android"],
       "softwareVersion": "0.5.0",
-      "downloadUrl": ["https://github.com/judeTimothy/Tagbalay/releases/latest/download/Tagbalay-Windows.zip", "https://github.com/judeTimothy/Tagbalay/releases/latest/download/Tagbalay-Android.apk"],
+      "downloadUrl": ["https://github.com/judeTimothy/yume-interactive/releases/latest/download/Tagbalay-Windows.zip", "https://github.com/judeTimothy/yume-interactive/releases/latest/download/Tagbalay-Android.apk"],
       "sameAs": ["https://yumeindie.itch.io/tagbalay"],
       "award": ["2nd place, Sound Design, Filipino Horror Game Jam 2026", "3rd place, most ratings received with 37 ratings, Filipino Horror Game Jam 2026", "Top 10 in all other judging criteria, Filipino Horror Game Jam 2026"],
       "publisher": { "@type": "Organization", "name": "YUME Interactive", "url": "https://judetimothy.github.io/yume-interactive/" }
@@ -113,8 +113,8 @@
   <div class="tn-overlay" id="getOverlay"></div>
   <div class="tn-menu" id="getMenu" role="dialog" aria-label="Get Tagbalay">
     <div class="tn-menu__head"><span>Get Tagbalay on</span><button type="button" class="tn-menu__x" id="getClose" aria-label="Close">&times;</button></div>
-    <a href="https://github.com/judeTimothy/Tagbalay/releases/latest/download/Tagbalay-Windows.zip" rel="noopener"><svg><use href="#i-win"/></svg>Windows</a>
-    <a href="https://github.com/judeTimothy/Tagbalay/releases/latest/download/Tagbalay-Android.apk" rel="noopener"><svg><use href="#i-and"/></svg>Android</a>
+    <a href="https://github.com/judeTimothy/yume-interactive/releases/latest/download/Tagbalay-Windows.zip" rel="noopener"><svg><use href="#i-win"/></svg>Windows</a>
+    <a href="https://github.com/judeTimothy/yume-interactive/releases/latest/download/Tagbalay-Android.apk" rel="noopener"><svg><use href="#i-and"/></svg>Android</a>
     <a href="https://yumeindie.itch.io/tagbalay" target="_blank" rel="noopener noreferrer"><svg><use href="#i-itch"/></svg>itch.io</a>
   </div>
 
@@ -130,9 +130,14 @@
       <div class="tn-cta">
         <p class="tn-cta__label">Download Tagbalay for</p>
         <div class="tn-btns">
-          <a class="tn-btn" href="https://github.com/judeTimothy/Tagbalay/releases/latest/download/Tagbalay-Windows.zip" rel="noopener"><svg><use href="#i-win"/></svg><span>Windows</span></a>
-          <a class="tn-btn" href="https://github.com/judeTimothy/Tagbalay/releases/latest/download/Tagbalay-Android.apk" rel="noopener"><svg><use href="#i-and"/></svg><span>Android</span></a>
+          <a class="tn-btn" href="https://github.com/judeTimothy/yume-interactive/releases/latest/download/Tagbalay-Windows.zip" rel="noopener"><svg><use href="#i-win"/></svg><span>Windows</span></a>
+          <a class="tn-btn" href="https://github.com/judeTimothy/yume-interactive/releases/latest/download/Tagbalay-Android.apk" rel="noopener"><svg><use href="#i-and"/></svg><span>Android</span></a>
           <a class="tn-btn" href="https://yumeindie.itch.io/tagbalay" target="_blank" rel="noopener noreferrer"><svg><use href="#i-itch"/></svg><span>itch.io</span></a>
+        </div>
+        <div class="tn-download-stats" aria-live="polite">
+          <span class="tn-download-stats__number" id="totalDownloads">—</span>
+          <span class="tn-download-stats__label">Total Downloads</span>
+          <span class="tn-download-stats__note">Across all platforms</span>
         </div>
         <p class="tn-cta__note">Early access, v0.5.0. Also available on itch.io as playable browser game.</p>
       </div>
@@ -179,7 +184,7 @@
         <article class="tn-card">
           <h3>Windows</h3>
           <p class="tn-muted">PC · ZIP file</p>
-          <a class="tn-btn" href="https://github.com/judeTimothy/Tagbalay/releases/latest/download/Tagbalay-Windows.zip" rel="noopener"><svg><use href="#i-win"/></svg><span>Download for Windows</span></a>
+          <a class="tn-btn" href="https://github.com/judeTimothy/yume-interactive/releases/latest/download/Tagbalay-Windows.zip" rel="noopener"><svg><use href="#i-win"/></svg><span>Download for Windows</span></a>
           <details>
             <summary><svg><use href="#i-shield"/></svg>Check that the file is safe</summary>
             <p><a href="https://www.virustotal.com/gui/file/01965d8aa5d7604a5905ae33dd1e0dbf9cadbe23be039644732f9dc3a5b490de/details" rel="noopener noreferrer">View the virus scan report</a>, from VirusTotal, an independent scanner.</p>
@@ -191,7 +196,7 @@
         <article class="tn-card">
           <h3>Android</h3>
           <p class="tn-muted">Phone or tablet · APK file</p>
-          <a class="tn-btn" href="https://github.com/judeTimothy/Tagbalay/releases/latest/download/Tagbalay-Android.apk" rel="noopener"><svg><use href="#i-and"/></svg><span>Download for Android</span></a>
+          <a class="tn-btn" href="https://github.com/judeTimothy/yume-interactive/releases/latest/download/Tagbalay-Android.apk" rel="noopener"><svg><use href="#i-and"/></svg><span>Download for Android</span></a>
           <p class="tn-muted">You might need to uninstall an older version before updating.</p>
           <details>
             <summary><svg><use href="#i-info"/></svg>How to install on Android</summary>
@@ -199,9 +204,10 @@
           </details>
           <details>
             <summary><svg><use href="#i-shield"/></svg>Check that the file is safe</summary>
-            <p><a href="ANDROID_VT_URL" rel="noopener noreferrer" data-ph="Android VirusTotal link">View the virus scan report</a>, from VirusTotal, an independent scanner.</p>
+            <p><a href="https://www.virustotal.com/gui/file/ea8f1ba946dffefae7734c69e633cc1615103495e515d0dfad059bd3daf82d23/details" rel="noopener noreferrer" data-ph="Android VirusTotal link">View the virus scan report</a>, from VirusTotal, an independent scanner.</p>
             <p class="tn-muted">File fingerprint (SHA-256)</p>
-            <code class="tn-hash" data-ph="Android SHA-256">ANDROID_SHA256</code>
+            <code class="tn-hash" data-ph="Android SHA-256">EA8F1BA946DFFEFAE7734C69E633CC1615103495E515D0DFAD059BD3DAF82D23
+</code>
           </details>
         </article>
         <article class="tn-card">
@@ -299,7 +305,6 @@
 
     <div class="wide footer-bottom">
       <span>© <span id="yr">2026</span> YUME Interactive. All rights reserved.</span>
-      <span>Built with plain HTML, CSS, and JavaScript.</span>
     </div>
   </footer>
 
