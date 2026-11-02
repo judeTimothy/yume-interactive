@@ -129,27 +129,33 @@
       </div>
       <div class="tn-cta">
         <p class="tn-cta__label">Download Tagbalay for</p>
-        <div class="tn-btns">
-          <a class="tn-btn" href="https://github.com/judeTimothy/yume-interactive/releases/latest/download/Tagbalay-Windows.zip" rel="noopener"><svg><use href="#i-win"/></svg><span>Windows</span></a>
-          <a class="tn-btn" href="https://github.com/judeTimothy/yume-interactive/releases/latest/download/Tagbalay-Android.apk" rel="noopener"><svg><use href="#i-and"/></svg><span>Android</span></a>
-          <a class="tn-btn" href="https://yumeindie.itch.io/tagbalay" target="_blank" rel="noopener noreferrer"><svg><use href="#i-itch"/></svg><span>itch.io</span></a>
-        </div>
-        <div class="tn-download-stats" aria-live="polite">
-          <div class="tn-download-stat">
-            <span class="tn-download-stats__number" id="windowsDownloads">—</span>
-            <span class="tn-download-stats__label">Windows Downloads</span>
-          </div>
         
-          <div class="tn-download-stat">
-            <span class="tn-download-stats__number" id="androidDownloads">—</span>
-            <span class="tn-download-stats__label">Android Downloads</span>
-          </div>
-        
-          <div class="tn-download-stat">
-            <span class="tn-download-stats__number" id="itchDownloads">—</span>
-            <span class="tn-download-stats__label">itch.io Downloads</span>
-          </div>
+      <div class="tn-btns">
+        <div class="tn-download-item">
+          <a class="tn-btn" href="https://github.com/judeTimothy/yume-interactive/releases/latest/download/Tagbalay-Windows.zip" rel="noopener">
+            <svg><use href="#i-win"/></svg>
+            <span>Windows</span>
+          </a>
+          <span class="tn-download-count" id="windowsDownloads" aria-live="polite">Loading downloads...</span>
         </div>
+      
+        <div class="tn-download-item">
+          <a class="tn-btn" href="https://github.com/judeTimothy/yume-interactive/releases/latest/download/Tagbalay-Android.apk" rel="noopener">
+            <svg><use href="#i-and"/></svg>
+            <span>Android</span>
+          </a>
+          <span class="tn-download-count" id="androidDownloads" aria-live="polite">Loading downloads...</span>
+        </div>
+      
+        <div class="tn-download-item">
+          <a class="tn-btn" href="https://yumeindie.itch.io/tagbalay" target="_blank" rel="noopener noreferrer">
+            <svg><use href="#i-itch"/></svg>
+            <span>itch.io</span>
+          </a>
+          <span class="tn-download-count" id="itchDownloads">0 downloads</span>
+        </div>
+      </div>
+
         <p class="tn-cta__note">Early access, v0.5.0. Also available on itch.io as playable browser game.</p>
       </div>
     </section>
