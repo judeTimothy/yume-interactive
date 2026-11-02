@@ -129,3 +129,62 @@
   function ready() { if (!mb.hidden) return; mb.hidden = false; ui(false); if (!touch && !userOff) { play(); startWait(); } }
   if (audio.readyState >= 1) ready(); else audio.addEventListener("loadedmetadata", ready, { once: true });
 })();
+
+// ========================================
+// TAGBALAY TOTAL DOWNLOAD COUNTER
+// ========================================
+
+const DOWNLOAD_CONFIG = {
+  github: {
+    owner: "judeTimothy",
+    repo: "yume-interactive"
+  },
+
+  // Update these numbers manually
+  itch: 0,
+  other: 0
+};
+
+async function updateDownloadCounter() {
+  const counter = document.getElementById("totalDownloads");
+  if (!counter) return;
+
+  try {
+    const response = await fetch(
+      `https://api.github.com/repos/${DOWNLOAD_CONFIG.github.owner}/${DOWNLOAD_CONFIG.github.repo}/releases?per_page=100`,
+      {
+        headers: {
+          Accept: "application/vnd.github+json"
+        }
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error("GitHub API unavailable");
+    }
+
+    const releases = await response.json();
+
+    const githubDownloads = releases.reduce((total, release) => {
+      return total + (release.assets || [])
+        .filter(asset =>
+          asset.name === "Tagbalay-Windows.zip" ||
+          asset.name === "Tagbalay-Android.apk"
+        )
+        .reduce((sum, asset) => sum + asset.download_count, 0);
+    }, 0);
+
+    const total =
+      githubDownloads +
+      DOWNLOAD_CONFIG.itch +
+      DOWNLOAD_CONFIG.other;
+
+    counter.textContent = total.toLocaleString("en-US");
+
+  } catch (error) {
+    console.error("Could not retrieve download statistics:", error);
+    counter.textContent = "Unavailable";
+  }
+}
+
+updateDownloadCounter();
