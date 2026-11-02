@@ -129,3 +129,102 @@
   function ready() { if (!mb.hidden) return; mb.hidden = false; ui(false); if (!touch && !userOff) { play(); startWait(); } }
   if (audio.readyState >= 1) ready(); else audio.addEventListener("loadedmetadata", ready, { once: true });
 })();
+
+
+
+/* ========================================
+   TAGBALAY INDIVIDUAL DOWNLOAD COUNTERS
+   ======================================== */
+
+const DOWNLOAD_CONFIG = {
+  github: {
+    owner: "judeTimothy",
+    repo: "yume-interactive"
+  },
+
+  // Additional downloads not reflected in GitHub.
+  // Update these manually whenever necessary.
+  manual: {
+    windows: 20,
+    android: 10,
+    itch: 1146
+  }
+};
+
+async function updateDownloadCounter() {
+  const windows = document.getElementById("windowsDownloads");
+  const android = document.getElementById("androidDownloads");
+  const itch = document.getElementById("itchDownloads");
+
+  if (!windows || !android || !itch) return;
+
+  // itch.io: manually configured count.
+  itch.textContent =
+    (DOWNLOAD_CONFIG.manual.itch).toLocaleString("en-US") +
+    " downloads";
+
+  try {
+    let windowsTotal = 0;
+    let androidTotal = 0;
+    let page = 1;
+
+    // Retrieve all GitHub release pages.
+    while (true) {
+      const response = await fetch(
+        `https://api.github.com/repos/${DOWNLOAD_CONFIG.github.owner}/${DOWNLOAD_CONFIG.github.repo}/releases?per_page=100&page=${page}`,
+        {
+          headers: {
+            Accept: "application/vnd.github+json"
+          }
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("GitHub API unavailable");
+      }
+
+      const releases = await response.json();
+
+      releases.forEach(release => {
+        (release.assets || []).forEach(asset => {
+          if (asset.name === "Tagbalay-Windows.zip") {
+            windowsTotal += asset.download_count;
+          }
+
+          if (asset.name === "Tagbalay-Android.apk") {
+            androidTotal += asset.download_count;
+          }
+        });
+      });
+
+      if (releases.length < 100) break;
+
+      page++;
+    }
+
+    // GitHub + manually configured additional downloads.
+    const finalWindows =
+      windowsTotal + DOWNLOAD_CONFIG.manual.windows;
+
+    const finalAndroid =
+      androidTotal + DOWNLOAD_CONFIG.manual.android;
+
+    windows.textContent =
+      finalWindows.toLocaleString("en-US") + " downloads";
+
+    android.textContent =
+      finalAndroid.toLocaleString("en-US") + " downloads";
+
+  } catch (error) {
+    console.error(
+      "Could not retrieve GitHub download statistics:",
+      error
+    );
+
+    windows.textContent = "Statistics unavailable";
+    android.textContent = "Statistics unavailable";
+  }
+}
+
+updateDownloadCounter();
+

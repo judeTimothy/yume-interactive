@@ -3,8 +3,9 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src https://formspree.io; frame-src https://www.youtube-nocookie.com; form-action https://formspree.io; base-uri 'self'; object-src 'none'" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src https://formspree.io https://api.github.com; frame-src https://www.youtube-nocookie.com; form-action https://formspree.io; base-uri 'self'; object-src 'none'" />
   <meta name="theme-color" content="#0d0d0f" />
+  <meta name="robots" content="noindex, nofollow" />
   <title>Tagbalay — Psychological Survival Horror Game by YUME Interactive</title>
   <meta name="description" content="Tagbalay is a social, psychological survival horror game about poverty and desperation. Care for your sick mother, decide who to let in at night, and survive. Fully voiced in Hiligaynon. Download the early access build." />
   <link rel="canonical" href="https://judetimothy.github.io/yume-interactive/tagbalay/" />
@@ -128,11 +129,33 @@
       </div>
       <div class="tn-cta">
         <p class="tn-cta__label">Download Tagbalay for</p>
-        <div class="tn-btns">
-          <a class="tn-btn" href="https://github.com/judeTimothy/yume-interactive/releases/latest/download/Tagbalay-Windows.zip" rel="noopener"><svg><use href="#i-win"/></svg><span>Windows</span></a>
-          <a class="tn-btn" href="https://github.com/judeTimothy/yume-interactive/releases/latest/download/Tagbalay-Android.apk" rel="noopener"><svg><use href="#i-and"/></svg><span>Android</span></a>
-          <a class="tn-btn" href="https://yumeindie.itch.io/tagbalay" target="_blank" rel="noopener noreferrer"><svg><use href="#i-itch"/></svg><span>itch.io</span></a>
+        
+      <div class="tn-btns">
+        <div class="tn-download-item">
+          <a class="tn-btn" href="https://github.com/judeTimothy/yume-interactive/releases/latest/download/Tagbalay-Windows.zip" rel="noopener">
+            <svg><use href="#i-win"/></svg>
+            <span>Windows</span>
+          </a>
+          <span class="tn-download-count" id="windowsDownloads" aria-live="polite">Loading downloads...</span>
         </div>
+      
+        <div class="tn-download-item">
+          <a class="tn-btn" href="https://github.com/judeTimothy/yume-interactive/releases/latest/download/Tagbalay-Android.apk" rel="noopener">
+            <svg><use href="#i-and"/></svg>
+            <span>Android</span>
+          </a>
+          <span class="tn-download-count" id="androidDownloads" aria-live="polite">Loading downloads...</span>
+        </div>
+      
+        <div class="tn-download-item">
+          <a class="tn-btn" href="https://yumeindie.itch.io/tagbalay" target="_blank" rel="noopener noreferrer">
+            <svg><use href="#i-itch"/></svg>
+            <span>itch.io</span>
+          </a>
+          <span class="tn-download-count" id="itchDownloads">0 downloads</span>
+        </div>
+      </div>
+
         <p class="tn-cta__note">Early access, v0.5.0. Also available on itch.io as playable browser game.</p>
       </div>
     </section>
