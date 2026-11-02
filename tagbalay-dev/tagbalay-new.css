@@ -130,4 +130,33 @@ svg{fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-lin
 /* PREVIEW: yellow dashed boxes on placeholders. Remove class="preview" from <body> to hide them. */
 .preview [data-ph]{outline:2px dashed rgba(255,200,0,.75);outline-offset:3px}
 
+.tn-download-stats {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  margin: 28px auto 12px;
+  gap: 5px;
+}
+
+.tn-download-stats__number {
+  font-size: clamp(2rem, 5vw, 3rem);
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  color: #fff;
+  font-variant-numeric: tabular-nums;
+}
+
+.tn-download-stats__label {
+  font-size: 0.9rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+}
+
+.tn-download-stats__note {
+  font-size: 0.8rem;
+  opacity: 0.6;
+}
+
 @media (prefers-reduced-motion:reduce){body::before,.tb-music__bars i,.tb-music.is-hint::after{animation:none}html{scroll-behavior:auto}.tb-music__bars i{transform:scaleY(.7)}}
