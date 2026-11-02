@@ -130,8 +130,9 @@
   if (audio.readyState >= 1) ready(); else audio.addEventListener("loadedmetadata", ready, { once: true });
 })();
 
+
 // ========================================
-// TAGBALAY TOTAL DOWNLOAD COUNTER
+// TAGBALAY INDIVIDUAL DOWNLOAD COUNTERS
 // ========================================
 
 const DOWNLOAD_CONFIG = {
@@ -140,14 +141,16 @@ const DOWNLOAD_CONFIG = {
     repo: "yume-interactive"
   },
 
-  // Update these numbers manually
-  itch: 0,
-  other: 0
+  // Reserved for future itch.io integration
+  itch: null
 };
 
 async function updateDownloadCounter() {
-  const counter = document.getElementById("totalDownloads");
-  if (!counter) return;
+  const windowsCounter = document.getElementById("windowsDownloads");
+  const androidCounter = document.getElementById("androidDownloads");
+  const itchCounter = document.getElementById("itchDownloads");
+
+  if (!windowsCounter || !androidCounter) return;
 
   try {
     const response = await fetch(
@@ -165,25 +168,47 @@ async function updateDownloadCounter() {
 
     const releases = await response.json();
 
-    const githubDownloads = releases.reduce((total, release) => {
-      return total + (release.assets || [])
-        .filter(asset =>
-          asset.name === "Tagbalay-Windows.zip" ||
-          asset.name === "Tagbalay-Android.apk"
-        )
-        .reduce((sum, asset) => sum + asset.download_count, 0);
-    }, 0);
+    let windowsDownloads = 0;
+    let androidDownloads = 0;
 
-    const total =
-      githubDownloads +
-      DOWNLOAD_CONFIG.itch +
-      DOWNLOAD_CONFIG.other;
+    // Aggregate downloads independently across all releases.
+    releases.forEach(release => {
+      (release.assets || []).forEach(asset => {
 
-    counter.textContent = total.toLocaleString("en-US");
+        if (asset.name === "Tagbalay-Windows.zip") {
+          windowsDownloads += asset.download_count;
+        }
+
+        if (asset.name === "Tagbalay-Android.apk") {
+          androidDownloads += asset.download_count;
+        }
+
+      });
+    });
+
+    windowsCounter.textContent =
+      windowsDownloads.toLocaleString("en-US");
+
+    androidCounter.textContent =
+      androidDownloads.toLocaleString("en-US");
+
+    // itch.io integration will be implemented separately.
+    if (itchCounter) {
+      itchCounter.textContent =
+        DOWNLOAD_CONFIG.itch === null
+          ? "—"
+          : DOWNLOAD_CONFIG.itch.toLocaleString("en-US");
+    }
 
   } catch (error) {
     console.error("Could not retrieve download statistics:", error);
-    counter.textContent = "Unavailable";
+
+    windowsCounter.textContent = "Unavailable";
+    androidCounter.textContent = "Unavailable";
+
+    if (itchCounter) {
+      itchCounter.textContent = "—";
+    }
   }
 }
 
