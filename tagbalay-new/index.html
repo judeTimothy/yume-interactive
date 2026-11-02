@@ -74,18 +74,44 @@
 
   <canvas id="fx" aria-hidden="true"></canvas>
 
-  <header class="tn-header">
-    <a href="../" class="tn-brand" aria-label="YUME Interactive home">
-      <img src="../assets/logo-web.webp" width="40" height="40" alt="" />
-      <span>YUME Interactive</span>
-    </a>
-    <nav class="tn-nav" aria-label="Page navigation">
-      <a href="../"><svg><use href="#i-home"/></svg><span>Studio</span></a>
-      <a href="#about"><svg><use href="#i-info"/></svg><span>About</span></a>
-      <button type="button" id="getBtn" aria-expanded="false" aria-controls="getMenu"><svg><use href="#i-dl"/></svg><span>Get the game</span></button>
-      <a href="#media"><svg><use href="#i-img"/></svg><span>Media</span></a>
-      <a href="#contact"><svg><use href="#i-mail"/></svg><span>Contact</span></a>
-    </nav>
+  <header class="site-header">
+    <div class="wide site-header__inner">
+      <a href="../" class="brand" aria-label="Go to YUME Interactive home">
+        <img class="brand__logo" src="../assets/logo-web.webp" width="128" height="128" alt="YUME Interactive logo" />
+        <span class="brand__text">
+          <span class="brand__name">YUME Interactive</span>
+          <span class="brand__meta">Indie Game Studio</span>
+        </span>
+      </a>
+
+      <nav class="site-nav" aria-label="Primary navigation">
+        <div class="site-nav__bar">
+          <a href="#about">About</a>
+          <a href="#media">Media</a>
+          <a href="#download">Download</a>
+          <a href="#contact">Contact</a>
+        </div>
+
+        <button class="menu-toggle" id="menuToggle" aria-expanded="false" aria-controls="mobileNav" aria-label="Toggle menu" type="button">
+          <span class="menu-toggle__icon" aria-hidden="true"></span>
+          <span class="visually-hidden">Toggle menu</span>
+        </button>
+
+        <div class="site-nav__panel" id="mobileNav">
+          <div class="site-nav__links">
+            <a href="#about">About</a>
+            <a href="#media">Media</a>
+            <a href="#download">Download</a>
+            <a href="#contact">Contact</a>
+            <!-- Tagbalay-only (mobile) -->
+            <button type="button" class="tn-get-m" id="getBtnM">Get the game</button>
+          </div>
+        </div>
+      </nav>
+
+      <!-- Tagbalay-only header button (not in the main site header): opens the download pop-out -->
+      <button type="button" class="btn btn-primary tn-get" id="getBtn" aria-expanded="false" aria-controls="getMenu">Get the game</button>
+    </div>
   </header>
 
   <div class="tn-overlay" id="getOverlay"></div>
@@ -262,20 +288,48 @@
 
   <div class="tn-lightbox" id="lightbox" role="dialog" aria-label="Screenshot"><button type="button" class="tn-lightbox__x" id="lbClose" aria-label="Close">&times;</button><img id="lbImg" src="" alt="" /></div>
 
-  <footer class="tn-footer">
-    <svg class="tn-house" viewBox="0 0 600 200" preserveAspectRatio="xMidYMax meet" aria-hidden="true">
-      <path fill="#060607" d="M0 200V178c40-6 70 2 110-4 30-5 50-14 90-14h60l-6-58h-14l-4 58h-6V92h-14v68h96l60-60 60 60h60v-22h30v22h20v-30l14-26 14 26v30h26v-24c30 0 40 8 70 14 40 8 70 2 102 6v28z"/>
-      <path fill="#060607" d="M300 112l-80 62h160z" opacity="0"/>
-      <rect class="tn-win" x="294" y="132" width="22" height="22" rx="2"/>
-    </svg>
-    <div class="tn-footer__links">
-      <a href="../">Studio</a><a href="#contact">Contact</a>
-      <a href="https://yumeindie.itch.io/tagbalay" target="_blank" rel="noopener noreferrer">itch.io</a>
-      <a href="#" data-ph="Presskit link">Presskit</a>
-      <a href="#" data-ph="Discord link">Discord</a>
-      <a href="#" data-ph="Instagram link">Instagram</a>
+  <footer class="site-footer">
+    <div class="wide footer-top">
+      <div class="footer-brand">
+        <h3>YUME Interactive</h3>
+        <p>A small indie studio aiming to revolutionize the local indie scene.</p>
+      </div>
+
+      <div class="footer-columns">
+        <div>
+          <ul class="footer-links">
+            <li><strong>About the Studio</strong></li>
+            <li><a href="../#work">Work</a></li>
+            <li><a href="../#capabilities">Capabilities</a></li>
+            <li><a href="../#case-study">Case Study</a></li>
+            <li><a href="../#contact">Contact</a></li>
+            <!-- Tagbalay-only link (not in the main site footer) -->
+            <li><a href="PRESSKIT_URL" target="_blank" rel="noopener noreferrer" data-ph="Press kit link">Tagbalay Press Kit</a></li>
+          </ul>
+        </div>
+        <div>
+          <ul class="footer-links">
+            <li><strong>Become a Dreamer</strong></li>
+            <li><a href="https://yumeindie.itch.io" target="_blank" rel="noopener noreferrer">Itch.io</a></li>
+            <li><a href="https://steamcommunity.com/id/godprime" target="_blank" rel="noopener noreferrer">Steam</a></li>
+            <li><a href="https://github.com/judeTimothy" target="_blank" rel="noopener noreferrer">GitHub</a></li>
+            <li><a href="https://www.linkedin.com/in/jude-timothy-joshua-bomban-59387b1a7/" target="_blank" rel="noopener noreferrer">LinkedIn</a></li>
+          </ul>
+        </div>
+        <div>
+          <ul class="footer-links">
+            <li><strong>Legal</strong></li>
+            <li><a href="#">Privacy</a></li>
+            <li><a href="#">Terms</a></li>
+          </ul>
+        </div>
+      </div>
     </div>
-    <p>© <span id="yr">2026</span> YUME Interactive. All rights reserved.</p>
+
+    <div class="wide footer-bottom">
+      <span>© <span id="yr">2026</span> YUME Interactive. All rights reserved.</span>
+      <span>Built with plain HTML, CSS, and JavaScript.</span>
+    </div>
   </footer>
 
   <audio id="tbMusic" loop preload="metadata">

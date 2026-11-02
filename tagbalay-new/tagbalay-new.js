@@ -4,13 +4,32 @@
   var touch = window.matchMedia("(hover: none) and (pointer: coarse)").matches;
   $("yr").textContent = new Date().getFullYear();
 
-  /* Get-the-game menu */
-  var gBtn = $("getBtn"), gMenu = $("getMenu"), gOv = $("getOverlay");
+  /* Mobile menu (same behavior as the main site) */
+  var tog = $("menuToggle"), panel = $("mobileNav");
+  function closeNav() { document.body.classList.remove("nav-open"); tog.setAttribute("aria-expanded", "false"); }
+  tog.addEventListener("click", function (e) {
+    e.preventDefault(); e.stopPropagation();
+    tog.setAttribute("aria-expanded", String(document.body.classList.toggle("nav-open")));
+  });
+  panel.addEventListener("click", function (e) { e.stopPropagation(); });
+  document.addEventListener("click", function (e) {
+    if (document.body.classList.contains("nav-open") && !panel.contains(e.target) && !tog.contains(e.target)) closeNav();
+  });
+  document.querySelectorAll('.site-nav a[href^="#"]').forEach(function (a) { a.addEventListener("click", closeNav); });
+
+  /* Page-only download pop-out (desktop dropdown, mobile bottom sheet) */
+  var gBtn = $("getBtn"), gBtnM = $("getBtnM"), gMenu = $("getMenu"), gOv = $("getOverlay");
   function gSet(open) {
+    if (open && gBtn.offsetParent) {
+      var r = gBtn.getBoundingClientRect();
+      gMenu.style.setProperty("--tn-top", (r.bottom + 8) + "px");
+      gMenu.style.setProperty("--tn-right", Math.max(8, innerWidth - r.right) + "px");
+    }
     gMenu.classList.toggle("is-open", open); gOv.classList.toggle("is-open", open);
     gBtn.setAttribute("aria-expanded", String(open));
   }
   gBtn.addEventListener("click", function () { gSet(!gMenu.classList.contains("is-open")); });
+  gBtnM.addEventListener("click", function () { closeNav(); gSet(true); });
   gOv.addEventListener("click", function () { gSet(false); });
   $("getClose").addEventListener("click", function () { gSet(false); });
   gMenu.addEventListener("click", function (e) { if (e.target.closest("a")) gSet(false); });
@@ -26,7 +45,7 @@
   });
   lb.addEventListener("click", function (e) { if (e.target !== lbImg) lbClose(); });
   document.addEventListener("keydown", function (e) {
-    if (e.key === "Escape") { lbClose(); gSet(false); }
+    if (e.key === "Escape") { lbClose(); closeNav(); gSet(false); }
   });
 
   /* Contact form (same Formspree endpoint as the main site) */
