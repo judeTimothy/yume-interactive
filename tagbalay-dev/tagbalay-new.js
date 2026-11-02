@@ -131,9 +131,10 @@
 })();
 
 
-// ========================================
-// TAGBALAY INDIVIDUAL DOWNLOAD COUNTERS
-// ========================================
+
+/* ========================================
+   TAGBALAY INDIVIDUAL DOWNLOAD COUNTERS
+   ======================================== */
 
 const DOWNLOAD_CONFIG = {
   github: {
@@ -141,75 +142,89 @@ const DOWNLOAD_CONFIG = {
     repo: "yume-interactive"
   },
 
-  // Reserved for future itch.io integration
-  itch: null
+  // Additional downloads not reflected in GitHub.
+  // Update these manually whenever necessary.
+  manual: {
+    windows: 20,
+    android: 10,
+    itch: 1146
+  }
 };
 
 async function updateDownloadCounter() {
-  const windowsCounter = document.getElementById("windowsDownloads");
-  const androidCounter = document.getElementById("androidDownloads");
-  const itchCounter = document.getElementById("itchDownloads");
+  const windows = document.getElementById("windowsDownloads");
+  const android = document.getElementById("androidDownloads");
+  const itch = document.getElementById("itchDownloads");
 
-  if (!windowsCounter || !androidCounter) return;
+  if (!windows || !android || !itch) return;
+
+  // itch.io: manually configured count.
+  itch.textContent =
+    (DOWNLOAD_CONFIG.manual.itch).toLocaleString("en-US") +
+    " downloads";
 
   try {
-    const response = await fetch(
-      `https://api.github.com/repos/${DOWNLOAD_CONFIG.github.owner}/${DOWNLOAD_CONFIG.github.repo}/releases?per_page=100`,
-      {
-        headers: {
-          Accept: "application/vnd.github+json"
+    let windowsTotal = 0;
+    let androidTotal = 0;
+    let page = 1;
+
+    // Retrieve all GitHub release pages.
+    while (true) {
+      const response = await fetch(
+        `https://api.github.com/repos/${DOWNLOAD_CONFIG.github.owner}/${DOWNLOAD_CONFIG.github.repo}/releases?per_page=100&page=${page}`,
+        {
+          headers: {
+            Accept: "application/vnd.github+json"
+          }
         }
+      );
+
+      if (!response.ok) {
+        throw new Error("GitHub API unavailable");
       }
-    );
 
-    if (!response.ok) {
-      throw new Error("GitHub API unavailable");
-    }
+      const releases = await response.json();
 
-    const releases = await response.json();
+      releases.forEach(release => {
+        (release.assets || []).forEach(asset => {
+          if (asset.name === "Tagbalay-Windows.zip") {
+            windowsTotal += asset.download_count;
+          }
 
-    let windowsDownloads = 0;
-    let androidDownloads = 0;
-
-    // Aggregate downloads independently across all releases.
-    releases.forEach(release => {
-      (release.assets || []).forEach(asset => {
-
-        if (asset.name === "Tagbalay-Windows.zip") {
-          windowsDownloads += asset.download_count;
-        }
-
-        if (asset.name === "Tagbalay-Android.apk") {
-          androidDownloads += asset.download_count;
-        }
-
+          if (asset.name === "Tagbalay-Android.apk") {
+            androidTotal += asset.download_count;
+          }
+        });
       });
-    });
 
-    windowsCounter.textContent =
-      windowsDownloads.toLocaleString("en-US");
+      if (releases.length < 100) break;
 
-    androidCounter.textContent =
-      androidDownloads.toLocaleString("en-US");
-
-    // itch.io integration will be implemented separately.
-    if (itchCounter) {
-      itchCounter.textContent =
-        DOWNLOAD_CONFIG.itch === null
-          ? "—"
-          : DOWNLOAD_CONFIG.itch.toLocaleString("en-US");
+      page++;
     }
+
+    // GitHub + manually configured additional downloads.
+    const finalWindows =
+      windowsTotal + DOWNLOAD_CONFIG.manual.windows;
+
+    const finalAndroid =
+      androidTotal + DOWNLOAD_CONFIG.manual.android;
+
+    windows.textContent =
+      finalWindows.toLocaleString("en-US") + " downloads";
+
+    android.textContent =
+      finalAndroid.toLocaleString("en-US") + " downloads";
 
   } catch (error) {
-    console.error("Could not retrieve download statistics:", error);
+    console.error(
+      "Could not retrieve GitHub download statistics:",
+      error
+    );
 
-    windowsCounter.textContent = "Unavailable";
-    androidCounter.textContent = "Unavailable";
-
-    if (itchCounter) {
-      itchCounter.textContent = "—";
-    }
+    windows.textContent = "Statistics unavailable";
+    android.textContent = "Statistics unavailable";
   }
 }
 
 updateDownloadCounter();
+
