@@ -862,6 +862,7 @@
   <div class="toolbar no-print">
     <button class="primary" onclick="generateCharacter()">🎲 Generate Full Character</button>
     <button id="btn-playtest-docs" onclick="openPlaytestDocs()" style="display:none;">📁 Playtest Docs</button>
+    <button id="btn-playtest" onclick="openPlaytest()" style="display:none;">📖 In-house Playtest</button>
     <button id="btn-whatsnew" onclick="openWhatsNew()">📜 What's New<span class="notify-dot"></span></button>
   </div>
 
@@ -1125,6 +1126,7 @@ function toggleJsonVisibility(){
 }
 
 const PLAYTEST_DOCS_URL = "https://drive.google.com/drive/folders/1_kp7rhZ4YVlahnh6DvtFcrg-2PaZUuB5?usp=sharing";
+const PLAYTEST_LINK = "https://yume-interactive.site/gmm/campaign-tracker.html";
 
 function openPlaytestDocs(){
   if(!PLAYTEST_DOCS_URL) return;
@@ -1134,6 +1136,16 @@ function openPlaytestDocs(){
 function initPlaytestDocsButton(){
   var btn = document.getElementById("btn-playtest-docs");
   if(btn) btn.style.display = PLAYTEST_DOCS_URL ? "" : "none";
+}
+
+function openPlaytest(){
+  if(!PLAYTEST_LINK) return;
+  window.open(PLAYTEST_LINK, "_blank", "noopener");
+}
+
+function initPlaytestButton(){
+  var btn = document.getElementById("btn-playtest");
+  if(btn) btn.style.display = PLAYTEST_LINK ? "" : "none";
 }
 
 /*****************************************************************
@@ -3177,6 +3189,7 @@ toggleJsonVisibility();
 renderLevelUpTracker();
 refreshAccountBar();
 initPlaytestDocsButton();
+initPlaytestButton();
 document.getElementById("d-backstory").setAttribute("maxlength", BACKSTORY_CHAR_CAP);
 syncBackstoryDisplay();
 if(CHANGELOG.length) document.getElementById("version-label").textContent = CHANGELOG[0].version;
