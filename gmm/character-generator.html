@@ -861,6 +861,7 @@
 
   <div class="toolbar no-print">
     <button class="primary" onclick="generateCharacter()">🎲 Generate Full Character</button>
+    <button id="btn-playtest-docs" onclick="openPlaytestDocs()" style="display:none;">📁 Playtest Docs</button>
     <button id="btn-whatsnew" onclick="openWhatsNew()">📜 What's New<span class="notify-dot"></span></button>
   </div>
 
@@ -1121,6 +1122,18 @@ let SHOW_JSON_OUTPUT = false;
 
 function toggleJsonVisibility(){
   document.getElementById("json-block").style.display = SHOW_JSON_OUTPUT ? "block" : "none";
+}
+
+const PLAYTEST_DOCS_URL = "https://drive.google.com/drive/folders/1_kp7rhZ4YVlahnh6DvtFcrg-2PaZUuB5?usp=sharing";
+
+function openPlaytestDocs(){
+  if(!PLAYTEST_DOCS_URL) return;
+  window.open(PLAYTEST_DOCS_URL, "_blank", "noopener");
+}
+
+function initPlaytestDocsButton(){
+  var btn = document.getElementById("btn-playtest-docs");
+  if(btn) btn.style.display = PLAYTEST_DOCS_URL ? "" : "none";
 }
 
 /*****************************************************************
@@ -3163,6 +3176,7 @@ buildStatDropdowns();
 toggleJsonVisibility();
 renderLevelUpTracker();
 refreshAccountBar();
+initPlaytestDocsButton();
 document.getElementById("d-backstory").setAttribute("maxlength", BACKSTORY_CHAR_CAP);
 syncBackstoryDisplay();
 if(CHANGELOG.length) document.getElementById("version-label").textContent = CHANGELOG[0].version;
