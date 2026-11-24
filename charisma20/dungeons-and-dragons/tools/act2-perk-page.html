@@ -7,17 +7,14 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;800&family=Roboto+Condensed:wght@400;700&display=swap" rel="stylesheet">
-
 <style>
 :root{--bg:#12100f;--panel:#1d1a19;--panel2:#262221;--line:#3a3331;--ink:#ece6df;--mute:#9b918a;--red:#c53131;--gold:#d8a94a;--green:#5fa86a;color-scheme:dark}
 *{box-sizing:border-box}
 html,body{margin:0}
 body{background:radial-gradient(1200px 600px at 50% -200px,#2a1614,var(--bg));color:var(--ink);font:400 16px/1.4 'Roboto Condensed',sans-serif;min-height:100%;padding:env(safe-area-inset-top,0) 0 env(safe-area-inset-bottom,0)}
 h1,h2,h3{font-family:'Cinzel',serif;margin:0;letter-spacing:.04em}
-header{display:flex;justify-content:space-between;align-items:center;padding:14px 16px;border-bottom:2px solid var(--red);background:#0c0a0a}
-header h1{font-size:1.15rem;font-weight:800}
-header a,.btn{font-family:'Roboto Condensed',sans-serif;text-transform:uppercase;letter-spacing:.08em;font-weight:700;font-size:.8rem;border:1px solid var(--red);color:var(--ink);background:var(--red);padding:9px 14px;border-radius:4px;cursor:pointer;text-decoration:none}
-.btn.ghost,header a{background:transparent;border-color:var(--line);color:var(--mute)}
+a.btn,.btn{font-family:'Roboto Condensed',sans-serif;text-transform:uppercase;letter-spacing:.08em;font-weight:700;font-size:.8rem;border:1px solid var(--red);color:var(--ink);background:var(--red);padding:9px 14px;border-radius:4px;cursor:pointer;text-decoration:none}
+.btn.ghost{background:transparent;border-color:var(--line);color:var(--mute)}
 .btn:disabled{opacity:.4;cursor:not-allowed}
 main{max-width:1100px;margin:0 auto;padding:16px;display:grid;gap:16px;grid-template-columns:1fr}
 @media(min-width:860px){main.player{grid-template-columns:300px 1fr;align-items:start}.sheet{position:sticky;top:12px}}
@@ -56,7 +53,7 @@ a.lnk{color:var(--gold)}
 </style>
 </head>
 <body>
-<header><h1>Character Perks</h1><a id="modeLink" href="#admin">Admin</a></header>
+<script src="ossyra-header.js" data-title="Character Perks"></script>
 <main id="app"></main>
 
 <script type="module">
@@ -104,6 +101,7 @@ const holdData=()=>({uid:user.uid,name:name.trim()||"Another player",expiresAt:T
 
 const admin=()=>location.hash==="#admin";
 addEventListener("hashchange",()=>location.reload());
+$("#headerSlot").innerHTML='<a id="modeLink" class="btn ghost" href="#admin">Admin</a>';
 $("#modeLink").href=admin()?"#":"#admin";
 $("#modeLink").textContent=admin()?"Player view":"Admin";
 
