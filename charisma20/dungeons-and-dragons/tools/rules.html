@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Rules · The World of Ossyra</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;800&family=Roboto+Condensed:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#12100f;--panel:#1d1a19;--panel2:#262221;--line:#3a3331;--ink:#ece6df;--mute:#9b918a;--red:#c53131;--gold:#d8a94a;color-scheme:dark}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:radial-gradient(1200px 600px at 50% -200px,#2a1614,var(--bg));color:var(--ink);font:400 16px/1.4 'Roboto Condensed',sans-serif;min-height:100%}
+.tb{position:sticky;top:0;z-index:40;display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:8px;padding:8px 12px;background:#17130f;border-bottom:1px solid var(--line)}
+.btn{font:700 .8rem 'Roboto Condensed',sans-serif;text-transform:uppercase;letter-spacing:.08em;color:var(--ink);background:transparent;border:1px solid var(--line);border-radius:4px;padding:8px 12px;cursor:pointer;text-decoration:none;min-width:40px;text-align:center}
+.btn:hover:not(:disabled){border-color:var(--gold);color:var(--gold)}
+.btn:disabled{opacity:.35;cursor:not-allowed}
+.pg{display:flex;align-items:center;gap:6px;color:var(--mute);font-size:.9rem}
+.pg input{width:58px;background:#0f0d0d;border:1px solid var(--line);border-bottom:2px solid var(--red);border-radius:3px;color:var(--ink);padding:6px;font:inherit;text-align:center}
+.zl{min-width:48px;text-align:center;color:var(--mute);font-size:.85rem}
+#stage{padding:16px 8px 40px;overflow-x:auto;text-align:center}
+canvas{display:inline-block;max-width:none;background:#fff;box-shadow:0 8px 30px rgba(0,0,0,.6);border-radius:2px}
+#msg{color:var(--gold);padding:40px 16px}
+</style>
+</head>
+<body>
+<script src="ossyra-header.js" data-title="Rules"></script>
+
+<div class="tb">
+  <button class="btn" id="prev" aria-label="Previous page">‹ Prev</button>
+  <span class="pg"><input id="num" type="number" min="1" value="1" aria-label="Page number"> / <span id="tot">–</span></span>
+  <button class="btn" id="next" aria-label="Next page">Next ›</button>
+  <button class="btn" id="zout" aria-label="Zoom out">−</button>
+  <span class="zl" id="zl">Fit</span>
+  <button class="btn" id="zin" aria-label="Zoom in">+</button>
+  <button class="btn" id="fit">Fit</button>
+  <a class="btn" id="dl" download>Download</a>
+</div>
+
+<div id="stage"><div id="msg">Loading rules…</div><canvas id="cv" hidden></canvas></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script>
+/* ===== CONFIG ===== */
+const PDF_FILE = "ossyra-rules.pdf";   // upload next to this page; change the name here if needed
+/* ================== */
+const PDF_URL = encodeURI(PDF_FILE);
+pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+
+const $ = s => document.querySelector(s), cv = $("#cv"), stage = $("#stage"), msg = $("#msg");
+let doc = null, num = 1, zoom = 1, busy = false, again = false, resetScroll = false;
+$("#dl").href = PDF_URL;
+
+const saved = () => { try { return parseInt(localStorage.getItem("ossyra-rules-page")) || 0 } catch { return 0 } };
+
+async function render() {
+  if (!doc) return;
+  if (busy) { again = true; return }
+  busy = true;
+  try {
+    const pg = await doc.getPage(num), v0 = pg.getViewport({ scale: 1 });
+    const fitW = Math.min(stage.clientWidth - 16, 900) / v0.width;
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    const vp = pg.getViewport({ scale: fitW * zoom * dpr });
+    cv.width = vp.width; cv.height = vp.height;
+    cv.style.width = vp.width / dpr + "px"; cv.style.height = vp.height / dpr + "px";
+    await pg.render({ canvasContext: cv.getContext("2d"), viewport: vp }).promise;
+    cv.hidden = false; msg.hidden = true;
+    if (resetScroll) { resetScroll = false; window.scrollTo({ top: stage.offsetTop - $(".tb").offsetHeight - 8 }) }
+  } catch (e) { msg.hidden = false; msg.textContent = "Couldn’t draw this page." }
+  busy = false;
+  if (again) { again = false; render() }
+}
+
+function ui() {
+  $("#num").value = num;
+  $("#prev").disabled = num <= 1;
+  $("#next").disabled = !doc || num >= doc.numPages;
+  $("#zl").textContent = zoom === 1 ? "Fit" : Math.round(zoom * 100) + "%";
+}
+function go(n) {
+  if (!doc) return;
+  n = Math.max(1, Math.min(doc.numPages, n | 0 || 1));
+  if (n === num && !cv.hidden) return ui();
+  num = n; resetScroll = true; ui();
+  history.replaceState(null, "", "#" + n);
+  try { localStorage.setItem("ossyra-rules-page", n) } catch {}
+  render();
+}
+function setZoom(z) { zoom = Math.max(.5, Math.min(3, Math.round(z * 100) / 100)); ui(); render() }
+
+$("#prev").onclick = () => go(num - 1);
+$("#next").onclick = () => go(num + 1);
+$("#num").onchange = e => go(parseInt(e.target.value));
+$("#zin").onclick = () => setZoom(zoom + .25);
+$("#zout").onclick = () => setZoom(zoom - .25);
+$("#fit").onclick = () => setZoom(1);
+addEventListener("keydown", e => {
+  if (e.target.tagName === "INPUT") return;
+  if (e.key === "ArrowRight") go(num + 1);
+  if (e.key === "ArrowLeft") go(num - 1);
+});
+let sx = 0, sy = 0;
+stage.addEventListener("touchstart", e => { sx = e.touches[0].clientX; sy = e.touches[0].clientY }, { passive: true });
+stage.addEventListener("touchend", e => {
+  if (zoom > 1) return; // swiping while zoomed scrolls the page instead
+  const dx = e.changedTouches[0].clientX - sx, dy = e.changedTouches[0].clientY - sy;
+  if (Math.abs(dx) > 70 && Math.abs(dy) < 40) go(num + (dx < 0 ? 1 : -1));
+});
+let rt; addEventListener("resize", () => { clearTimeout(rt); rt = setTimeout(render, 200) });
+
+pdfjsLib.getDocument(PDF_URL).promise.then(d => {
+  doc = d; $("#tot").textContent = d.numPages; $("#num").max = d.numPages;
+  const fromHash = parseInt(location.hash.slice(1)) || saved() || 1;
+  num = Math.max(1, Math.min(d.numPages, fromHash));
+  ui(); render();
+}).catch((error) => {
+  console.error("PDF loading error:", error);
+
+  msg.hidden = false;
+  msg.textContent =
+    "Couldn’t load the rules PDF. Please check that ossyra-rules.pdf exists in the correct folder. " +
+    (error.message || "");
+});
+</script>
+</body>
+</html>
