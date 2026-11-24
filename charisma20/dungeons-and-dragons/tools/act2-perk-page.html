@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Character Perks</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;800&family=Roboto+Condensed:wght@400;700&display=swap" rel="stylesheet">
+<!--
+FIRESTORE RULES (paste in Firebase console, replace the admin email):
+
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{db}/documents {
+    function signedIn() { return request.auth != null && request.auth.token.firebase.sign_in_provider != 'anonymous'; }
+    function admin() { return signedIn() && request.auth.token.email in ['YOUR_ADMIN_EMAIL@gmail.com']; }
+    function holdOk(id) {
+      let p = /databases/$(db)/documents/perkHolds/$(id);
+      return !exists(p) || get(p).data.uid == request.auth.uid || get(p).data.expiresAt < request.time;
+    }
+    match /perkClaims/{perkId} {
+      allow read: if signedIn();
+      allow create: if signedIn() && request.resource.data.uid == request.auth.uid && holdOk(perkId);
+      allow delete: if admin() || resource.data.uid == request.auth.uid;
+    }
+    match /perkHolds/{perkId} {
+      allow read: if signedIn();
+      allow create, update: if signedIn() && request.resource.data.uid == request.auth.uid
+        && request.resource.data.expiresAt is timestamp
+        && request.resource.data.expiresAt <= request.time + duration.value(5, 'm')
+        && !exists(/databases/$(db)/documents/perkClaims/$(perkId))
+        && (resource == null || resource.data.uid == request.auth.uid || resource.data.expiresAt < request.time);
+      allow delete: if admin() || resource.data.uid == request.auth.uid;
+    }
+    match /characters/{uid} {
+      allow read: if admin() || (signedIn() && request.auth.uid == uid);
+      allow create, update: if signedIn() && request.auth.uid == uid && request.resource.data.name is string
+        && request.resource.data.name.size() <= 40 && request.resource.data.perks.size() <= 6;
+      allow delete: if admin() || (signedIn() && request.auth.uid == uid);
+    }
+  }
+}
+Enable Authentication > Google, and add your site domain under Authorized domains. Anonymous sign-in is not used.
+-->
+<style>
+:root{--bg:#12100f;--panel:#1d1a19;--panel2:#262221;--line:#3a3331;--ink:#ece6df;--mute:#9b918a;--red:#c53131;--gold:#d8a94a;--green:#5fa86a;color-scheme:dark}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:radial-gradient(1200px 600px at 50% -200px,#2a1614,var(--bg));color:var(--ink);font:400 16px/1.4 'Roboto Condensed',sans-serif;min-height:100%;padding:env(safe-area-inset-top,0) 0 env(safe-area-inset-bottom,0)}
+h1,h2,h3{font-family:'Cinzel',serif;margin:0;letter-spacing:.04em}
+header{display:flex;justify-content:space-between;align-items:center;padding:14px 16px;border-bottom:2px solid var(--red);background:#0c0a0a}
+header h1{font-size:1.15rem;font-weight:800}
+header a,.btn{font-family:'Roboto Condensed',sans-serif;text-transform:uppercase;letter-spacing:.08em;font-weight:700;font-size:.8rem;border:1px solid var(--red);color:var(--ink);background:var(--red);padding:9px 14px;border-radius:4px;cursor:pointer;text-decoration:none}
+.btn.ghost,header a{background:transparent;border-color:var(--line);color:var(--mute)}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+main{max-width:1100px;margin:0 auto;padding:16px;display:grid;gap:16px;grid-template-columns:1fr}
+@media(min-width:860px){main.player{grid-template-columns:300px 1fr;align-items:start}.sheet{position:sticky;top:12px}}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:6px;overflow:hidden}
+.panel>h2{font-size:.9rem;padding:10px 14px;background:var(--panel2);border-bottom:1px solid var(--line);color:var(--gold);text-transform:uppercase}
+.pad{padding:14px;display:grid;gap:12px}
+label{font-size:.72rem;text-transform:uppercase;letter-spacing:.1em;color:var(--mute)}
+input[type=text]{width:100%;background:#0f0d0d;border:1px solid var(--line);border-bottom:2px solid var(--red);color:var(--ink);padding:10px;font:inherit;font-size:1.05rem;border-radius:3px}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.stat{background:#0f0d0d;border:1px solid var(--line);border-radius:6px;text-align:center;padding:8px 4px}
+.stat b{display:block;font:800 1.6rem 'Cinzel',serif}
+.stat span{font-size:.65rem;text-transform:uppercase;letter-spacing:.1em;color:var(--mute)}
+.stat.bad b{color:var(--red)}
+.picked{display:flex;flex-wrap:wrap;gap:6px}
+.chip{font-size:.8rem;padding:3px 9px;border-radius:99px;border:1px solid var(--line);background:var(--panel2)}
+.chip.pos{border-color:var(--green)}.chip.neg{border-color:var(--red)}
+.cols{display:grid;gap:16px}
+@media(min-width:620px){.cols{grid-template-columns:1fr 1fr}}
+.perk{display:grid;grid-template-columns:1fr auto;gap:2px 10px;padding:12px 14px;border-bottom:1px solid var(--line);cursor:pointer;border-left:4px solid transparent;transition:background .15s}
+.perk:hover{background:var(--panel2)}
+.perk h3{font-size:.95rem}
+.perk p{grid-column:1;margin:0;color:var(--mute);font-size:.88rem}
+.cost{grid-row:1/3;grid-column:2;align-self:center;font:800 1.2rem 'Cinzel',serif;min-width:44px;text-align:center;border:1px solid var(--line);border-radius:6px;padding:4px 6px}
+.pos .cost{color:var(--gold)}.neg .cost{color:var(--green)}
+.perk.on{background:#2b1b1a;border-left-color:var(--red)}
+.perk.taken,.perk.held{opacity:.45;cursor:not-allowed;filter:grayscale(1)}
+.perk.held{border-left-color:var(--gold)}
+.perk small{grid-column:1;color:var(--red);font-weight:700;text-transform:uppercase;letter-spacing:.06em;font-size:.7rem}
+.perk.held small{color:var(--gold)}
+.msg{font-size:.85rem;color:var(--gold);min-height:1.2em}
+.chars{display:grid;gap:12px;grid-template-columns:repeat(auto-fill,minmax(260px,1fr))}
+.card{background:var(--panel);border:1px solid var(--line);border-top:3px solid var(--red);border-radius:6px;padding:14px;display:grid;gap:8px}
+.card h3{font-size:1.05rem}
+.muted{color:var(--mute);font-size:.8rem}
+a.lnk{color:var(--gold)}
+</style>
+</head>
+<body>
+<header><h1>Character Perks</h1><a id="modeLink" href="#admin">Admin</a></header>
+<main id="app"></main>
+
+<script type="module">
+import {initializeApp} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import {getAuth,onAuthStateChanged,GoogleAuthProvider,signInWithPopup,signOut} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import {getFirestore,collection,doc,onSnapshot,runTransaction,writeBatch,setDoc,deleteDoc,serverTimestamp,Timestamp} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+/* ===== CONFIG: paste the same firebaseConfig your YUME site uses ===== */
+const firebaseConfig={apiKey:"YOUR_KEY",authDomain:"YOUR_PROJECT.firebaseapp.com",projectId:"YOUR_PROJECT",appId:"YOUR_APP_ID"};
+const BASE_POINTS=5, MAX_POS=4, MAX_NEG=2;
+const HOLD_SEC=120;   // how long a reserved (unsaved) perk stays greyed out for others
+const PERKS=[
+ // positive: cost points
+ {id:"keen-senses",t:"pos",c:2,n:"Keen Senses",d:"Advantage on Perception checks that rely on sight or hearing."},
+ {id:"sure-footed",t:"pos",c:1,n:"Sure-Footed",d:"Ignore difficult terrain from rubble or mud; advantage on saves against being knocked prone."},
+ {id:"quick-reflexes",t:"pos",c:3,n:"Quick Reflexes",d:"+2 to initiative and advantage on Dexterity saves against traps."},
+ {id:"silver-tongue",t:"pos",c:2,n:"Silver Tongue",d:"Proficiency in Persuasion; once per rest, reroll a failed Persuasion or Deception check."},
+ {id:"hardy-constitution",t:"pos",c:3,n:"Hardy Constitution",d:"+1 hit point per level and advantage on saves against poison."},
+ {id:"lucky-charm",t:"pos",c:4,n:"Lucky Charm",d:"Once per long rest, reroll any d20 and keep either result."},
+ {id:"arcane-dabbler",t:"pos",c:3,n:"Arcane Dabbler",d:"Learn two cantrips and one 1st-level spell (once per long rest) from any class list."},
+ {id:"weapon-master",t:"pos",c:3,n:"Weapon Master",d:"Gain proficiency with four weapons of your choice."},
+ {id:"battle-hardened",t:"pos",c:2,n:"Battle Hardened",d:"Once per combat, add 1d4 to a saving throw."},
+ {id:"trained-scholar",t:"pos",c:2,n:"Trained Scholar",d:"Proficiency in two of Arcana, History, Nature or Religion."},
+ {id:"darkvision",t:"pos",c:2,n:"Darkvision",d:"See in dim light within 30 feet as if it were bright light."},
+ {id:"beast-friend",t:"pos",c:1,n:"Beast Friend",d:"A loyal non-combat animal companion and advantage on Animal Handling."},
+ // negative: give points
+ {id:"frail",t:"neg",c:2,n:"Frail",d:"Your hit point maximum is reduced by 1 per level."},
+ {id:"night-blind",t:"neg",c:1,n:"Night Blind",d:"Disadvantage on Perception checks in dim light or darkness."},
+ {id:"haunted-dreams",t:"neg",c:2,n:"Haunted Dreams",d:"After each long rest roll a d6; on a 1 you regain only half your spent Hit Dice."},
+ {id:"cursed-luck",t:"neg",c:3,n:"Cursed Luck",d:"Once per session the DM may force you to reroll a d20 and take the lower result."},
+ {id:"hot-tempered",t:"neg",c:1,n:"Hot-Tempered",d:"When provoked, you may have to succeed on a Wisdom save or lash out."},
+ {id:"clumsy-hands",t:"neg",c:1,n:"Clumsy Hands",d:"Disadvantage on Sleight of Hand checks and thieves’ tools."},
+ {id:"marked-enemy",t:"neg",c:2,n:"Marked by an Enemy",d:"A rival or bounty hunter hounds you. The DM builds this into the story."},
+ {id:"sickly",t:"neg",c:2,n:"Sickly",d:"Disadvantage on saves against disease and poison."}
+];
+/* ===================================================================== */
+
+const app=initializeApp(firebaseConfig),auth=getAuth(app),db=getFirestore(app);
+const $=s=>document.querySelector(s),el=$("#app");
+const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const P=Object.fromEntries(PERKS.map(p=>[p.id,p]));
+let user=null,claims={},holds={},sel=new Set(),saved=[],name="",msg="",unsubs=[];
+const live=h=>h&&h.expiresAt&&h.expiresAt.toMillis()>Date.now();
+const holdData=()=>({uid:user.uid,name:name.trim()||"Another player",expiresAt:Timestamp.fromMillis(Date.now()+HOLD_SEC*1000)});
+
+const admin=()=>location.hash==="#admin";
+addEventListener("hashchange",()=>location.reload());
+$("#modeLink").href=admin()?"#":"#admin";
+$("#modeLink").textContent=admin()?"Player view":"Admin";
+
+const login=()=>signInWithPopup(auth,new GoogleAuthProvider()).catch(e=>alert(e.message));
+onAuthStateChanged(auth,u=>{
+ user=u;unsubs.forEach(f=>f());unsubs=[];
+ if(!u||u.isAnonymous){
+  el.className="";
+  el.innerHTML=`<section class="panel"><h2>${admin()?"Admin":"Create your character"}</h2><div class="pad">
+   <p class="muted">Sign in so your character and perks are saved to your account.</p>
+   <button class="btn" id="g">Sign in with Google</button></div></section>`;
+  $("#g").onclick=login;return;
+ }
+ admin()?startAdmin():startPlayer();
+});
+
+function totals(){
+ let pos=0,neg=0,spent=0,gained=0;
+ sel.forEach(id=>{const p=P[id];if(!p)return;if(p.t==="pos"){pos++;spent+=p.c}else{neg++;gained+=p.c}});
+ return {pos,neg,left:BASE_POINTS-spent+gained};
+}
+function stateOf(id){
+ const c=claims[id];if(c)return c.uid===user.uid?"mine":"taken";
+ const h=holds[id];return live(h)&&h.uid!==user.uid?"held":"free";
+}
+
+/* ---------- Player ---------- */
+function startPlayer(){
+ el.className="player";claims={};holds={};sel=new Set();saved=[];name="";msg="";startPlayer.loaded=false;
+ unsubs.push(onSnapshot(collection(db,"perkClaims"),s=>{
+  claims={};s.forEach(d=>claims[d.id]=d.data());
+  sel.forEach(id=>{if(!saved.includes(id)&&claims[id]&&claims[id].uid!==user.uid){sel.delete(id);msg=`“${P[id]?.n}” was just taken by ${claims[id].name}.`}});
+  drawPlayer();
+ }));
+ unsubs.push(onSnapshot(collection(db,"perkHolds"),s=>{
+  holds={};s.forEach(d=>holds[d.id]=d.data());
+  sel.forEach(id=>{if(!saved.includes(id)&&stateOf(id)==="held"){sel.delete(id);msg=`“${P[id]?.n}” was reserved by ${holds[id].name} just before you.`}});
+  drawPlayer();
+ }));
+ unsubs.push(onSnapshot(doc(db,"characters",user.uid),d=>{
+  if(d.exists()){saved=d.data().perks||[];if(!startPlayer.loaded){name=d.data().name;sel=new Set(saved)}}
+  startPlayer.loaded=true;drawPlayer();
+ }));
+ // keep reservations alive while the page is open; redraw so expired holds free up
+ const beat=setInterval(()=>{
+  if(document.visibilityState==="visible")sel.forEach(id=>{if(!saved.includes(id)&&stateOf(id)!=="taken")setDoc(doc(db,"perkHolds",id),holdData()).catch(()=>{})});
+  drawPlayer();
+ },45000);
+ unsubs.push(()=>clearInterval(beat));
+}
+function drawPlayer(){
+ if(!user)return;
+ const f=document.activeElement,keep=f&&f.id==="nm"?f.selectionStart:null;
+ const t=totals(),ok=name.trim()&&t.left>=0&&t.pos<=MAX_POS&&t.neg<=MAX_NEG;
+ const card=p=>{
+  const s=stateOf(p.id),on=sel.has(p.id),h=holds[p.id],c=claims[p.id];
+  return `<div class="perk ${p.t} ${on?"on":""} ${s==="taken"?"taken":""} ${s==="held"?"held":""}" data-id="${p.id}">
+   <h3>${esc(p.n)}</h3><div class="cost">${p.t==="pos"?"−":"+"}${p.c}</div><p>${esc(p.d)}</p>
+   ${s==="taken"?`<small>Claimed by ${esc(c.name)}</small>`:s==="held"?`<small>Reserved by ${esc(h.name)}</small>`:s==="mine"?`<small style="color:var(--gold)">Yours</small>`:""}</div>`};
+ el.innerHTML=`
+ <section class="panel sheet"><h2>Character Sheet</h2><div class="pad">
+  <div><label for="nm">Character name</label><input id="nm" type="text" maxlength="40" value="${esc(name)}" placeholder="Enter a name"></div>
+  <div class="stats">
+   <div class="stat ${t.left<0?"bad":""}"><b>${t.left}</b><span>Points</span></div>
+   <div class="stat ${t.pos>MAX_POS?"bad":""}"><b>${t.pos}/${MAX_POS}</b><span>Positive</span></div>
+   <div class="stat ${t.neg>MAX_NEG?"bad":""}"><b>${t.neg}/${MAX_NEG}</b><span>Negative</span></div>
+  </div>
+  <div class="picked">${[...sel].map(id=>`<span class="chip ${P[id].t}">${esc(P[id].n)}</span>`).join("")||'<span class="muted">No perks picked yet</span>'}</div>
+  <button class="btn" id="save" ${ok?"":"disabled"}>Save &amp; claim perks</button>
+  <div class="msg">${esc(msg)}</div>
+  <div class="muted">Start with ${BASE_POINTS} points. Picking a perk reserves it for you for ${HOLD_SEC/60} minutes while you stay on this page. Saving makes it yours permanently.</div>
+  <div class="muted">${esc(user.email)} · <a href="#" class="lnk" id="out">Sign out</a></div>
+ </div></section>
+ <div class="cols">
+  <section class="panel"><h2>Positive perks (cost points)</h2>${PERKS.filter(p=>p.t==="pos").map(card).join("")}</section>
+  <section class="panel"><h2>Negative perks (give points)</h2>${PERKS.filter(p=>p.t==="neg").map(card).join("")}</section>
+ </div>`;
+ const nm=$("#nm");
+ nm.oninput=e=>{name=e.target.value;const t=totals();$("#save").disabled=!(name.trim()&&t.left>=0&&t.pos<=MAX_POS&&t.neg<=MAX_NEG)};
+ if(keep!==null){nm.focus();nm.setSelectionRange(keep,keep)}
+ el.querySelectorAll(".perk").forEach(n=>n.onclick=()=>toggle(n.dataset.id));
+ $("#save").onclick=save;
+ $("#out").onclick=e=>{e.preventDefault();signOut(auth)};
+}
+async function toggle(id){
+ const s=stateOf(id);if(s==="taken"||s==="held")return;
+ const p=P[id],t=totals();msg="";
+ if(sel.has(id)){
+  sel.delete(id);drawPlayer();
+  if(!saved.includes(id)&&holds[id]&&holds[id].uid===user.uid)deleteDoc(doc(db,"perkHolds",id)).catch(()=>{});
+  return;
+ }
+ if(p.t==="pos"&&t.pos>=MAX_POS){msg=`Only ${MAX_POS} positive perks allowed.`;return drawPlayer()}
+ if(p.t==="neg"&&t.neg>=MAX_NEG){msg=`Only ${MAX_NEG} negative perks allowed.`;return drawPlayer()}
+ sel.add(id);drawPlayer();
+ if(saved.includes(id))return; // already yours, no reservation needed
+ try{await setDoc(doc(db,"perkHolds",id),holdData())}
+ catch{sel.delete(id);msg=`“${p.n}” was just reserved by someone else.`;drawPlayer()}
+}
+async function save(){
+ const b=$("#save");b.disabled=true;msg="Saving…";
+ const want=[...sel],uid=user.uid,nm=name.trim();
+ try{
+  await runTransaction(db,async tx=>{
+   const cref=doc(db,"characters",uid),cs=await tx.get(cref);
+   const old=cs.exists()?(cs.data().perks||[]):[];
+   const ids=[...new Set([...want,...old])];
+   const cl=await Promise.all(ids.map(id=>tx.get(doc(db,"perkClaims",id))));
+   const hl=await Promise.all(ids.map(id=>tx.get(doc(db,"perkHolds",id))));
+   const C={},H={};ids.forEach((id,i)=>{C[id]=cl[i].exists()?cl[i].data():null;H[id]=hl[i].exists()?hl[i].data():null});
+   for(const id of want){
+    if(C[id]&&C[id].uid!==uid)throw new Error(`“${P[id].n}” was just taken by ${C[id].name}.`);
+    if(!C[id]&&live(H[id])&&H[id].uid!==uid)throw new Error(`“${P[id].n}” is reserved by ${H[id].name}.`);
+   }
+   for(const id of want){
+    if(!C[id])tx.set(doc(db,"perkClaims",id),{uid,name:nm,at:serverTimestamp()});
+    if(H[id]&&H[id].uid===uid)tx.delete(doc(db,"perkHolds",id));
+   }
+   for(const id of old)if(!want.includes(id)&&C[id]&&C[id].uid===uid)tx.delete(doc(db,"perkClaims",id));
+   tx.set(cref,{name:nm,perks:want,points:totals().left,updatedAt:serverTimestamp()});
+  });
+  msg="Saved! Your perks are locked in.";
+ }catch(e){
+  msg=e.message.startsWith("“")?e.message:"Could not save: "+e.message;
+  want.forEach(id=>{if(!saved.includes(id)&&stateOf(id)!=="free"&&stateOf(id)!=="mine")sel.delete(id)});
+ }
+ drawPlayer();
+}
+
+/* ---------- Admin ---------- */
+function startAdmin(){
+ el.className="";claims={};holds={};
+ let chars=[];
+ const draw=()=>{
+  const reserved=Object.values(holds).filter(live).length;
+  el.innerHTML=`<section class="panel"><h2>Saved characters (${chars.length})</h2><div class="pad">
+   <div class="muted">${Object.keys(claims).length} of ${PERKS.length} perks claimed · ${reserved} reserved · ${esc(user.email)} · <a href="#" class="lnk" id="out">Sign out</a></div>
+   <div class="chars">${chars.map(c=>`<div class="card"><h3>${esc(c.name)}</h3>
+    <div class="muted">${c.points} points left</div>
+    <div class="picked">${(c.perks||[]).map(id=>`<span class="chip ${P[id]?.t}">${esc(P[id]?.n||id)}</span>`).join("")}</div>
+    <button class="btn ghost" data-del="${c.id}">Delete &amp; free perks</button></div>`).join("")||'<span class="muted">No characters yet.</span>'}</div>
+  </div></section>`;
+  $("#out").onclick=e=>{e.preventDefault();signOut(auth)};
+  el.querySelectorAll("[data-del]").forEach(b=>b.onclick=async()=>{
+   const c=chars.find(x=>x.id===b.dataset.del);
+   if(!confirm(`Delete ${c.name} and free their perks?`))return;
+   const w=writeBatch(db);
+   (c.perks||[]).forEach(id=>{if(claims[id]&&claims[id].uid===c.id)w.delete(doc(db,"perkClaims",id))});
+   w.delete(doc(db,"characters",c.id));
+   await w.commit().catch(e=>alert(e.message));
+  });
+ };
+ const fail=e=>el.innerHTML=`<p class="msg">${esc(e.message)}</p>`;
+ unsubs.push(onSnapshot(collection(db,"perkClaims"),s=>{claims={};s.forEach(d=>claims[d.id]=d.data());draw()},fail));
+ unsubs.push(onSnapshot(collection(db,"perkHolds"),s=>{holds={};s.forEach(d=>holds[d.id]=d.data());draw()},fail));
+ unsubs.push(onSnapshot(collection(db,"characters"),s=>{chars=s.docs.map(d=>({id:d.id,...d.data()}));draw()},fail));
+}
+</script>
+</body>
+</html>
