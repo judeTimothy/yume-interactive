@@ -1,0 +1,1172 @@
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.11.0/firebase-app.js";
+import {
+  getAuth,
+  GoogleAuthProvider,
+  signInWithPopup,
+  signOut,
+  onAuthStateChanged
+} from "https://www.gstatic.com/firebasejs/12.11.0/firebase-auth.js";
+
+import {
+  getFirestore,
+  doc,
+  getDoc,
+  collection,
+  runTransaction,
+  deleteDoc,
+  serverTimestamp,
+  setDoc,
+  onSnapshot
+} from "https://www.gstatic.com/firebasejs/12.11.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyCCBAuZgYfHqAYZa2tRQeiqR2kLh8rjLVY",
+  authDomain: "charisma20-a7ea6.firebaseapp.com",
+  projectId: "charisma20-a7ea6",
+  storageBucket: "charisma20-a7ea6.firebasestorage.app",
+  messagingSenderId: "874066974213",
+  appId: "1:874066974213:web:8c02d7ba12fca73c7d6e6c",
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+const provider = new GoogleAuthProvider();
+
+const ABILITIES = ["str", "dex", "con", "int", "wis", "cha"];
+
+const CLASS_CONFIG = {
+  fighter: { hitDie: "d10", saves: ["str", "con"], skillChoices: 2 },
+  rogue: { hitDie: "d8", saves: ["dex", "int"], skillChoices: 4 },
+  wizard: { hitDie: "d6", saves: ["int", "wis"], skillChoices: 2 },
+  cleric: { hitDie: "d8", saves: ["wis", "cha"], skillChoices: 2 },
+  ranger: { hitDie: "d10", saves: ["str", "dex"], skillChoices: 3 },
+  bard: { hitDie: "d8", saves: ["dex", "cha"], skillChoices: 3 },
+  paladin: { hitDie: "d10", saves: ["wis", "cha"], skillChoices: 2 },
+  druid: { hitDie: "d8", saves: ["int", "wis"], skillChoices: 2 },
+  sorcerer: { hitDie: "d6", saves: ["con", "cha"], skillChoices: 2 },
+  warlock: { hitDie: "d8", saves: ["wis", "cha"], skillChoices: 2 },
+  barbarian: { hitDie: "d12", saves: ["str", "con"], skillChoices: 2 }
+};
+
+const CLASS_FEATURES = {
+  fighter: [
+    { level: 1, name: "Fighting Style", desc: "Gain a combat specialty that reflects your training." },
+    { level: 1, name: "Second Wind", desc: "Recover a small amount of health once per short rest." },
+    { level: 2, name: "Action Surge", desc: "Take one additional action on your turn once per short rest." },
+    { level: 3, name: "Martial Archetype", desc: "Choose a combat path or specialty." },
+    { level: 5, name: "Extra Attack", desc: "Attack twice when you take the Attack action." }
+  ],
+  rogue: [
+    { level: 1, name: "Sneak Attack", desc: "Deal extra damage when you strike with advantage or an opening." },
+    { level: 1, name: "Expertise", desc: "Double proficiency in selected trained skills." },
+    { level: 2, name: "Cunning Action", desc: "Take quick movement options as a bonus action." },
+    { level: 3, name: "Roguish Archetype", desc: "Choose your criminal or specialist path." },
+    { level: 5, name: "Uncanny Dodge", desc: "Reduce damage from an attacker you can react to." }
+  ],
+  wizard: [
+    { level: 1, name: "Spellcasting", desc: "Cast prepared spells using intelligence." },
+    { level: 1, name: "Arcane Recovery", desc: "Recover some spell energy after a short rest." },
+    { level: 2, name: "Arcane Tradition", desc: "Choose your magical school or discipline." },
+    { level: 5, name: "Empowered Casting", desc: "Your spell output becomes more reliable and dangerous." }
+  ],
+  cleric: [
+    { level: 1, name: "Spellcasting", desc: "Cast divine spells using wisdom." },
+    { level: 1, name: "Divine Domain", desc: "Choose a divine focus that shapes your gifts." },
+    { level: 2, name: "Channel Divinity", desc: "Invoke divine power for special effects." },
+    { level: 5, name: "Improved Channeling", desc: "Your divine power becomes more potent." }
+  ],
+  ranger: [
+    { level: 1, name: "Favored Specialty", desc: "Gain training and field advantages tied to your hunting style." },
+    { level: 2, name: "Fighting Style", desc: "Choose a combat approach that suits your method." },
+    { level: 2, name: "Spellcasting", desc: "Gain limited nature-based magical abilities." },
+    { level: 3, name: "Ranger Archetype", desc: "Choose a path that defines your style." },
+    { level: 5, name: "Extra Attack", desc: "Attack twice when you take the Attack action." }
+  ],
+  bard: [
+    { level: 1, name: "Bardic Inspiration", desc: "Grant allies a bonus through performance or presence." },
+    { level: 1, name: "Spellcasting", desc: "Cast spells through performance and force of personality." },
+    { level: 2, name: "Jack of All Trades", desc: "Gain partial proficiency in many things." },
+    { level: 3, name: "Bard College", desc: "Choose your artistic or martial tradition." },
+    { level: 5, name: "Font of Inspiration", desc: "Recover inspiration more easily." }
+  ],
+  paladin: [
+    { level: 1, name: "Lay on Hands", desc: "Heal wounds through sacred touch." },
+    { level: 2, name: "Fighting Style", desc: "Choose a martial discipline." },
+    { level: 2, name: "Divine Smite", desc: "Channel sacred force into weapon strikes." },
+    { level: 3, name: "Sacred Oath", desc: "Swear an oath that shapes your power." },
+    { level: 5, name: "Extra Attack", desc: "Attack twice when you take the Attack action." }
+  ],
+  druid: [
+    { level: 1, name: "Druidic", desc: "Know the secret language of druids." },
+    { level: 1, name: "Spellcasting", desc: "Cast nature-based spells using wisdom." },
+    { level: 2, name: "Wild Shape", desc: "Transform into natural beast forms." },
+    { level: 2, name: "Druid Circle", desc: "Choose a druidic circle that defines your path." },
+    { level: 5, name: "Empowered Forms", desc: "Your transformations and nature magic improve." }
+  ],
+  sorcerer: [
+    { level: 1, name: "Spellcasting", desc: "Cast innate spells using charisma." },
+    { level: 1, name: "Sorcerous Origin", desc: "Choose the source of your magical bloodline or power." },
+    { level: 2, name: "Font of Magic", desc: "Gain sorcery points to shape your spellcasting." },
+    { level: 3, name: "Metamagic", desc: "Alter your spells with special casting techniques." },
+    { level: 5, name: "Potent Casting", desc: "Your innate magic becomes more forceful." }
+  ],
+  warlock: [
+    { level: 1, name: "Otherworldly Patron", desc: "Choose the powerful entity behind your pact." },
+    { level: 1, name: "Pact Magic", desc: "Cast pact-based spells using charisma." },
+    { level: 2, name: "Eldritch Invocations", desc: "Gain supernatural enhancements and tricks." },
+    { level: 3, name: "Pact Boon", desc: "Receive a special gift tied to your patron." },
+    { level: 5, name: "Deepened Pact", desc: "Your patron's influence and gifts grow stronger." }
+  ],
+  barbarian: [
+    { level: 1, name: "Rage", desc: "Enter a furious state that boosts offense and resilience." },
+    { level: 1, name: "Unarmored Defense", desc: "Rely on physical toughness rather than armor." },
+    { level: 2, name: "Reckless Attack", desc: "Attack with greater force at the cost of defense." },
+    { level: 2, name: "Danger Sense", desc: "Gain heightened awareness against visible threats." },
+    { level: 3, name: "Primal Path", desc: "Choose the source of your fury." },
+    { level: 5, name: "Extra Attack", desc: "Attack twice when you take the Attack action." }
+  ]
+};
+
+const CLASS_FEATURE_SELECTORS = {
+  fighter: [
+    {
+      id: "fighterStyle",
+      label: "Fighting Style",
+      minLevel: 1,
+      options: ["Archery", "Defense", "Dueling", "Great Weapon Fighting", "Protection", "Two-Weapon Fighting"]
+    },
+    {
+      id: "fighterArchetype",
+      label: "Martial Archetype",
+      minLevel: 3,
+      options: ["Champion", "Battle Master", "Eldritch Knight"]
+    }
+  ],
+  rogue: [
+    {
+      id: "rogueArchetype",
+      label: "Roguish Archetype",
+      minLevel: 3,
+      options: ["Thief", "Assassin", "Arcane Trickster"]
+    }
+  ],
+  wizard: [
+    {
+      id: "wizardTradition",
+      label: "Arcane Tradition",
+      minLevel: 2,
+      options: ["Abjuration", "Conjuration", "Divination", "Enchantment", "Evocation", "Illusion", "Necromancy", "Transmutation"]
+    }
+  ],
+  cleric: [
+    {
+      id: "clericDomain",
+      label: "Divine Domain",
+      minLevel: 1,
+      options: ["Life", "Light", "Trickery", "War", "Knowledge", "Nature", "Tempest"]
+    }
+  ],
+  ranger: [
+    {
+      id: "rangerArchetype",
+      label: "Ranger Archetype",
+      minLevel: 3,
+      options: ["Hunter", "Beast Master", "Gloom Stalker"]
+    }
+  ],
+  bard: [
+    {
+      id: "bardCollege",
+      label: "Bard College",
+      minLevel: 3,
+      options: ["Lore", "Valor", "Glamour", "Swords", "Whispers"]
+    }
+  ],
+  paladin: [
+    {
+      id: "paladinOath",
+      label: "Sacred Oath",
+      minLevel: 3,
+      options: ["Devotion", "Ancients", "Vengeance", "Glory"]
+    }
+  ],
+  barbarian: [
+    {
+      id: "barbarianPath",
+      label: "Primal Path",
+      minLevel: 3,
+      options: ["Berserker", "Totem Warrior", "Zealot", "Wild Magic"]
+    }
+  ],
+  druid: [
+    {
+      id: "druidCircle",
+      label: "Druid Circle",
+      minLevel: 2,
+      options: ["Land", "Moon", "Stars", "Wildfire", "Spores"]
+    }
+  ],
+  sorcerer: [
+    {
+      id: "sorcererOrigin",
+      label: "Sorcerous Origin",
+      minLevel: 1,
+      options: ["Draconic", "Wild Magic", "Shadow", "Divine Soul", "Clockwork Soul"]
+    },
+    {
+      id: "sorcererMetamagic",
+      label: "Metamagic",
+      minLevel: 3,
+      options: ["Careful Spell", "Distant Spell", "Empowered Spell", "Extended Spell", "Quickened Spell", "Subtle Spell", "Twinned Spell"]
+    }
+  ],
+  warlock: [
+    {
+      id: "warlockPatron",
+      label: "Otherworldly Patron",
+      minLevel: 1,
+      options: ["Fiend", "Archfey", "Great Old One", "Celestial", "Hexblade"]
+    },
+    {
+      id: "warlockBoon",
+      label: "Pact Boon",
+      minLevel: 3,
+      options: ["Blade", "Chain", "Tome", "Talisman"]
+    }
+  ]
+};
+
+const QUINT_CONFIG = {
+  "astral-platinum": {
+    armorClass: 18,
+    armor: "Natural Guard",
+    weapon: "Precision Barrage",
+    range: "Melee / Combat",
+    attackModStat: "dex",
+    distance: "15 ft.",
+    features: [
+      { level: 1, name: "Barrage", desc: "Rapid close-range strikes with exceptional force and precision. Astral can attack twice instead of once." },
+      { level: 3, name: "Pinpoint Control", desc: "Can perform extremely precise actions at close range. Astral gains +2 to attack and Dexterity Rolls." },
+      { level: 5, name: "Overwhelming Rush", desc: "Astral can attack three times instead of two." }
+    ]
+  },
+  "hierophant-verdant": {
+    armorClass: 14,
+    armor: "Tendril Body",
+    weapon: "Emerald Volley",
+    range: "Ranged / Combat",
+    attackModStat: "wis",
+    distance: "120 ft.",
+    features: [
+      { level: 1, name: "Tendril Reach", desc: "Extends through threads and tendrils to strike or scout. Verdant can squeeze in tight spaces as small as an inch." },
+      { level: 3, name: "Emerald Volley", desc: "Fires concentrated projectile attacks." },
+      { level: 5, name: "Remote Control", desc: "Verdant can operate outside his normal range." }
+    ]
+  },
+  "magus-crimson": {
+    armorClass: 15,
+    armor: "Flame Mantle",
+    weapon: "Fire Assault",
+    range: "Mid / Combat",
+    attackModStat: "int",
+    distance: "15 ft.",
+    features: [
+      { level: 1, name: "Flame Control", desc: "Shapes and projects intense fire offensively. Magus can use the Firebolt cantrip." },
+      { level: 3, name: "Heat Wave", desc: "Can pressure multiple targets with spreading flame. Magus can cast Burning Hands once per combat." },
+      { level: 5, name: "Blazing Surge", desc: "Fire attacks become more forceful and persistent. Magus can cast Fireball once per short rest." }
+    ]
+  },
+  "silver-cavalier": {
+    armorClass: 17,
+    armor: "Dueling Shell",
+    weapon: "Rapier",
+    range: "Melee / Combat",
+    attackModStat: "dex",
+    distance: "15 ft.",
+    features: [
+      { level: 1, name: "Fencing Mastery", desc: "Fast and accurate thrusting attacks. Silver can attack twice instead of once." },
+      { level: 3, name: "Armor Shed", desc: "Drops protection for greater speed. You receive and deal additional damage based on your DEX mod." },
+      { level: 5, name: "Flash Assault", desc: "Executes very rapid melee strings. Silver can attack thrice." }
+    ]
+  },
+  "hermit-violet": {
+    armorClass: 13,
+    armor: "Vine Form",
+    weapon: "Binding Vines",
+    range: "Mid / Utility",
+    attackModStat: "wis",
+    distance: "0 ft.",
+    features: [
+      { level: 1, name: "Binding", desc: "Restrains or lashes with thorned vines. You gain the thornwhip cantrip." },
+      { level: 3, name: "Divination", desc: "Produces insight through symbolic or medium-based readings. You gain the Guidance cantrip." },
+      { level: 5, name: "Extended Grip", desc: "Your Violet cantrips gain additional 10 ft. range." }
+    ]
+  },
+  "the-wanderer": {
+    armorClass: 16,
+    armor: "Sand Body",
+    weapon: "Shifting Mass",
+    range: "Variable / Combat",
+    attackModStat: "dex",
+    distance: "15 ft.",
+    features: [
+      { level: 1, name: "Sand Form", desc: "Body shifts shape to defend and attack. As a reaction, the Wanderer can increase its AC by 2 until his next turn." },
+      { level: 3, name: "Mobility", desc: "Moves flexibly across unstable terrain." },
+      { level: 5, name: "Morph Strike", desc: "Alters attack shape and angle fluidly. The wanderer gains a +2 to attack rolls." }
+    ]
+  },
+  "wild-diamond": {
+    armorClass: 17,
+    armor: "Restorative Guard",
+    weapon: "Heavy Barrage",
+    range: "Melee / Combat",
+    attackModStat: "dex",
+    distance: "10 ft.",
+    features: [
+      { level: 1, name: "Restoration", desc: "You gain the Mending cantrip. Diamond's attacks can heal allies for 1d4 hit points." },
+      { level: 3, name: "Impact Rush", desc: "Delivers powerful short-range punch combinations. Diamond can attack twice instead of once." },
+      { level: 5, name: "Reconstruction Control", desc: "Diamond's attacks now heal for 2d4+2." }
+    ]
+  },
+  "the-palm": {
+    armorClass: 16,
+    armor: "Brutal Guard",
+    weapon: "Erasure Swipe",
+    range: "Melee / Combat",
+    attackModStat: "str",
+    distance: "10 ft.",
+    features: [
+      { level: 1, name: "Erasure", desc: "Black Hole's attacks removes space and matter. Targets must succeed against a Dexterity Saving Throw (DC 10) or suffer from the Quintessence effects." },
+      { level: 3, name: "Gap Close", desc: "As an action, Black Hole can choose to remove space to close the gap to a target. Alternatively, Black Hole can also pull a target closer." },
+      { level: 5, name: "Void Pressure", desc: "Saving Throw against Erasure now adds your Strength Modifier to the DC." }
+    ]
+  },
+  "reverberation": {
+    armorClass: 14,
+    armor: "Sound Form",
+    weapon: "Sound Effect",
+    range: "Melee / Combat",
+    attackModStat: "cha",
+    distance: "15 ft.",
+    features: [
+      { level: 1, name: "Sound Marks", desc: "Reverberation's attacks place a Glyph of Warding spell on the target. Effects only last until the next turn and one effect can only be active at a time." },
+      { level: 3, name: "Act Shift", desc: "Reverberation gains an additional +2 to attack rolls." },
+      { level: 5, name: "Pressure Word", desc: "Once per combat, you can cast Magnify Gravity spell without expending a spell slot." }
+    ]
+  },
+  "celestial-gate": {
+    armorClass: 13,
+    armor: "Manifest Script",
+    weapon: "Command Imprint",
+    range: "Melee / Combat",
+    attackModStat: "wis",
+    distance: "5 ft.",
+    features: [
+      { level: 1, name: "Read Target", desc: "Celestial's attacks place a mark on a target which you can use to extract information from the target." },
+      { level: 3, name: "Write Command", desc: "Marked targets can be told as if under the Command spell which lasts until your next turn or when the mark expires." },
+      { level: 5, name: "Narrative Control", desc: "Mark persists for 1 minute or until Celestial's user is Incapacitated." }
+    ]
+  }
+};
+
+function getQuintConfig(quintKey){
+  return QUINT_CONFIG[quintKey] || {
+    armorClass: 10,
+    armor: "Manifest Form",
+    weapon: "Unarmed",
+    range: "Close",
+    attackModStat: "dex",
+    features: []
+  };
+}
+
+const ARMOR_CONFIG = {
+  none: 10,
+  light: 11,
+  medium: 13,
+  heavy: 16
+};
+
+const SAVING_THROWS = [
+  { key: "str", label: "Strength" },
+  { key: "dex", label: "Dexterity" },
+  { key: "con", label: "Constitution" },
+  { key: "int", label: "Intelligence" },
+  { key: "wis", label: "Wisdom" },
+  { key: "cha", label: "Charisma" }
+];
+
+const SKILLS = [
+  { key: "acrobatics", label: "Acrobatics", ability: "dex" },
+  { key: "animalHandling", label: "Animal Handling", ability: "wis" },
+  { key: "arcana", label: "Arcana", ability: "int" },
+  { key: "athletics", label: "Athletics", ability: "str" },
+  { key: "deception", label: "Deception", ability: "cha" },
+  { key: "history", label: "History", ability: "int" },
+  { key: "insight", label: "Insight", ability: "wis" },
+  { key: "intimidation", label: "Intimidation", ability: "cha" },
+  { key: "investigation", label: "Investigation", ability: "int" },
+  { key: "medicine", label: "Medicine", ability: "wis" },
+  { key: "nature", label: "Nature", ability: "int" },
+  { key: "perception", label: "Perception", ability: "wis" },
+  { key: "performance", label: "Performance", ability: "cha" },
+  { key: "persuasion", label: "Persuasion", ability: "cha" },
+  { key: "religion", label: "Religion", ability: "int" },
+  { key: "sleightOfHand", label: "Sleight of Hand", ability: "dex" },
+  { key: "stealth", label: "Stealth", ability: "dex" },
+  { key: "survival", label: "Survival", ability: "wis" }
+];
+
+const loginView = document.getElementById("loginView");
+const appView = document.getElementById("appView");
+const loginBtn = document.getElementById("loginBtn");
+const logoutBtn = document.getElementById("logoutBtn");
+const saveBtn = document.getElementById("saveBtn");
+const resetBtn = document.getElementById("resetBtn");
+const loginError = document.getElementById("loginError");
+const saveStatus = document.getElementById("saveStatus");
+
+const userPhoto = document.getElementById("userPhoto");
+const userName = document.getElementById("userName");
+const userEmail = document.getElementById("userEmail");
+
+let currentUser = null;
+let stopQuintListener = null;
+let previousQuintKey = "";
+let saveTimer = null;
+
+function getSelectedText(selectId) {
+  const el = document.getElementById(selectId);
+  if (!el) return "";
+  return el.options[el.selectedIndex]?.text || "";
+}
+
+function getProficiencyBonusFromLevel(level) {
+  if (level >= 17) return 6;
+  if (level >= 13) return 5;
+  if (level >= 9) return 4;
+  if (level >= 5) return 3;
+  return 2;
+}
+
+function getHitDieSizeFromClass(classKey) {
+  const hitDieText = CLASS_CONFIG[classKey]?.hitDie || "d8";
+  return Number(hitDieText.replace("d", "")) || 8;
+}
+
+function rollDie(sides) {
+  return Math.floor(Math.random() * sides) + 1;
+}
+
+function rollMaxHp() {
+  const classEl = document.getElementById("classSelect");
+  const levelEl = document.getElementById("level");
+  const maxHpEl = document.getElementById("charMaxHp");
+
+  if (!classEl || !levelEl || !maxHpEl) return;
+
+  const classKey = classEl.value;
+  const level = Math.max(1, Number(levelEl.value || 1));
+  const hitDie = getHitDieSizeFromClass(classKey);
+  const conMod = getAbilityMods().con;
+
+  let totalHp = hitDie;
+
+  for (let i = 1; i < level; i++) {
+    totalHp += rollDie(hitDie);
+  }
+
+  totalHp += conMod * level;
+
+  if (totalHp < 1) totalHp = 1;
+
+  maxHpEl.value = totalHp;
+  setStatus(`Rolled Max HP: ${totalHp}`, "ok");
+  queueFirestoreSave();
+}
+
+function averagePerLevel(hitDie) {
+  return Math.floor(hitDie / 2) + 1;
+}
+
+function setAverageHp() {
+  const classEl = document.getElementById("classSelect");
+  const levelEl = document.getElementById("level");
+  const maxHpEl = document.getElementById("charMaxHp");
+
+  if (!classEl || !levelEl || !maxHpEl) return;
+
+  const classKey = classEl.value;
+  const level = Math.max(1, Number(levelEl.value || 1));
+  const hitDie = getHitDieSizeFromClass(classKey);
+  const conMod = getAbilityMods().con;
+
+  let totalHp = hitDie;
+
+  for (let i = 1; i < level; i++) {
+    totalHp += averagePerLevel(hitDie);
+  }
+
+  totalHp += conMod * level;
+
+  if (totalHp < 1) totalHp = 1;
+
+  maxHpEl.value = totalHp;
+  setStatus(`Average Max HP: ${totalHp}`, "ok");
+  queueFirestoreSave();
+}
+
+
+function formatMod(value) {
+  return value >= 0 ? `+${value}` : `${value}`;
+}
+
+function setStatus(message = "", type = "") {
+  saveStatus.textContent = message;
+  saveStatus.className = `status ${type}`.trim();
+}
+
+function buildSavingThrows() {
+  const wrap = document.getElementById("savingThrows");
+  if (!wrap) return;
+  wrap.innerHTML = "";
+
+  SAVING_THROWS.forEach((item) => {
+    const row = document.createElement("div");
+    row.className = "list-row";
+    row.innerHTML = `
+      <input type="checkbox" data-save id="saveProf-${item.key}">
+      <div>${item.label}</div>
+      <div class="list-value" id="saveVal-${item.key}">+0</div>
+    `;
+    wrap.appendChild(row);
+  });
+}
+
+function buildSkills() {
+  const wrap = document.getElementById("skillsList");
+  if (!wrap) return;
+  wrap.innerHTML = "";
+
+  SKILLS.forEach((item) => {
+    const row = document.createElement("div");
+    row.className = "list-row";
+    row.innerHTML = `
+      <input type="checkbox" data-save id="skillProf-${item.key}">
+      <div>${item.label}</div>
+      <div class="list-value" id="skillVal-${item.key}">+0</div>
+    `;
+    wrap.appendChild(row);
+  });
+}
+
+function getAbilityMods() {
+  return {
+    str: Number(document.getElementById("mod-str")?.textContent || 0),
+    dex: Number(document.getElementById("mod-dex")?.textContent || 0),
+    con: Number(document.getElementById("mod-con")?.textContent || 0),
+    int: Number(document.getElementById("mod-int")?.textContent || 0),
+    wis: Number(document.getElementById("mod-wis")?.textContent || 0),
+    cha: Number(document.getElementById("mod-cha")?.textContent || 0)
+  };
+}
+
+function getPointPoolRemaining() {
+  const mods = getAbilityMods();
+  const spent = Object.values(mods).reduce((sum, value) => sum + value, 0);
+  return 4 - spent;
+}
+
+function updatePointPool() {
+  const el = document.getElementById("pointPool");
+  if (!el) return;
+  el.textContent = getPointPoolRemaining();
+}
+
+function changeModifier(ability, delta) {
+  const el = document.getElementById(`mod-${ability}`);
+  if (!el) return;
+
+  const current = Number(el.textContent || 0);
+  const next = current + delta;
+
+  if (next < -1 || next > 2) return;
+
+  const remaining = getPointPoolRemaining();
+  if (delta > 0 && remaining <= 0) return;
+
+  el.textContent = String(next);
+  recalcSheet();
+  queueFirestoreSave();
+}
+
+function updateClassRules() {
+  const classEl = document.getElementById("classSelect");
+  const levelEl = document.getElementById("level");
+  const charHitDiceEl = document.getElementById("charHitDice");
+  const pbEl = document.getElementById("proficiencyBonus");
+
+  if (!classEl || !levelEl || !charHitDiceEl || !pbEl) return;
+
+  const classKey = classEl.value;
+  const level = Number(levelEl.value || 1);
+  const config = CLASS_CONFIG[classKey];
+  if (!config) return;
+
+  charHitDiceEl.value = `${level}${config.hitDie}`;
+  pbEl.value = getProficiencyBonusFromLevel(level);
+
+  SAVING_THROWS.forEach((item) => {
+    const box = document.getElementById(`saveProf-${item.key}`);
+    if (!box) return;
+    const isProficient = config.saves.includes(item.key);
+    box.checked = isProficient;
+    box.disabled = true;
+  });
+
+  enforceSkillLimit();
+  updateFeatureSections();
+}
+
+function enforceSkillLimit() {
+  const classEl = document.getElementById("classSelect");
+  if (!classEl) return;
+
+  const classKey = classEl.value;
+  const config = CLASS_CONFIG[classKey];
+  if (!config) return;
+
+  const maxSkills = config.skillChoices;
+  const boxes = SKILLS
+    .map((item) => document.getElementById(`skillProf-${item.key}`))
+    .filter(Boolean);
+
+  const checked = boxes.filter((box) => box.checked);
+
+  if (checked.length > maxSkills) {
+    checked[checked.length - 1].checked = false;
+  }
+
+  const newChecked = boxes.filter((box) => box.checked);
+  boxes.forEach((box) => {
+    box.disabled = !box.checked && newChecked.length >= maxSkills;
+  });
+}
+
+function renderFeatureList(containerId, features, level) {
+  const container = document.getElementById(containerId);
+  if (!container) return;
+
+  const unlocked = features.filter((feature) => level >= feature.level);
+
+  if (unlocked.length === 0) {
+    container.innerHTML = `<div class="feature-item"><div class="feature-item-desc">No features available yet.</div></div>`;
+    return;
+  }
+
+  container.innerHTML = unlocked
+    .map((feature) => `
+      <div class="feature-item">
+        <div class="feature-item-title">${feature.name}</div>
+        <div class="feature-item-level">Level ${feature.level}</div>
+        <div class="feature-item-desc">${feature.desc}</div>
+      </div>
+    `)
+    .join("");
+}
+
+function renderFeatureSelectors(savedFeatureValues = {}) {
+  const container = document.getElementById("charFeatureSelectors");
+  const classEl = document.getElementById("classSelect");
+  const levelEl = document.getElementById("level");
+
+  if (!container || !classEl || !levelEl) return;
+
+  const classKey = classEl.value;
+  const level = Number(levelEl.value || 1);
+  const selectors = CLASS_FEATURE_SELECTORS[classKey] || [];
+  const available = selectors.filter((item) => level >= item.minLevel);
+
+  const currentValues = {};
+  container.querySelectorAll("select").forEach((select) => {
+    currentValues[select.id] = select.value;
+  });
+
+  if (available.length === 0) {
+    container.innerHTML = "";
+    return;
+  }
+
+  container.innerHTML = available.map((item) => {
+    const savedValue = currentValues[item.id] || savedFeatureValues[item.id] || "";
+    return `
+      <div class="field">
+        <label for="${item.id}">${item.label}</label>
+        <select id="${item.id}" data-feature-save>
+          ${item.options.map((opt) => {
+            const selected = opt === savedValue ? "selected" : "";
+            return `<option value="${opt}" ${selected}>${opt}</option>`;
+          }).join("")}
+        </select>
+      </div>
+    `;
+  }).join("");
+}
+
+function updateFeatureSections(savedFeatureValues = {}) {
+  const classEl = document.getElementById("classSelect");
+  const levelEl = document.getElementById("level");
+  const quintEl = document.getElementById("quintName");
+
+  if (!classEl || !levelEl) return;
+
+  const classKey = classEl.value;
+  const level = Number(levelEl.value || 1);
+  const quintKey = quintEl?.value || "";
+  const quint = getQuintConfig(quintKey);
+
+  renderFeatureList("charFeatures", CLASS_FEATURES[classKey] || [], level);
+  renderFeatureList("quintFeatures", quint.features || [], level);
+  renderFeatureSelectors(savedFeatureValues);
+}
+
+function recalcSheet() {
+  updatePointPool();
+
+  const mods = getAbilityMods();
+  const profEl = document.getElementById("proficiencyBonus");
+  const prof = Number(profEl?.value || 2);
+
+  SAVING_THROWS.forEach((item) => {
+    const profBox = document.getElementById(`saveProf-${item.key}`);
+    const valEl = document.getElementById(`saveVal-${item.key}`);
+    if (!profBox || !valEl) return;
+    const total = mods[item.key] + (profBox.checked ? prof : 0);
+    valEl.textContent = formatMod(total);
+  });
+
+  SKILLS.forEach((item) => {
+    const profBox = document.getElementById(`skillProf-${item.key}`);
+    const valEl = document.getElementById(`skillVal-${item.key}`);
+    if (!profBox || !valEl) return;
+    const total = mods[item.ability] + (profBox.checked ? prof : 0);
+    valEl.textContent = formatMod(total);
+  });
+
+  const charArmorTypeEl = document.getElementById("charArmorType");
+  const charArmorClassEl = document.getElementById("charArmorClass");
+  const charInitiativeEl = document.getElementById("charInitiative");
+  const charPassiveEl = document.getElementById("charPassivePerception");
+
+  if (charArmorTypeEl && charArmorClassEl) {
+    const armorType = charArmorTypeEl.value;
+    const armorBase = ARMOR_CONFIG[armorType] ?? 10;
+    let armorClass = armorBase;
+
+    if (armorType === "light") armorClass += mods.dex;
+    else if (armorType === "medium") armorClass += Math.min(mods.dex, 2);
+    else if (armorType === "none") armorClass += mods.dex;
+
+    charArmorClassEl.value = armorClass;
+  }
+
+  if (charInitiativeEl) charInitiativeEl.value = mods.dex;
+  if (charPassiveEl) charPassiveEl.value = 10 + mods.wis;
+
+  const quintKey = document.getElementById("quintName")?.value || "";
+  const quint = getQuintConfig(quintKey);
+
+  const quintArmorClassEl = document.getElementById("quintArmorClass");
+  const quintInitiativeEl = document.getElementById("quintInitiative");
+  const quintPassiveEl = document.getElementById("quintPassivePerception");
+  const quintAttackBonusEl = document.getElementById("quintAttackBonus");
+  const quintWeaponEl = document.getElementById("quintWeaponSelect");
+  const quintArmorEl = document.getElementById("quintArmorType");
+  const quintDistanceEl = document.getElementById("quintDistance");
+  const quintRangeEl = document.getElementById("quintRangeType");
+
+  if (quintArmorClassEl) quintArmorClassEl.value = quint.armorClass;
+  if (quintInitiativeEl) quintInitiativeEl.value = mods.dex;
+  if (quintPassiveEl) quintPassiveEl.value = 10 + mods.wis;
+  if (quintAttackBonusEl) quintAttackBonusEl.value = prof + (mods[quint.attackModStat] || 0);
+  if (quintWeaponEl) quintWeaponEl.value = quint.weapon;
+  if (quintArmorEl) quintArmorEl.value = quint.armor;
+  if (quintDistanceEl) quintDistanceEl.value = quint.distance;
+  if (quintRangeEl) quintRangeEl.value = quint.range;
+}
+
+function collectData() {
+  const data = {};
+
+  document.querySelectorAll("[data-save], [data-feature-save]").forEach((el) => {
+    data[el.id] = el.type === "checkbox" ? el.checked : el.value;
+  });
+
+  ABILITIES.forEach((ability) => {
+    const el = document.getElementById(`mod-${ability}`);
+    if (el) {
+      data[`mod-${ability}`] = el.textContent || "0";
+    }
+  });
+
+  return data;
+}
+
+function applyData(data) {
+  document.querySelectorAll("[data-save]").forEach((el) => {
+    if (!(el.id in data)) return;
+
+    if (el.type === "checkbox") {
+      el.checked = Boolean(data[el.id]);
+    } else {
+      el.value = data[el.id];
+    }
+  });
+
+  ABILITIES.forEach((ability) => {
+    const key = `mod-${ability}`;
+    const el = document.getElementById(key);
+    if (el && key in data) {
+      el.textContent = String(data[key]);
+    }
+  });
+
+  updateClassRules();
+  updateFeatureSections(data);
+
+  document.querySelectorAll("[data-feature-save]").forEach((el) => {
+    if (!(el.id in data)) return;
+    el.value = data[el.id];
+  });
+
+  previousQuintKey = data.quintName || "";
+  recalcSheet();
+}
+
+function getSheetRef() {
+  if (!currentUser) return null;
+  return doc(db, "sheets", currentUser.uid);
+}
+
+async function saveSheetToFirestore() {
+  const ref = getSheetRef();
+  if (!ref || !currentUser) return;
+
+  const data = collectData();
+
+  await setDoc(
+    ref,
+    {
+      uid: currentUser.uid,
+      playerName: currentUser.displayName || currentUser.email || "",
+      updatedAt: serverTimestamp(),
+      sheet: data
+    },
+    { merge: true }
+  );
+
+  setStatus("Sheet saved.", "ok");
+}
+
+async function loadSheetFromFirestore() {
+  const ref = getSheetRef();
+  if (!ref) return;
+
+  const snap = await getDoc(ref);
+
+  if (!snap.exists()) {
+    updateClassRules();
+    updateFeatureSections();
+    recalcSheet();
+    return;
+  }
+
+  const data = snap.data()?.sheet || {};
+  applyData(data);
+  setStatus("Sheet loaded.", "ok");
+}
+
+function queueFirestoreSave() {
+  if (!currentUser) return;
+
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(async () => {
+    try {
+      await saveSheetToFirestore();
+    } catch (error) {
+      console.error(error);
+      setStatus("Autosave failed.", "error");
+    }
+  }, 500);
+}
+
+function resetForm() {
+  document.querySelectorAll("[data-save]").forEach((el) => {
+    if (el.type === "checkbox") {
+      el.checked = false;
+      return;
+    }
+
+    if (el.type === "number") {
+      if (el.id === "level") el.value = 1;
+      else if (el.id === "charArmorClass") el.value = 10;
+      else if (el.id === "charInitiative") el.value = 0;
+      else if (el.id === "charPassivePerception") el.value = 10;
+      else if (el.id === "quintArmorClass") el.value = 10;
+      else if (el.id === "quintInitiative") el.value = 0;
+      else if (el.id === "quintPassivePerception") el.value = 10;
+      else if (el.id === "quintAttackBonus") el.value = 0;
+      else if (el.id === "proficiencyBonus") el.value = 2;
+      else el.value = 0;
+      return;
+    }
+
+    if (el.tagName === "SELECT") {
+      el.selectedIndex = 0;
+      return;
+    }
+
+    el.value = "";
+  });
+
+  document.querySelectorAll("[data-feature-save]").forEach((el) => {
+    el.selectedIndex = 0;
+  });
+
+  ABILITIES.forEach((ability) => {
+    const el = document.getElementById(`mod-${ability}`);
+    if (el) el.textContent = "0";
+  });
+
+  previousQuintKey = "";
+  updateClassRules();
+  updateFeatureSections();
+  recalcSheet();
+  queueFirestoreSave();
+  setStatus("Reset complete.", "");
+}
+
+async function claimQuintessence(quintKey) {
+  if (!currentUser || !quintKey) return;
+
+  const claimRef = doc(db, "quintessenceClaims", quintKey);
+
+  await runTransaction(db, async (transaction) => {
+    const snap = await transaction.get(claimRef);
+
+    if (snap.exists()) {
+      const data = snap.data();
+      if (data.claimedByUid !== currentUser.uid) {
+        throw new Error("That Quintessence is already taken.");
+      }
+      return;
+    }
+
+    transaction.set(claimRef, {
+      claimedByUid: currentUser.uid,
+      claimedByName: currentUser.displayName || currentUser.email || "Unknown",
+      claimedAt: serverTimestamp()
+    });
+  });
+}
+
+async function releaseQuintessence(quintKey) {
+  if (!currentUser || !quintKey) return;
+
+  const claimRef = doc(db, "quintessenceClaims", quintKey);
+  const snap = await getDoc(claimRef);
+
+  if (!snap.exists()) return;
+
+  const data = snap.data();
+  if (data.claimedByUid === currentUser.uid) {
+    await deleteDoc(claimRef);
+  }
+}
+
+function watchQuintessenceAvailability() {
+  const select = document.getElementById("quintName");
+  if (!select) return;
+
+  if (stopQuintListener) stopQuintListener();
+
+  stopQuintListener = onSnapshot(collection(db, "quintessenceClaims"), (snapshot) => {
+    const taken = new Map();
+
+    snapshot.forEach((docSnap) => {
+      taken.set(docSnap.id, docSnap.data());
+    });
+
+    Array.from(select.options).forEach((opt) => {
+      if (!opt.value) return;
+
+      const cleanText = opt.text.replace(" (Taken)", "");
+      const claim = taken.get(opt.value);
+      const ownedByMe = claim && claim.claimedByUid === currentUser?.uid;
+
+      if (claim && !ownedByMe) {
+        opt.disabled = true;
+        opt.text = `${cleanText} (Taken)`;
+      } else {
+        opt.disabled = false;
+        opt.text = cleanText;
+      }
+    });
+  });
+}
+
+loginBtn.addEventListener("click", async () => {
+  loginError.textContent = "";
+  loginBtn.disabled = true;
+
+  try {
+    await signInWithPopup(auth, provider);
+  } catch (error) {
+    console.error(error);
+    loginError.textContent = error.message || "Login failed.";
+  } finally {
+    loginBtn.disabled = false;
+  }
+});
+
+logoutBtn.addEventListener("click", async () => {
+  try {
+    await signOut(auth);
+  } catch (error) {
+    console.error(error);
+    setStatus("Logout failed.", "error");
+  }
+
+  if (stopQuintListener) {
+    stopQuintListener();
+    stopQuintListener = null;
+  }
+});
+
+saveBtn.addEventListener("click", async () => {
+  try {
+    await saveSheetToFirestore();
+  } catch (error) {
+    console.error(error);
+    setStatus("Could not save sheet.", "error");
+  }
+});
+
+resetBtn.addEventListener("click", resetForm);
+
+document.addEventListener("input", (event) => {
+  if (event.target.matches("[data-feature-save]")) {
+    queueFirestoreSave();
+    return;
+  }
+
+  if (event.target.matches("[data-save]")) {
+    recalcSheet();
+    queueFirestoreSave();
+  }
+});
+
+document.addEventListener("change", async (event) => {
+  if (event.target.id === "quintName") {
+    const newKey = event.target.value;
+
+    try {
+      if (previousQuintKey && previousQuintKey !== newKey) {
+        await releaseQuintessence(previousQuintKey);
+      }
+
+      if (newKey) {
+        await claimQuintessence(newKey);
+        previousQuintKey = newKey;
+        setStatus(`Quintessence locked: ${getSelectedText("quintName")}`, "ok");
+      } else {
+        previousQuintKey = "";
+      }
+      updateFeatureSections();
+      recalcSheet();
+      queueFirestoreSave();
+    } catch (error) {
+      console.error(error);
+      setStatus(error.message || "Could not claim Quintessence.", "error");
+      event.target.value = previousQuintKey || "";
+    }
+    return;
+  }
+
+  if (event.target.matches("[data-feature-save]")) {
+    queueFirestoreSave();
+    return;
+  }
+
+  if (event.target.id === "classSelect" || event.target.id === "level") {
+    updateClassRules();
+    updateFeatureSections();
+    recalcSheet();
+    queueFirestoreSave();
+    return;
+  }
+
+  if (event.target.id.startsWith("skillProf-")) {
+    enforceSkillLimit();
+    recalcSheet();
+    queueFirestoreSave();
+    return;
+  }
+
+  if (event.target.matches("[data-save]")) {
+    recalcSheet();
+    queueFirestoreSave();
+  }
+});
+
+document.addEventListener("click", (event) => {
+  const modButton = event.target.closest("[data-mod-change]");
+  if (modButton) {
+    const [ability, deltaText] = modButton.dataset.modChange.split(":");
+    changeModifier(ability, Number(deltaText));
+    return;
+  }
+
+  const rollHpButton = event.target.closest("#rollHpBtn");
+  if (rollHpButton) {
+    rollMaxHp();
+    return;
+  }
+
+  const avgHpButton = event.target.closest("#avgHpBtn");
+  if (avgHpButton) {
+    setAverageHp();
+  }
+});
+
+buildSavingThrows();
+buildSkills();
+updateClassRules();
+updateFeatureSections();
+recalcSheet();
+
+onAuthStateChanged(auth, async (user) => {
+  currentUser = user;
+
+  if (user) {
+    loginView.classList.add("hidden");
+    appView.classList.remove("hidden");
+
+    userPhoto.src = user.photoURL || "";
+    userName.textContent = user.displayName || "User";
+    userEmail.textContent = user.email || "";
+
+    await loadSheetFromFirestore();
+    watchQuintessenceAvailability();
+  } else {
+    appView.classList.add("hidden");
+    loginView.classList.remove("hidden");
+    setStatus("");
+
+    if (stopQuintListener) {
+      stopQuintListener();
+      stopQuintListener = null;
+    }
+  }
+});
