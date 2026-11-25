@@ -64,7 +64,41 @@ import {getFirestore,collection,doc,onSnapshot,runTransaction,writeBatch,setDoc,
 /* ===== CONFIG: paste the same firebaseConfig your YUME site uses ===== */
 const firebaseConfig={apiKey:"AIzaSyCY0tkVIUqGjO_6ayWJWLHNcRUpDls5VZ8",authDomain:"grace-might-and-magicks.firebaseapp.com",projectId:"grace-might-and-magicks",appId:"1:449279853302:web:fdef6375c84605bcf5a2d7"};
 const BASE_POINTS=5, MAX_POS=4, MAX_NEG=2;
+const RACES = [
+ "Human",
+ "Elf",
+ "Dwarf",
+ "Halfling",
+ "Tiefling",
+ "Dragonborn",
+ "Orc",
+ "Gnome",
+ "Aelyasari",
+ "Malverin",
+ "Other"
+];
+
+const CLASSES = [
+ "Barbarian",
+ "Bard",
+ "Cleric",
+ "Druid",
+ "Fighter",
+ "Monk",
+ "Paladin",
+ "Ranger",
+ "Rogue",
+ "Sorcerer",
+ "Warlock",
+ "Wizard",
+ "Windtalker",
+ "Chaos Shaper",
+ "Voidcaller",
+ "Veilbreaker",
+ "Other"
+];
 const HOLD_SEC=120;   // how long a reserved (unsaved) perk stays greyed out for others
+const PERKS=[
  // ---- positive: cost points ----
  {id:"corsair-training",t:"pos",c:2,n:"Corsair Training",d:"During the first round of each combat, your attacks that hit deal an extra 2 damage."},
  {id:"killers-instinct",t:"pos",c:3,n:"Killer’s Instinct",d:"When you hit a creature that has half its Hit Points or fewer, it takes an extra 1d4 damage."},
@@ -174,7 +208,7 @@ const app=initializeApp(firebaseConfig),auth=getAuth(app),db=getFirestore(app);
 const $=s=>document.querySelector(s),el=$("#app");
 const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const P=Object.fromEntries(PERKS.map(p=>[p.id,p]));
-let user=null,claims={},holds={},sel=new Set(),saved=[],name="",msg="",unsubs=[];
+let user=null,claims={},holds={},sel=new Set(),saved=[],name="",race="",charClass="",msg="",unsubs=[];
 const live=h=>h&&h.expiresAt&&h.expiresAt.toMillis()>Date.now();
 const holdData=()=>({uid:user.uid,name:name.trim()||"Another player",expiresAt:Timestamp.fromMillis(Date.now()+HOLD_SEC*1000)});
 
@@ -221,9 +255,18 @@ function startPlayer(){
   drawPlayer();
  }));
  unsubs.push(onSnapshot(doc(db,"perkCharacters",user.uid),d=>{
-  if(d.exists()){saved=d.data().perks||[];if(!startPlayer.loaded){name=d.data().name;sel=new Set(saved)}}
-  startPlayer.loaded=true;drawPlayer();
- }));
+  if(d.exists()){
+    saved=d.data().perks||[];
+    if(!startPlayer.loaded){
+      name=d.data().name||"";
+      race=d.data().race||"";
+      charClass=d.data().charClass||"";
+      sel=new Set(saved);
+    }
+  }
+  startPlayer.loaded=true;
+  drawPlayer();
+}));
  // keep reservations alive while the page is open; redraw so expired holds free up
  const beat=setInterval(()=>{
   if(document.visibilityState==="visible")sel.forEach(id=>{if(!saved.includes(id)&&stateOf(id)!=="taken")setDoc(doc(db,"perkHolds",id),holdData()).catch(()=>{})});
@@ -242,7 +285,27 @@ function drawPlayer(){
    ${s==="taken"?`<small>Claimed by ${esc(c.name)}</small>`:s==="held"?`<small>Reserved by ${esc(h.name)}</small>`:s==="mine"?`<small style="color:var(--gold)">Yours</small>`:""}</div>`};
  el.innerHTML=`
  <section class="panel sheet"><h2>Character Sheet</h2><div class="pad">
-  <div><label for="nm">Character name</label><input id="nm" type="text" maxlength="40" value="${esc(name)}" placeholder="Enter a name"></div>
+  <div>
+    <label for="nm">Character name</label>
+    <input id="nm" type="text" maxlength="40"
+      value="${esc(name)}" placeholder="Enter a name">
+  </div>
+
+  <div>
+    <label for="race">Race</label>
+    <select id="race">
+      <option value="">Select Race</option>
+      ${RACES.map(r=>`<option value="${esc(r)}" ${race===r?"selected":""}>${esc(r)}</option>`).join("")}
+    </select>
+  </div>
+
+  <div>
+    <label for="charClass">Class</label>
+    <select id="charClass">
+      <option value="">Select Class</option>
+      ${CLASSES.map(c=>`<option value="${esc(c)}" ${charClass===c?"selected":""}>${esc(c)}</option>`).join("")}
+    </select>
+  </div>
   <div class="stats">
    <div class="stat ${t.left<0?"bad":""}"><b>${t.left}</b><span>Points</span></div>
    <div class="stat ${t.pos>MAX_POS?"bad":""}"><b>${t.pos}/${MAX_POS}</b><span>Positive</span></div>
@@ -258,8 +321,36 @@ function drawPlayer(){
   <section class="panel"><h2>Positive perks (cost points)</h2>${PERKS.filter(p=>p.t==="pos").map(card).join("")}</section>
   <section class="panel"><h2>Negative perks (give points)</h2>${PERKS.filter(p=>p.t==="neg").map(card).join("")}</section>
  </div>`;
- const nm=$("#nm");
- nm.oninput=e=>{name=e.target.value;const t=totals();$("#save").disabled=!(name.trim()&&t.left>=0&&t.pos<=MAX_POS&&t.neg<=MAX_NEG)};
+  const nm=$("#nm");
+  const raceSelect=$("#race");
+  const classSelect=$("#charClass");
+
+  const updateSaveButton=()=>{
+  const t=totals();
+  $("#save").disabled=!(
+    name.trim() &&
+    race &&
+    charClass &&
+    t.left>=0 &&
+    t.pos<=MAX_POS &&
+    t.neg<=MAX_NEG
+  );
+  };
+
+  nm.oninput=e=>{
+  name=e.target.value;
+  updateSaveButton();
+  };
+
+  raceSelect.onchange=e=>{
+  race=e.target.value;
+  updateSaveButton();
+  };
+
+  classSelect.onchange=e=>{
+  charClass=e.target.value;
+  updateSaveButton();
+  };
  if(keep!==null){nm.focus();nm.setSelectionRange(keep,keep)}
  el.querySelectorAll(".perk").forEach(n=>n.onclick=()=>toggle(n.dataset.id));
  $("#save").onclick=save;
@@ -300,7 +391,14 @@ async function save(){
     if(H[id]&&H[id].uid===uid)tx.delete(doc(db,"perkHolds",id));
    }
    for(const id of old)if(!want.includes(id)&&C[id]&&C[id].uid===uid)tx.delete(doc(db,"perkClaims",id));
-   tx.set(cref,{name:nm,perks:want,points:totals().left,updatedAt:serverTimestamp()});
+   tx.set(cref,{
+    name:nm,
+    race:race,
+    charClass:charClass,
+    perks:want,
+    points:totals().left,
+    updatedAt:serverTimestamp()
+   });
   });
   msg="Saved! Your perks are locked in.";
  }catch(e){
@@ -319,6 +417,9 @@ function startAdmin(){
   el.innerHTML=`<section class="panel"><h2>Saved characters (${chars.length})</h2><div class="pad">
    <div class="muted">${Object.keys(claims).length} of ${PERKS.length} perks claimed · ${reserved} reserved · ${esc(user.email)} · <a href="#" class="lnk" id="out">Sign out</a></div>
    <div class="chars">${chars.map(c=>`<div class="card"><h3>${esc(c.name)}</h3>
+    <div class="muted">
+      ${esc(c.race||"No race")} · ${esc(c.charClass||"No class")}
+    </div>
     <div class="muted">${c.points} points left</div>
     <div class="picked">${(c.perks||[]).map(id=>`<span class="chip ${P[id]?.t}">${esc(P[id]?.n||id)}</span>`).join("")}</div>
     <button class="btn ghost" data-del="${c.id}">Delete &amp; free perks</button></div>`).join("")||'<span class="muted">No characters yet.</span>'}</div>
