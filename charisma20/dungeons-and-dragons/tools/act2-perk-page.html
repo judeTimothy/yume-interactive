@@ -109,7 +109,7 @@ import {getFirestore,collection,doc,onSnapshot,runTransaction,writeBatch,setDoc,
 /* ===== CONFIG: paste the same firebaseConfig your YUME site uses ===== */
 const firebaseConfig={apiKey:"AIzaSyCY0tkVIUqGjO_6ayWJWLHNcRUpDls5VZ8",authDomain:"grace-might-and-magicks.firebaseapp.com",projectId:"grace-might-and-magicks",appId:"1:449279853302:web:fdef6375c84605bcf5a2d7"};
 const BASE_POINTS=5, MAX_POS=4, MAX_NEG=2;
-const ADMIN_EMAILS=["gamersinceten@gmail.com"]; // lowercase; these accounts can delete any character in Party View
+const ADMIN_UIDS=["hhTAJ5QXt9fmItaBonU6cAchWfZ2"];
 const RACES = [
  "Human",
  "Elf",
@@ -259,7 +259,7 @@ const live=h=>h&&h.expiresAt&&h.expiresAt.toMillis()>Date.now();
 const holdData=()=>({uid:user.uid,name:name.trim()||"Another player",expiresAt:Timestamp.fromMillis(Date.now()+HOLD_SEC*1000)});
 
 const party=()=>location.hash==="#party";
-const isAdmin=()=>!!user&&ADMIN_EMAILS.includes((user.email||"").toLowerCase());
+const isAdmin=()=>!!user&&ADMIN_UIDS.includes(user.uid);
 addEventListener("hashchange",()=>location.reload());
 $("#headerSlot").innerHTML='<a id="modeLink" class="btn ghost" href="#party">Party View</a>';
 $("#modeLink").href=party()?"#":"#party";
