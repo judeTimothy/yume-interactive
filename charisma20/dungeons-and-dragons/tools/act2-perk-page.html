@@ -109,6 +109,7 @@ import {getFirestore,collection,doc,onSnapshot,runTransaction,writeBatch,setDoc,
 /* ===== CONFIG: paste the same firebaseConfig your YUME site uses ===== */
 const firebaseConfig={apiKey:"AIzaSyCY0tkVIUqGjO_6ayWJWLHNcRUpDls5VZ8",authDomain:"grace-might-and-magicks.firebaseapp.com",projectId:"grace-might-and-magicks",appId:"1:449279853302:web:fdef6375c84605bcf5a2d7"};
 const BASE_POINTS=5, MAX_POS=4, MAX_NEG=2;
+const ADMIN_EMAILS=["gamersinceten@gmail.com"]; // lowercase; these accounts can delete any character in Party View
 const RACES = [
  "Human",
  "Elf",
@@ -257,23 +258,24 @@ let user=null,claims={},holds={},sel=new Set(),saved=[],name="",race="",charClas
 const live=h=>h&&h.expiresAt&&h.expiresAt.toMillis()>Date.now();
 const holdData=()=>({uid:user.uid,name:name.trim()||"Another player",expiresAt:Timestamp.fromMillis(Date.now()+HOLD_SEC*1000)});
 
-const admin=()=>location.hash==="#admin";
+const party=()=>location.hash==="#party";
+const isAdmin=()=>!!user&&ADMIN_EMAILS.includes((user.email||"").toLowerCase());
 addEventListener("hashchange",()=>location.reload());
-$("#headerSlot").innerHTML='<a id="modeLink" class="btn ghost" href="#admin">Admin</a>';
-$("#modeLink").href=admin()?"#":"#admin";
-$("#modeLink").textContent=admin()?"Player view":"Admin";
+$("#headerSlot").innerHTML='<a id="modeLink" class="btn ghost" href="#party">Party View</a>';
+$("#modeLink").href=party()?"#":"#party";
+$("#modeLink").textContent=party()?"Player view":"Party View";
 
 const login=()=>signInWithPopup(auth,new GoogleAuthProvider()).catch(e=>alert(e.message));
 onAuthStateChanged(auth,u=>{
  user=u;unsubs.forEach(f=>f());unsubs=[];
  if(!u||u.isAnonymous){
   el.className="";
-  el.innerHTML=`<section class="panel"><h2>${admin()?"Admin":"Create your character"}</h2><div class="pad">
+  el.innerHTML=`<section class="panel"><h2>${party()?"Party View":"Create your character"}</h2><div class="pad">
    <p class="muted">Sign in so your character and perks are saved to your account.</p>
    <button class="btn" id="g">Sign in with Google</button></div></section>`;
   $("#g").onclick=login;return;
  }
- admin()?startAdmin():startPlayer();
+ party()?startParty():startPlayer();
 });
 
 function totals(){
@@ -453,25 +455,28 @@ async function save(){
  drawPlayer();
 }
 
-/* ---------- Admin ---------- */
-function startAdmin(){
+/* ---------- Party View ---------- */
+function startParty(){
  el.className="";claims={};holds={};
  let chars=[];
+ const canDelete=c=>c.id===user.uid||isAdmin();
  const draw=()=>{
   const reserved=Object.values(holds).filter(live).length;
-  el.innerHTML=`<section class="panel"><h2>Saved characters (${chars.length})</h2><div class="pad">
-   <div class="muted">${Object.keys(claims).length} of ${PERKS.length} perks claimed · ${reserved} reserved · ${esc(user.email)} · <a href="#" class="lnk" id="out">Sign out</a></div>
-   <div class="chars">${chars.map(c=>`<div class="card"><h3>${esc(c.name)}</h3>
+  const list=[...chars].sort((a,b)=>(b.id===user.uid)-(a.id===user.uid)||(a.name||"").localeCompare(b.name||""));
+  el.innerHTML=`<section class="panel"><h2>Party View (${chars.length})</h2><div class="pad">
+   <div class="muted">${Object.keys(claims).length} of ${PERKS.length} perks claimed · ${reserved} reserved · ${esc(user.email)}${isAdmin()?" · Admin":""} · <a href="#" class="lnk" id="out">Sign out</a></div>
+   <div class="chars">${list.map(c=>`<div class="card"><h3>${esc(c.name)}${c.id===user.uid?' <span class="muted">(you)</span>':""}</h3>
     <div class="muted">
       ${esc(c.race||"No race")} · ${esc(c.charClass||"No class")}
     </div>
     <div class="muted">${c.points} points left</div>
     <div class="picked">${(c.perks||[]).map(id=>`<span class="chip ${P[id]?.t}">${esc(P[id]?.n||id)}</span>`).join("")}</div>
-    <button class="btn ghost" data-del="${c.id}">Delete &amp; free perks</button></div>`).join("")||'<span class="muted">No characters yet.</span>'}</div>
+    ${canDelete(c)?`<button class="btn ghost" data-del="${c.id}">${c.id===user.uid?"Delete my character":"Delete &amp; free perks"}</button>`:""}</div>`).join("")||'<span class="muted">No characters yet.</span>'}</div>
   </div></section>`;
   $("#out").onclick=e=>{e.preventDefault();signOut(auth)};
   el.querySelectorAll("[data-del]").forEach(b=>b.onclick=async()=>{
    const c=chars.find(x=>x.id===b.dataset.del);
+   if(!c||!canDelete(c))return;
    if(!confirm(`Delete ${c.name} and free their perks?`))return;
    const w=writeBatch(db);
    (c.perks||[]).forEach(id=>{if(claims[id]&&claims[id].uid===c.id)w.delete(doc(db,"perkClaims",id))});
