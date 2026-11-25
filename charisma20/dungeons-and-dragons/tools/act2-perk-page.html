@@ -23,6 +23,7 @@ main{max-width:1100px;margin:0 auto;padding:16px;display:grid;gap:16px;grid-temp
 .pad{padding:14px;display:grid;gap:12px}
 label{font-size:.72rem;text-transform:uppercase;letter-spacing:.1em;color:var(--mute)}
 input[type=text]{width:100%;background:#0f0d0d;border:1px solid var(--line);border-bottom:2px solid var(--red);color:var(--ink);padding:10px;font:inherit;font-size:1.05rem;border-radius:3px}
+input[type=text]:disabled{opacity:.5;cursor:not-allowed}
 
 /* Character dropdowns */
 select {
@@ -80,6 +81,8 @@ select option {
 @media(min-width:620px){.cols{grid-template-columns:1fr 1fr}}
 .perk{display:grid;grid-template-columns:1fr auto;gap:2px 10px;padding:12px 14px;border-bottom:1px solid var(--line);cursor:pointer;border-left:4px solid transparent;transition:background .15s}
 .perk:hover{background:var(--panel2)}
+.cols.locked .perk{cursor:default}
+.cols.locked .perk:not(.on):hover{background:none}
 .perk h3{font-size:.95rem}
 .perk p{grid-column:1;margin:0;color:var(--mute);font-size:.88rem}
 .cost{grid-row:1/3;grid-column:2;align-self:center;font:800 1.2rem 'Cinzel',serif;min-width:44px;text-align:center;border:1px solid var(--line);border-radius:6px;padding:4px 6px}
@@ -95,6 +98,7 @@ select option {
 .card h3{font-size:1.05rem}
 .muted{color:var(--mute);font-size:.8rem}
 a.lnk{color:var(--gold)}
+.bar{display:flex;flex-wrap:wrap;gap:8px}
 </style>
 </head>
 <body>
@@ -104,7 +108,7 @@ a.lnk{color:var(--gold)}
 <script type="module">
 import {initializeApp} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import {getAuth,onAuthStateChanged,GoogleAuthProvider,signInWithPopup,signOut} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-import {getFirestore,collection,doc,onSnapshot,runTransaction,writeBatch,setDoc,deleteDoc,serverTimestamp,Timestamp} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import {getFirestore,collection,doc,onSnapshot,runTransaction,writeBatch,setDoc,deleteDoc,updateDoc,serverTimestamp,Timestamp} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 /* ===== CONFIG: paste the same firebaseConfig your YUME site uses ===== */
 const firebaseConfig={apiKey:"AIzaSyCY0tkVIUqGjO_6ayWJWLHNcRUpDls5VZ8",authDomain:"grace-might-and-magicks.firebaseapp.com",projectId:"grace-might-and-magicks",appId:"1:449279853302:web:fdef6375c84605bcf5a2d7"};
@@ -254,7 +258,7 @@ const app=initializeApp(firebaseConfig),auth=getAuth(app),db=getFirestore(app);
 const $=s=>document.querySelector(s),el=$("#app");
 const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const P=Object.fromEntries(PERKS.map(p=>[p.id,p]));
-let user=null,claims={},holds={},sel=new Set(),saved=[],name="",race="",charClass="",msg="",unsubs=[];
+let user=null,claims={},holds={},sel=new Set(),saved=[],name="",race="",charClass="",locked=false,sortDir="",msg="",unsubs=[];
 const live=h=>h&&h.expiresAt&&h.expiresAt.toMillis()>Date.now();
 const holdData=()=>({uid:user.uid,name:name.trim()||"Another player",expiresAt:Timestamp.fromMillis(Date.now()+HOLD_SEC*1000)});
 
@@ -283,6 +287,8 @@ function totals(){
  sel.forEach(id=>{const p=P[id];if(!p)return;if(p.t==="pos"){pos++;spent+=p.c}else{neg++;gained+=p.c}});
  return {pos,neg,left:BASE_POINTS-spent+gained};
 }
+// Sort perks by cost inside each column. "" keeps the original list order.
+const sortPerks=list=>sortDir?[...list].sort((a,b)=>(sortDir==="asc"?a.c-b.c:b.c-a.c)||a.n.localeCompare(b.n)):list;
 function stateOf(id){
  const c=claims[id];if(c)return c.uid===user.uid?"mine":"taken";
  const h=holds[id];return live(h)&&h.uid!==user.uid?"held":"free";
@@ -290,7 +296,7 @@ function stateOf(id){
 
 /* ---------- Player ---------- */
 function startPlayer(){
- el.className="player";claims={};holds={};sel=new Set();saved=[];name="";msg="";startPlayer.loaded=false;
+ el.className="player";claims={};holds={};sel=new Set();saved=[];name="";msg="";locked=false;startPlayer.loaded=false;
  unsubs.push(onSnapshot(collection(db,"perkClaims"),s=>{
   claims={};s.forEach(d=>claims[d.id]=d.data());
   sel.forEach(id=>{if(!saved.includes(id)&&claims[id]&&claims[id].uid!==user.uid){sel.delete(id);msg=`“${P[id]?.n}” was just taken by ${claims[id].name}.`}});
@@ -303,20 +309,23 @@ function startPlayer(){
  }));
  unsubs.push(onSnapshot(doc(db,"perkCharacters",user.uid),d=>{
   if(d.exists()){
-    saved=d.data().perks||[];
-    if(!startPlayer.loaded){
-      name=d.data().name||"";
-      race=d.data().race||"";
-      charClass=d.data().charClass||"";
+    const c=d.data();
+    saved=(c.perks||[]).filter(id=>P[id]);
+    // No "locked" field (characters saved before this update) counts as locked.
+    locked=c.locked!==false;
+    if(!startPlayer.loaded||locked){
+      name=c.name||"";
+      race=c.race||"";
+      charClass=c.charClass||"";
       sel=new Set(saved);
     }
-  }
+  }else locked=false;
   startPlayer.loaded=true;
   drawPlayer();
-}));
+ }));
  // keep reservations alive while the page is open; redraw so expired holds free up
  const beat=setInterval(()=>{
-  if(document.visibilityState==="visible")sel.forEach(id=>{if(!saved.includes(id)&&stateOf(id)!=="taken")setDoc(doc(db,"perkHolds",id),holdData()).catch(()=>{})});
+  if(document.visibilityState==="visible"&&!locked)sel.forEach(id=>{if(!saved.includes(id)&&stateOf(id)!=="taken")setDoc(doc(db,"perkHolds",id),holdData()).catch(()=>{})});
   drawPlayer();
  },45000);
  unsubs.push(()=>clearInterval(beat));
@@ -324,7 +333,7 @@ function startPlayer(){
 function drawPlayer(){
  if(!user)return;
  const f=document.activeElement,keep=f&&f.id==="nm"?f.selectionStart:null;
- const t=totals(),ok=name.trim()&&t.left>=0&&t.pos<=MAX_POS&&t.neg<=MAX_NEG;
+ const t=totals(),ok=!locked&&name.trim()&&race&&charClass&&t.left>=0&&t.pos<=MAX_POS&&t.neg<=MAX_NEG;
  const card=p=>{
   const s=stateOf(p.id),on=sel.has(p.id),h=holds[p.id],c=claims[p.id];
   return `<div class="perk ${p.t} ${on?"on":""} ${s==="taken"?"taken":""} ${s==="held"?"held":""}" data-id="${p.id}">
@@ -335,12 +344,12 @@ function drawPlayer(){
   <div>
     <label for="nm">Character name</label>
     <input id="nm" type="text" maxlength="40"
-      value="${esc(name)}" placeholder="Enter a name">
+      value="${esc(name)}" placeholder="Enter a name" ${locked?"disabled":""}>
   </div>
 
   <div>
     <label for="race">Race</label>
-    <select id="race">
+    <select id="race" ${locked?"disabled":""}>
       <option value="">Select Race</option>
       ${RACES.map(r=>`<option value="${esc(r)}" ${race===r?"selected":""}>${esc(r)}</option>`).join("")}
     </select>
@@ -348,7 +357,7 @@ function drawPlayer(){
 
   <div>
     <label for="charClass">Class</label>
-    <select id="charClass">
+    <select id="charClass" ${locked?"disabled":""}>
       <option value="">Select Class</option>
       ${CLASSES.map(c=>`<option value="${esc(c)}" ${charClass===c?"selected":""}>${esc(c)}</option>`).join("")}
     </select>
@@ -358,52 +367,65 @@ function drawPlayer(){
    <div class="stat ${t.pos>MAX_POS?"bad":""}"><b>${t.pos}/${MAX_POS}</b><span>Positive</span></div>
    <div class="stat ${t.neg>MAX_NEG?"bad":""}"><b>${t.neg}/${MAX_NEG}</b><span>Negative</span></div>
   </div>
+  <div>
+    <label for="sortCost">Sort perks by cost</label>
+    <select id="sortCost">
+      <option value="" ${sortDir===""?"selected":""}>Default order</option>
+      <option value="asc" ${sortDir==="asc"?"selected":""}>Cost: low to high</option>
+      <option value="desc" ${sortDir==="desc"?"selected":""}>Cost: high to low</option>
+    </select>
+  </div>
   <div class="picked">${[...sel].map(id=>`<span class="chip ${P[id].t}">${esc(P[id].n)}</span>`).join("")||'<span class="muted">No perks picked yet</span>'}</div>
-  <button class="btn" id="save" ${ok?"":"disabled"}>Save &amp; claim perks</button>
+  ${locked
+    ?`<div class="msg">Locked. Ask the DM to unlock your perks if you need to change them.</div>`
+    :`<button class="btn" id="save" ${ok?"":"disabled"}>Save &amp; claim perks</button>`}
   <div class="msg">${esc(msg)}</div>
-  <div class="muted">Start with ${BASE_POINTS} points. Picking a perk reserves it for you for ${HOLD_SEC/60} minutes while you stay on this page. Saving makes it yours permanently.</div>
+  <div class="muted">Start with ${BASE_POINTS} points. Picking a perk reserves it for you for ${HOLD_SEC/60} minutes while you stay on this page. Saving locks your perks in until the DM unlocks them.</div>
   <div class="muted">${esc(user.email)} · <a href="#" class="lnk" id="out">Sign out</a></div>
  </div></section>
- <div class="cols">
-  <section class="panel"><h2>Positive perks (cost points)</h2>${PERKS.filter(p=>p.t==="pos").map(card).join("")}</section>
-  <section class="panel"><h2>Negative perks (give points)</h2>${PERKS.filter(p=>p.t==="neg").map(card).join("")}</section>
+ <div class="cols ${locked?"locked":""}">
+  <section class="panel"><h2>Positive perks (cost points)</h2>${sortPerks(PERKS.filter(p=>p.t==="pos")).map(card).join("")}</section>
+  <section class="panel"><h2>Negative perks (give points)</h2>${sortPerks(PERKS.filter(p=>p.t==="neg")).map(card).join("")}</section>
  </div>`;
   const nm=$("#nm");
   const raceSelect=$("#race");
   const classSelect=$("#charClass");
 
   const updateSaveButton=()=>{
-  const t=totals();
-  $("#save").disabled=!(
-    name.trim() &&
-    race &&
-    charClass &&
-    t.left>=0 &&
-    t.pos<=MAX_POS &&
-    t.neg<=MAX_NEG
-  );
+    const sv=$("#save");if(!sv)return;
+    const t=totals();
+    sv.disabled=!(
+      name.trim() &&
+      race &&
+      charClass &&
+      t.left>=0 &&
+      t.pos<=MAX_POS &&
+      t.neg<=MAX_NEG
+    );
   };
 
   nm.oninput=e=>{
-  name=e.target.value;
-  updateSaveButton();
+    name=e.target.value;
+    updateSaveButton();
   };
 
   raceSelect.onchange=e=>{
-  race=e.target.value;
-  updateSaveButton();
+    race=e.target.value;
+    updateSaveButton();
   };
 
   classSelect.onchange=e=>{
-  charClass=e.target.value;
-  updateSaveButton();
+    charClass=e.target.value;
+    updateSaveButton();
   };
- if(keep!==null){nm.focus();nm.setSelectionRange(keep,keep)}
+ if(keep!==null&&!locked){nm.focus();nm.setSelectionRange(keep,keep)}
  el.querySelectorAll(".perk").forEach(n=>n.onclick=()=>toggle(n.dataset.id));
- $("#save").onclick=save;
+ const sv=$("#save");if(sv)sv.onclick=save;
+ $("#sortCost").onchange=e=>{sortDir=e.target.value;drawPlayer()};
  $("#out").onclick=e=>{e.preventDefault();signOut(auth)};
 }
 async function toggle(id){
+ if(locked)return;
  const s=stateOf(id);if(s==="taken"||s==="held")return;
  const p=P[id],t=totals();msg="";
  if(sel.has(id)){
@@ -419,7 +441,8 @@ async function toggle(id){
  catch{sel.delete(id);msg=`“${p.n}” was just reserved by someone else.`;drawPlayer()}
 }
 async function save(){
- const b=$("#save");b.disabled=true;msg="Saving…";
+ if(locked)return;
+ const b=$("#save");if(b)b.disabled=true;msg="Saving…";
  const want=[...sel],uid=user.uid,nm=name.trim();
  try{
   await runTransaction(db,async tx=>{
@@ -444,6 +467,7 @@ async function save(){
     charClass:charClass,
     perks:want,
     points:totals().left,
+    locked:true,
     updatedAt:serverTimestamp()
    });
   });
@@ -459,21 +483,38 @@ async function save(){
 function startParty(){
  el.className="";claims={};holds={};
  let chars=[];
- const canDelete=c=>c.id===user.uid||isAdmin();
+ // Admins can delete anyone. Players can delete their own character only while it is unlocked.
+ const canDelete=c=>isAdmin()||(c.id===user.uid&&c.locked===false);
+ const setAll=async v=>{
+  if(!isAdmin()||!chars.length)return;
+  if(!confirm(`${v?"Lock":"Unlock"} all ${chars.length} characters?`))return;
+  const w=writeBatch(db);
+  chars.forEach(c=>w.update(doc(db,"perkCharacters",c.id),{locked:v}));
+  await w.commit().catch(e=>alert(e.message));
+ };
  const draw=()=>{
   const reserved=Object.values(holds).filter(live).length;
   const list=[...chars].sort((a,b)=>(b.id===user.uid)-(a.id===user.uid)||(a.name||"").localeCompare(b.name||""));
   el.innerHTML=`<section class="panel"><h2>Party View (${chars.length})</h2><div class="pad">
    <div class="muted">${Object.keys(claims).length} of ${PERKS.length} perks claimed · ${reserved} reserved · ${esc(user.email)}${isAdmin()?" · Admin":""} · <a href="#" class="lnk" id="out">Sign out</a></div>
+   ${isAdmin()?`<div class="bar"><button class="btn ghost" id="lockAll">Lock all</button><button class="btn ghost" id="unlockAll">Unlock all</button></div>`:""}
    <div class="chars">${list.map(c=>`<div class="card"><h3>${esc(c.name)}${c.id===user.uid?' <span class="muted">(you)</span>':""}</h3>
     <div class="muted">
       ${esc(c.race||"No race")} · ${esc(c.charClass||"No class")}
     </div>
-    <div class="muted">${c.points} points left</div>
+    <div class="muted">${c.points} points left${isAdmin()?` · ${c.locked!==false?"Locked":"Unlocked"}`:""}</div>
     <div class="picked">${(c.perks||[]).map(id=>`<span class="chip ${P[id]?.t}">${esc(P[id]?.n||id)}</span>`).join("")}</div>
+    ${isAdmin()?`<button class="btn ghost" data-lock="${c.id}">${c.locked!==false?"Unlock":"Lock"}</button>`:""}
     ${canDelete(c)?`<button class="btn ghost" data-del="${c.id}">${c.id===user.uid?"Delete my character":"Delete &amp; free perks"}</button>`:""}</div>`).join("")||'<span class="muted">No characters yet.</span>'}</div>
   </div></section>`;
   $("#out").onclick=e=>{e.preventDefault();signOut(auth)};
+  if($("#lockAll")){$("#lockAll").onclick=()=>setAll(true);$("#unlockAll").onclick=()=>setAll(false)}
+  el.querySelectorAll("[data-lock]").forEach(b=>b.onclick=async()=>{
+   const c=chars.find(x=>x.id===b.dataset.lock);
+   if(!c||!isAdmin())return;
+   // currently unlocked (locked===false) -> lock it; otherwise unlock it
+   await updateDoc(doc(db,"perkCharacters",c.id),{locked:c.locked===false}).catch(e=>alert(e.message));
+  });
   el.querySelectorAll("[data-del]").forEach(b=>b.onclick=async()=>{
    const c=chars.find(x=>x.id===b.dataset.del);
    if(!c||!canDelete(c))return;
