@@ -23,6 +23,51 @@ main{max-width:1100px;margin:0 auto;padding:16px;display:grid;gap:16px;grid-temp
 .pad{padding:14px;display:grid;gap:12px}
 label{font-size:.72rem;text-transform:uppercase;letter-spacing:.1em;color:var(--mute)}
 input[type=text]{width:100%;background:#0f0d0d;border:1px solid var(--line);border-bottom:2px solid var(--red);color:var(--ink);padding:10px;font:inherit;font-size:1.05rem;border-radius:3px}
+
+/* Character dropdowns */
+select {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 100%;
+  min-height: 44px;
+  background-color: #0f0d0d;
+  border: 1px solid var(--line);
+  border-bottom: 2px solid var(--red);
+  border-radius: 3px;
+  color: var(--ink);
+  padding: 10px 38px 10px 10px;
+  font-family: 'Roboto Condensed', sans-serif;
+  font-size: 1.05rem;
+  cursor: pointer;
+  touch-action: manipulation;
+
+  /* Custom gold dropdown arrow */
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23d8a94a' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+}
+
+select:hover {
+  background-color: var(--panel2);
+  border-color: var(--gold);
+}
+
+select:focus {
+  outline: none;
+  border-color: var(--gold);
+  box-shadow: 0 0 0 2px rgba(216,169,74,.15);
+}
+
+select:disabled {
+  opacity: .5;
+  cursor: not-allowed;
+}
+
+select option {
+  background: #1d1a19;
+  color: var(--ink);
+}
+
 .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
 .stat{background:#0f0d0d;border:1px solid var(--line);border-radius:6px;text-align:center;padding:8px 4px}
 .stat b{display:block;font:800 1.6rem 'Cinzel',serif}
