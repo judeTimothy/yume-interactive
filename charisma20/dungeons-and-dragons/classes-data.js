@@ -1,8 +1,8 @@
 /* Charisma20 class data: shared by index.html (gallery) and classes.html (listing).
    Edit here once and both pages update. */
-window.C20_IMG = "dungeons-and-dragons/images/classes/";                       // art: images/classes/<slug>.jpg
+window.C20_IMG = "/charisma20/dungeons-and-dragons/images/classes/";                       // art: images/classes/<slug>.jpg
 // Where a class card goes. Switch to "class.html?c=" once the breakdown pages exist.
-window.C20_CLASS_URL = s => "dungeons-and-dragons/classes.html#" + s;
+window.C20_CLASS_URL = s => "charisma20/dungeons-and-dragons/classes.html#" + s;
 window.C20_CLASSES = [
  // ---- core ----
  {name:"Barbarian",group:"core",color:"#b56906",tag:"Raging Warrior",abil:"Strength",primary:"Strength",hd:"d12",saves:"Strength & Constitution",blurb:"Barbarians are mighty warriors who are powered by primal forces of the multiverse that manifest as a Rage."},
