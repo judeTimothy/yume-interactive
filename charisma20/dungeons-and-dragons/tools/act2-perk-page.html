@@ -353,9 +353,9 @@ function drawPlayer(){
   </div>
 
   <div>
-    <label for="race">Race</label>
+    <label for="race">Species</label>
     <select id="race" ${locked?"disabled":""}>
-      <option value="">Select Race</option>
+      <option value="">Select Species</option>
       ${RACES.map(r=>`<option value="${esc(r)}" ${race===r?"selected":""}>${esc(r)}</option>`).join("")}
     </select>
   </div>
