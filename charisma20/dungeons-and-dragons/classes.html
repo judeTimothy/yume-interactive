@@ -139,7 +139,7 @@ const GROUPS=[
  {id:"ossyran",title:"Ossyran Classics",sub:"Classes native to Ossyra",label:"The World of Ossyra (2026)"},
  {id:"thirdparty",title:"Official Third Party Classes",sub:"Official Third Party Classes",label:"Eberron: Forge of the Artificer (2025)"}
 ];
-const card=(c,g)=>`<a class="lc" id="${c.slug}" style="--c:${c.color}" href="${C20_CLASS_URL(c.slug)}" data-s="${esc((c.name+" "+g.title+" "+g.label+" "+(c.primary||"")+" "+(c.tag||"")).toLowerCase())}">
+const card=(c,g)=>`<a class="lc" id="${c.slug}" style="--c:${c.color}" href="classes/${c.slug}.html" data-s="${esc((c.name+" "+g.title+" "+g.label+" "+(c.primary||"")+" "+(c.tag||"")).toLowerCase())}">
  <span class="mono" aria-hidden="true">${esc(c.name[0])}</span>
  <img class="bg" src="${C20_IMG}${c.slug}.png" alt="" loading="lazy" onerror="this.remove()">
  <div class="lb">
