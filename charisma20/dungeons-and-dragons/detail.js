@@ -11,6 +11,8 @@ const HIDE_BELOW=["Ability Score Improvement","Subclass Feature"];
 const KEEP_FIRST=["Ability Score Improvement"];
 // Plain-text descriptions are wrapped in <p> automatically; text starting with a tag is used as-is
 const body=h=>!h?'<p class="todo">Description coming soon.</p>':(/^\s*</.test(h)?h:`<p>${h}</p>`);
+// Divider drawn between subclasses (inline style so only this file needs to change)
+const SUB_SEP='<hr style="border:0;height:1px;margin:34px 0 8px;background:linear-gradient(90deg,transparent,#d8a94a,transparent)">';
 const slug=s=>String(s).toLowerCase().replace(/[^a-z0-9]+/g,"-");
 
 let d=`<img class="art" src="${esc(img)}" alt="${n}" onerror="this.remove()">`+(P.intro||[]).map(p=>`<p>${p}</p>`).join("");
@@ -27,7 +29,7 @@ if(!C){
  if((P.subclasses||[]).length)d+=`<h2 id="subclasses">${n} Subclasses</h2>`+P.subclasses.map((s,si)=>`<h3 id="sub-${slug(s.slug||s.name)}">${esc(s.name)}</h3>`
   +(s.label?`<p class="sublabel">${esc(s.label)}</p>`:"")
   +(s.intro||[]).map(p=>`<p>${p}</p>`).join("")
-  +norm(s.features).map((f,i)=>`<h4 id="s${si}f${i}">Level ${f.level}: ${esc(f.name)}</h4>${body(f.html)}`).join("")).join("");
+  +norm(s.features).map((f,i)=>`<h4 id="s${si}f${i}">Level ${f.level}: ${esc(f.name)}</h4>${body(f.html)}`).join("")).join(SUB_SEP);
 }
 if(P.source)d+=`<div class="src">${esc(P.source)}</div>`;
 
