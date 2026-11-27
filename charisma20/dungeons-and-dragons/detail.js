@@ -7,6 +7,7 @@ const img=P.image||`../images/${dir}/${P.slug}.png`;
 const feats=(P.features||[]).map(f=>Array.isArray(f)?{level:f[0],name:f[1],html:f[2]}:f);
 // Features with these names appear in the level table but not in the detailed list below it
 const HIDE_BELOW=["Ability Score Improvement","Subclass Feature"];
+const KEEP_FIRST=["Ability Score Improvement"];
 const body=h=>h||'<p class="todo">Description coming soon.</p>';
 
 let d=`<img class="art" src="${esc(img)}" alt="${n}" onerror="this.remove()">`+(P.intro||[]).map(p=>`<p>${p}</p>`).join("");
@@ -18,7 +19,7 @@ if(!C){
  let rows="";
  for(let L=1;L<=20;L++){const f=feats.filter(x=>x.level===L).map(x=>esc(x.name)).join(", ")||"&mdash;";rows+=`<tr><td>${L}</td><td>+${2+Math.floor((L-1)/4)}</td><td>${f}</td></tr>`}
  d+=`<h2 id="table">${n} Features Table</h2><div class="tw"><table><thead><tr><th>Level</th><th>Proficiency Bonus</th><th>Class Features</th></tr></thead><tbody>${rows}</tbody></table></div>`;
- d+=`<h2 id="features">${n} Class Features</h2>`+feats.filter(f=>!HIDE_BELOW.includes(f.name)).map((f,i)=>`<h4 id="f${i}">Level ${f.level}: ${esc(f.name)}</h4>${body(f.html)}`).join("");
+ d+=`<h2 id="features">${n} Class Features</h2>`+feats.filter((f,i)=>!HIDE_BELOW.includes(f.name)||(KEEP_FIRST.includes(f.name)&&feats.findIndex(x=>x.name===f.name)===i)).map((f,i)=>`<h4 id="f${i}">Level ${f.level}: ${esc(f.name)}</h4>${body(f.html)}`).join("");
 }
 if(P.source)d+=`<div class="src">${esc(P.source)}</div>`;
 
