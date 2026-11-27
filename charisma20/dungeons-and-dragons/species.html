@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Species | Charisma20</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;800&family=Roboto+Condensed:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#12100f;--panel:#1d1a19;--panel2:#262221;--line:#3a3331;--ink:#ece6df;--mute:#9b918a;--red:#c53131;--gold:#d8a94a;--green:#5fa86a;color-scheme:dark}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:radial-gradient(1200px 500px at 50% -160px,#2a1614,var(--bg));color:var(--ink);font:400 16px/1.5 'Roboto Condensed',system-ui,sans-serif;min-height:100vh;padding-bottom:env(safe-area-inset-bottom,0)}
+h1,h2,h3{font-family:'Cinzel',Georgia,serif;margin:0;letter-spacing:.04em;font-weight:800}
+a{color:inherit;text-decoration:none}
+.wrap{max-width:1180px;margin:0 auto;padding:0 20px}
+
+/* page heading */
+.crumbs{padding:18px 0 0;font-size:.8rem;text-transform:uppercase;letter-spacing:.12em;color:var(--mute)}
+.crumbs a:hover{color:var(--gold)}
+.crumbs span{margin:0 8px;opacity:.5}
+.title{padding:10px 0 22px}
+.title h1{font-size:clamp(2rem,6vw,3.2rem)}
+.title p{margin:6px 0 0;color:var(--mute)}
+
+/* search */
+.search{position:relative;margin-bottom:22px}
+.search input{width:100%;background:#0f0d0d;border:1px solid var(--line);border-bottom:2px solid var(--red);border-radius:6px;color:var(--ink);padding:14px 90px 14px 44px;font:inherit;font-size:1.05rem}
+.search input:focus{outline:none;border-color:var(--gold)}
+.search svg{position:absolute;left:14px;top:50%;width:18px;height:18px;transform:translateY(-50%);fill:var(--mute)}
+.search button{position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:0;color:var(--mute);font:700 .75rem 'Roboto Condensed',sans-serif;letter-spacing:.1em;text-transform:uppercase;cursor:pointer}
+.search button[hidden]{display:none}
+
+/* collapsible groups */
+.grp{background:var(--panel);border:1px solid var(--line);border-radius:10px;margin-bottom:18px;overflow:hidden}
+.grp[hidden]{display:none}
+.gh{width:100%;display:flex;align-items:center;gap:14px;background:var(--panel2);border:0;border-bottom:1px solid var(--line);color:var(--ink);padding:16px 18px;cursor:pointer;text-align:left}
+.gh h2{font-size:1.15rem;color:var(--gold);text-transform:uppercase}
+.gh small{display:block;font:400 .85rem 'Roboto Condensed',sans-serif;letter-spacing:0;color:var(--mute);text-transform:none}
+.gh .count{margin-left:auto;font:700 .75rem 'Roboto Condensed',sans-serif;letter-spacing:.1em;color:var(--mute);text-transform:uppercase}
+.chev{width:12px;height:12px;border-right:2px solid var(--gold);border-bottom:2px solid var(--gold);transform:rotate(45deg);transition:transform .2s;margin:-4px 4px 0 0}
+.grp.closed .chev{transform:rotate(-45deg);margin-top:0}
+.grp.closed .gl{display:none}
+.grp.closed .gh{border-bottom:0}
+.gl{display:grid;gap:16px;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));padding:18px}
+
+/* species cards */
+.lc{position:relative;display:flex;flex-direction:column;min-height:330px;border:1px solid var(--line);border-radius:10px;overflow:hidden;background:radial-gradient(circle at 70% 0%,var(--c),#12100f 70%);transition:transform .2s,border-color .2s,box-shadow .2s;scroll-margin-top:90px}
+.lc[hidden]{display:none}
+.lc:hover,.lc:focus-visible{transform:translateY(-4px);border-color:var(--gold);box-shadow:0 12px 26px rgba(0,0,0,.5);outline:none}
+.lc.flash{animation:flash 1.8s ease-out}
+@keyframes flash{0%,40%{box-shadow:0 0 0 3px var(--gold),0 0 30px rgba(216,169,74,.6)}100%{box-shadow:none}}
+.lc .bg{
+  position:absolute;
+  inset:0;
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  object-position:50% 25%;
+  transform:scale(1.2);
+  opacity:.55;
+  pointer-events:none
+}
+/* Individual species image adjustments (tune per image; add Ossyran / third-party slugs as needed) */
+#aasimar .bg    { object-position: 50% 20%; transform: scale(1.2); }
+#dragonborn .bg { object-position: 50% 20%; transform: scale(1.25); }
+#dwarf .bg      { object-position: 50% 25%; transform: scale(1.25); }
+#elf .bg        { object-position: 50% 20%; transform: scale(1.25); }
+#gnome .bg      { object-position: 50% 30%; transform: scale(1.3); }
+#goliath .bg    { object-position: 50% 20%; transform: scale(1.2); }
+#halfling .bg   { object-position: 50% 30%; transform: scale(1.3); }
+#human .bg      { object-position: 50% 20%; transform: scale(1.2); }
+#orc .bg        { object-position: 50% 20%; transform: scale(1.25); }
+#tiefling .bg   { object-position: 50% 20%; transform: scale(1.25); }
+
+.lc::before{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(18,16,15,.15),rgba(18,16,15,.92) 62%);z-index:1}
+.lc .mono{position:absolute;right:14px;top:-6px;font:800 7rem 'Cinzel',serif;color:#fff;opacity:.1;line-height:1;z-index:0}
+.lb{position:relative;z-index:2;margin-top:auto;padding:18px 18px 56px}
+.lt{display:flex;align-items:center;gap:12px;margin-bottom:10px}
+.ic{flex:none;width:44px;height:44px;border-radius:50%;border:2px solid var(--c);background:#0f0d0d;display:grid;place-items:center;font:800 1.2rem 'Cinzel',serif;color:#fff;overflow:hidden}
+.ic img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  padding: 0;
+  border-radius: 50%;
+}
+.lt h3{font-size:1.3rem;line-height:1.1}
+.src{font-size:.72rem;letter-spacing:.12em;text-transform:uppercase;color:var(--gold)}
+.src.o{color:#c98bf0}
+.lb p{margin:0 0 6px;color:#d8d0c8;font-size:.95rem}
+.lb em{display:block;color:var(--ink);margin-bottom:4px}
+.tr{margin:12px 0 4px;font:800 .8rem 'Cinzel',Georgia,serif;letter-spacing:.08em;text-transform:uppercase;color:var(--gold)}
+.lb .trl{margin:0;font-size:.85rem;color:var(--mute);line-height:1.6}
+.go{position:absolute;left:0;right:0;bottom:0;z-index:3;padding:13px 18px;background:var(--red);font:700 .8rem 'Roboto Condensed',sans-serif;letter-spacing:.12em;text-transform:uppercase;text-align:center;transform:translateY(100%);transition:transform .2s}
+.lc:hover .go,.lc:focus-visible .go{transform:none}
+@media(hover:none){.go{transform:none;background:rgba(197,49,49,.9)}}
+
+.none{display:none;text-align:center;padding:50px 0;font:800 1.4rem 'Cinzel',serif;color:var(--mute)}
+.none small{display:block;font:400 .95rem 'Roboto Condensed',sans-serif;margin-top:6px}
+.none.show{display:block}
+footer{padding:30px 0;text-align:center;color:var(--mute);font-size:.85rem}
+</style>
+</head>
+<body>
+<script src="../charisma20-header.js" data-title="Species"></script>
+<script src="species-data.js"></script>
+
+<main class="wrap">
+  <div class="crumbs"><a href="../charisma20-home.html">Home</a><span>/</span>Species</div>
+  <div class="title">
+    <h1>Species</h1>
+    <p>The core D&amp;D species, the Ossyran Classics, and official third party species. Open a species for its full breakdown.</p>
+  </div>
+
+  <div class="search">
+    <svg viewBox="0 0 512 512" aria-hidden="true"><path d="M416 208c0 45.9-14.9 88.3-40 122.7l126.6 126.7c12.5 12.5 12.5 32.8 0 45.3s-32.8 12.5-45.3 0L330.7 376c-34.4 25.2-76.8 40-122.7 40C93.1 416 0 322.9 0 208S93.1 0 208 0s208 93.1 208 208M208 352a144 144 0 1 0 0-288 144 144 0 1 0 0 288"/></svg>
+    <input id="q" type="search" placeholder="Search by name, group, or trait" autocomplete="off" aria-label="Search species">
+    <button id="clr" type="button" hidden>Clear &times;</button>
+  </div>
+
+  <div id="groups"></div>
+  <div class="none" id="none">Natural 1.<small>No species match your search.</small></div>
+</main>
+<footer>Charisma20</footer>
+
+<script>
+const $=s=>document.querySelector(s);
+const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const GROUPS=[
+ {id:"core",title:"Core Species",sub:"The core D&D species",label:"Player's Handbook (2024)"},
+ {id:"ossyran",title:"Ossyran Classics",sub:"Species native to Ossyra",label:"The World of Ossyra (2026)"},
+ {id:"thirdparty",title:"Official Third Party Species",sub:"Official Third Party Species",label:"Eberron: Forge of the Artificer (2025)"}
+];
+const card=(c,g)=>`<a class="lc" id="${c.slug}" style="--c:${c.color}" href="species/${c.slug}.html" data-s="${esc((c.name+" "+g.title+" "+g.label+" "+(c.tag||"")+" "+(c.traits||[]).join(" ")).toLowerCase())}">
+ <span class="mono" aria-hidden="true">${esc(c.name[0])}</span>
+ <img class="bg" src="${C20_IMG}${c.slug}.png" alt="" loading="lazy" onerror="this.remove()">
+ <div class="lb">
+  <div class="lt"><span class="ic"><img src="images/icons/species/${c.slug}.jpg" alt="${esc(c.name)}" loading="lazy"></span><div><h3>${esc(c.name)}</h3><div class="src${g.id==="ossyran"?" o":""}">${esc(c.label || g.label)}</div></div></div>
+  ${c.blurb?`<p>${c.tag?`<em>${esc(c.tag)}</em>`:""}${esc(c.blurb)}</p>
+  <h4 class="tr">${esc(c.name)} Traits</h4>
+  <p class="trl">${(c.traits||[]).map(esc).join(", ")}</p>`
+  :`<p>Full breakdown coming soon.</p>`}
+ </div>
+ <div class="go">View ${esc(c.name)} Details &rarr;</div></a>`;
+
+$("#groups").innerHTML=GROUPS.map(g=>{
+ const list=C20_SPECIES.filter(c=>c.group===g.id);
+ return `<section class="grp" data-g="${g.id}"><button class="gh" type="button" aria-expanded="true">
+  <div><h2>${g.title}</h2><small>${g.sub}</small></div><span class="count"></span><span class="chev" aria-hidden="true"></span></button>
+  <div class="gl">${list.map(c=>card(c,g)).join("")}</div></section>`}).join("");
+
+const setOpen=(grp,open)=>{grp.classList.toggle("closed",!open);grp.querySelector(".gh").setAttribute("aria-expanded",open)};
+document.querySelectorAll(".gh").forEach(b=>b.onclick=()=>setOpen(b.parentElement,b.parentElement.classList.contains("closed")));
+
+function filter(){
+ const q=$("#q").value.trim().toLowerCase();let total=0;
+ $("#clr").hidden=!q;
+ document.querySelectorAll(".grp").forEach(grp=>{
+  let n=0;const cards=grp.querySelectorAll(".lc");
+  cards.forEach(c=>{const hit=!q||c.dataset.s.includes(q);c.hidden=!hit;if(hit)n++});
+  grp.querySelector(".count").textContent=q?`${n} of ${cards.length}`:`${cards.length} species`;
+  grp.hidden=q&&!n;if(q&&n)setOpen(grp,true);total+=n;
+ });
+ $("#none").classList.toggle("show",total===0);
+}
+$("#q").addEventListener("input",filter);
+$("#clr").onclick=()=>{$("#q").value="";filter();$("#q").focus()};
+filter();
+
+// #slug in the URL opens that species and highlights it
+function jump(){
+ const id=decodeURIComponent(location.hash.slice(1));if(!id)return;
+ const el=document.getElementById(id);if(!el||!el.classList.contains("lc"))return;
+ setOpen(el.closest(".grp"),true);
+ el.scrollIntoView({block:"center"});
+ el.classList.remove("flash");void el.offsetWidth;el.classList.add("flash");
+}
+addEventListener("hashchange",jump);addEventListener("load",jump);
+</script>
+</body>
+</html>
