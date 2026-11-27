@@ -1,12 +1,12 @@
 (function () {
   const NAV = [
-    { label: "Home", href: "index.html" },
-    { label: "Classes", href: "classes.html" },
+    { label: "Home", href: "/charisma20/charisma20-home.html" },
+    { label: "Classes", href: "/charisma20/dungeons-and-dragons/classes.html" },
     { label: "Play in Ossyra", children: [
-      { label: "Choose Perks", href: "act2-perk-page.html" },
-      { label: "Party View", href: "act2-perk-page.html#party" }
+      { label: "Choose Perks", href: "/charisma20/dungeons-and-dragons/tools/act2-perk-page.html" },
+      { label: "Party View", href: "/charisma20/dungeons-and-dragons/tools/act2-perk-page.html#party" }
     ]},
-    { label: "Rules", href: "rules.html" },               // PDF viewer page (to be built)
+    { label: "Rules", href: "/charisma20/dungeons-and-dragons/rules.html" },               // PDF viewer page (to be built)
     { label: "Community", children: [
       { label: "Discord", href: "https://discord.gg/8xtDXPtE42" },
       { label: "Facebook", href: "https://www.facebook.com/charisma20dnd" }
