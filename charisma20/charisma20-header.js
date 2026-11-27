@@ -1,12 +1,12 @@
 (function () {
   const NAV = [
-    { label: "Home", href: "/charisma20/charisma20-home.html" },
-    { label: "Classes", href: "/charisma20/dungeons-and-dragons/classes.html" },
+    { label: "Home", href: "index.html" },
+    { label: "Classes", href: "classes.html" },
     { label: "Play in Ossyra", children: [
-      { label: "Choose Perks", href: "/charisma20/dungeons-and-dragons/tools/act2-perk-page.html" },
-      { label: "Party View", href: "/charisma20/dungeons-and-dragons/tools/act2-perk-page.html#party" }
+      { label: "Choose Perks", href: "act2-perk-page.html" },
+      { label: "Party View", href: "act2-perk-page.html#party" }
     ]},
-    { label: "Rules", href: "/charisma20/dungeons-and-dragons/tools/rules.html" },               // PDF viewer page (to be built)
+    { label: "Rules", href: "rules.html" },               // PDF viewer page (to be built)
     { label: "Community", children: [
       { label: "Discord", href: "https://discord.gg/8xtDXPtE42" },
       { label: "Facebook", href: "https://www.facebook.com/charisma20dnd" }
@@ -31,6 +31,12 @@
 .oh-dd.open .oh-menu{display:block}
 @media(hover:hover) and (min-width:761px){.oh-dd:hover .oh-menu{display:block}}
 .oh-slot{margin-left:auto;display:flex;gap:8px;align-items:center}
+.oh-auth{display:flex;align-items:center;gap:8px;visibility:hidden}
+.oh-auth.on{visibility:visible}
+.oh-auth .who{font:700 .75rem 'Roboto Condensed',sans-serif;letter-spacing:.06em;color:var(--mute,#9b918a);max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.oh-btn{background:var(--red,#c53131);border:1px solid var(--red,#c53131);color:#fff;border-radius:4px;padding:7px 12px;font:700 .75rem 'Roboto Condensed',sans-serif;letter-spacing:.08em;text-transform:uppercase;cursor:pointer}
+.oh-btn.ghost{background:transparent;border-color:var(--line,#3a3331);color:var(--mute,#9b918a)}
+@media(max-width:760px){.oh-auth .who{display:none}}
 .oh-burger{display:none;background:none;border:1px solid var(--line,#3a3331);border-radius:4px;padding:8px;cursor:pointer;color:var(--ink,#ece6df);line-height:0}
 @media(max-width:760px){
  .oh-burger{display:block}
@@ -62,6 +68,7 @@
   <h1 class="oh-title">${title}</h1>
   <nav class="oh-nav" id="ohNav" aria-label="Main">${NAV.map(item).join("")}</nav>
   <div class="oh-slot" id="headerSlot"></div>
+  <div class="oh-auth" id="ohAuth"></div>
   <button type="button" class="oh-burger" id="ohBurger" aria-label="Menu" aria-expanded="false" aria-controls="ohNav">
     <svg width="22" height="22" viewBox="0 0 22 22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 6h16M3 11h16M3 16h16"/></svg>
   </button>
@@ -83,4 +90,16 @@
   }));
   document.addEventListener("click", e => { if (!hdr.contains(e.target)) { closeDds(); hdr.classList.remove("open"); burger.setAttribute("aria-expanded", "false"); } });
   document.addEventListener("keydown", e => { if (e.key === "Escape") { closeDds(); hdr.classList.remove("open"); burger.setAttribute("aria-expanded", "false"); } });
+  // ---- shared login (uses c20-auth.js next to this file) ----
+  const authBox = document.getElementById("ohAuth");
+  import(new URL("c20-auth.js", me.src).href).then(m => {
+    const render = u => {
+      authBox.innerHTML = m.isReal(u)
+        ? `<span class="who">${(u.displayName || u.email || "Signed in").replace(/[<>&"]/g, "")}</span><button type="button" class="oh-btn ghost">Sign out</button>`
+        : `<button type="button" class="oh-btn">Sign in</button>`;
+      authBox.classList.add("on");
+      authBox.querySelector("button").onclick = () => (m.isReal(u) ? m.logout() : m.login()).catch(e => { if (e.code !== "auth/popup-closed-by-user") alert(e.message); });
+    };
+    m.onAuthStateChanged(m.auth, render);
+  }).catch(e => console.warn("Login module not loaded:", e));
 })();
