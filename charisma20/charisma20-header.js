@@ -7,7 +7,7 @@
       { label: "Map", href: "/charisma20/dungeons-and-dragons/maps/world-map.html" }
     ]},
     { label: "Rules", children: [
-      { label: "Ossyra Sourcebook", href: "/charisma20/dungeons-and-dragons/rules.html"" },
+      { label: "Ossyra Sourcebook", href: "/charisma20/dungeons-and-dragons/rules.html" },
       { label: "Classes", href: "/charisma20/dungeons-and-dragons/classes.html" },
       { label: "Species", href: "/charisma20/dungeons-and-dragons/species.html" }
     ]},
