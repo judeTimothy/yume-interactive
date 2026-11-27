@@ -5,6 +5,8 @@ const C=P.kind==="class",dir=C?"classes":"species",lbl=C?"Classes":"Species",n=e
 document.title=P.name+" | Charisma20";
 const img=P.image||`../images/${dir}/${P.slug}.png`;
 const feats=(P.features||[]).map(f=>Array.isArray(f)?{level:f[0],name:f[1],html:f[2]}:f);
+// Features with these names appear in the level table but not in the detailed list below it
+const HIDE_BELOW=["Ability Score Improvement","Subclass Feature"];
 const body=h=>h||'<p class="todo">Description coming soon.</p>';
 
 let d=`<img class="art" src="${esc(img)}" alt="${n}" onerror="this.remove()">`+(P.intro||[]).map(p=>`<p>${p}</p>`).join("");
@@ -16,7 +18,7 @@ if(!C){
  let rows="";
  for(let L=1;L<=20;L++){const f=feats.filter(x=>x.level===L).map(x=>esc(x.name)).join(", ")||"&mdash;";rows+=`<tr><td>${L}</td><td>+${2+Math.floor((L-1)/4)}</td><td>${f}</td></tr>`}
  d+=`<h2 id="table">${n} Features Table</h2><div class="tw"><table><thead><tr><th>Level</th><th>Proficiency Bonus</th><th>Class Features</th></tr></thead><tbody>${rows}</tbody></table></div>`;
- d+=`<h2 id="features">${n} Class Features</h2>`+feats.map((f,i)=>`<h4 id="f${i}">Level ${f.level}: ${esc(f.name)}</h4>${body(f.html)}`).join("");
+ d+=`<h2 id="features">${n} Class Features</h2>`+feats.filter(f=>!HIDE_BELOW.includes(f.name)).map((f,i)=>`<h4 id="f${i}">Level ${f.level}: ${esc(f.name)}</h4>${body(f.html)}`).join("");
 }
 if(P.source)d+=`<div class="src">${esc(P.source)}</div>`;
 
@@ -26,7 +28,7 @@ $("#app").innerHTML=`<main class="wrap" style="--c:${esc(P.color)}">
  <div class="layout"><nav class="toc" aria-label="Chapters"><h5>Chapters</h5></nav><article class="doc">${d}</article></div></main><footer>Charisma20</footer>`;
 
 // chapter tracker: built from headings, highlights the section being read
-const toc=$(".toc"),hs=[...document.querySelectorAll(".doc h2,.doc h4")];
+const toc=$(".toc"),hs=[...document.querySelectorAll(".doc h2")];
 hs.forEach(h=>{const a=document.createElement("a");a.href="#"+h.id;a.dataset.t=h.id;a.textContent=h.textContent;if(h.tagName==="H4")a.className="sub";toc.appendChild(a)});
 const links=[...toc.querySelectorAll("a")];let cur;
 function spy(){
