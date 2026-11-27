@@ -63,6 +63,11 @@ const C20_SPECIES = [
     blurb:"The Malverin are mortals descended from devils, bearing an infernal heritage that may manifest in their appearance, abilities, and supernatural nature.",
     traits:["Sinful Clarity","Devil Sight","Infernal Resistance", "Infernal Manifestation", "Infernal Guise"]},
 
+  { slug:"dreamer", name:"Dreamer", color:"#d0ff00", group:"ossyran",
+    tag:"Artificial Life",
+    blurb:"Dreamers are manufactured bodies inhabited by copied, transferred, or reconstructed minds. Unlike ordinary constructs, they possess genuine consciousness, memories, emotions, and individual identities.",
+    traits:["Constructed Frame", "Synthetic Rest", "Assigned Function", "Fleeting Dreams", "Long Death Immunity"]},
+
   /* ---------- Official Third Party Species (Eberron: Forge of the Artificer 2025) ---------- */
   // { slug:"example", name:"Example", color:"#4a8ad0", group:"thirdparty",
   //   label:"Optional source override",
