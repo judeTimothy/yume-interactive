@@ -3,52 +3,52 @@ const C20_IMG = "/charisma20/dungeons-and-dragons/images/species/";
 const C20_SPECIES = [
   /* ---------- Core Species (Player's Handbook 2024) ---------- */
   { slug:"aasimar", name:"Aasimar", color:"#d8b84a", group:"core",
-    tag:"Celestial Spark",
+    tag:"Touched by the Divine",
     blurb:"Aasimar are mortals who carry a spark of the Upper Planes within their souls.",
     traits:["Celestial Resistance","Darkvision","Healing Hands","Light Bearer","Celestial Revelation"] },
 
   { slug:"dragonborn", name:"Dragonborn", color:"#b8452f", group:"core",
-    tag:"Dragonheirs",
+    tag:"Blood of Dragons",
     blurb:"The ancestors of dragonborn hatched from the eggs of chromatic and metallic dragons.",
     traits:["Draconic Ancestry","Breath Weapon","Damage Resistance","Darkvision","Draconic Flight"] },
 
   { slug:"dwarf", name:"Dwarf", color:"#a8703a", group:"core",
-    tag:"Masterful craftsman",
+    tag:"Forged in Stone",
     blurb:"Dwarves were raised from the earth in the elder days by a deity of the forge.",
     traits:["Darkvision","Dwarven Resilience","Dwarven Toughness","Stonecunning"] },
 
   { slug:"elf", name:"Elf", color:"#3f9a6b", group:"core",
-    tag:"Fey Ancestry",
+    tag:"Children of the Fey",
     blurb:"The elves’ curiosity led many of them to explore other planes of existence.",
     traits:["Darkvision","Elven Lineage","Fey Ancestry","Keen Senses","Trance"] },
 
   { slug:"gnome", name:"Gnome", color:"#c9783a", group:"core",
-    tag:"Curious Tinkerers",
+    tag:"Born of Wonder",
     blurb:"Gnomes are magical folk created by gods of invention, illusions, and life underground.",
     traits:["Darkvision","Gnomish Cunning","Gnomish Lineage"] },
 
   { slug:"goliath", name:"Goliath", color:"#6b8fa8", group:"core",
-    tag:"Giant-blooded",
+    tag:"Blood of Giants",
     blurb:"Goliaths are distant descendants of giants and seek heights above those reached by their ancestors.",
     traits:["Giant Ancestry","Large Form","Powerful Build"] },
 
   { slug:"halfling", name:"Halfling", color:"#8aa84a", group:"core",
-    tag:"Lucky smallfolks",
+    tag:"Smallfolk's Fortune",
     blurb:"Halflings possess a brave and adventurous spirit that leads them on journeys of discovery.",
     traits:["Brave","Halfling Nimbleness","Luck","Naturally Stealthy"] },
 
   { slug:"human", name:"Human", color:"#7a8fb8", group:"core",
-    tag:"Adaptable and Ambitious",
+    tag:"Heirs of Ambition",
     blurb:"Found throughout the multiverse, humans are as varied as they are numerous.",
     traits:["Resourceful","Skillful","Versatile"] },
 
   { slug:"orc", name:"Orc", color:"#5f7a3a", group:"core",
-    tag:"Relentless Resilience",
+    tag:"Sons of Resilience",
     blurb:"Orcs are equipped with gifts to help them wander great plains, vast caverns, and churning seas.",
     traits:["Adrenaline Rush","Darkvision","Relentless Endurance"] },
 
   { slug:"tiefling", name:"Tiefling", color:"#a8337a", group:"core",
-    tag:"Infernal Legacy",
+    tag:"Touched by the Hells",
     blurb:"Tieflings are either born in the Lower Planes or have fiendish ancestors who originated there.",
     traits:["Darkvision","Fiendish Legacy","Otherworldly Presence"] },
 
