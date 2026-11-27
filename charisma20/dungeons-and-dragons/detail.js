@@ -4,11 +4,14 @@ const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&
 const C=P.kind==="class",dir=C?"classes":"species",lbl=C?"Classes":"Species",n=esc(P.name);
 document.title=P.name+" | Charisma20";
 const img=P.image||`../images/${dir}/${P.slug}.png`;
-const feats=(P.features||[]).map(f=>Array.isArray(f)?{level:f[0],name:f[1],html:f[2]}:f);
+const norm=a=>(a||[]).filter(Boolean).map(f=>Array.isArray(f)?{level:f[0],name:f[1],html:f[2]}:f);
+const feats=norm(P.features);
 // Features with these names appear in the level table but not in the detailed list below it
 const HIDE_BELOW=["Ability Score Improvement","Subclass Feature"];
 const KEEP_FIRST=["Ability Score Improvement"];
-const body=h=>h||'<p class="todo">Description coming soon.</p>';
+// Plain-text descriptions are wrapped in <p> automatically; text starting with a tag is used as-is
+const body=h=>!h?'<p class="todo">Description coming soon.</p>':(/^\s*</.test(h)?h:`<p>${h}</p>`);
+const slug=s=>String(s).toLowerCase().replace(/[^a-z0-9]+/g,"-");
 
 let d=`<img class="art" src="${esc(img)}" alt="${n}" onerror="this.remove()">`+(P.intro||[]).map(p=>`<p>${p}</p>`).join("");
 if(!C){
@@ -20,6 +23,11 @@ if(!C){
  for(let L=1;L<=20;L++){const f=feats.filter(x=>x.level===L).map(x=>esc(x.name)).join(", ")||"&mdash;";rows+=`<tr><td>${L}</td><td>+${2+Math.floor((L-1)/4)}</td><td>${f}</td></tr>`}
  d+=`<h2 id="table">${n} Features Table</h2><div class="tw"><table><thead><tr><th>Level</th><th>Proficiency Bonus</th><th>Class Features</th></tr></thead><tbody>${rows}</tbody></table></div>`;
  d+=`<h2 id="features">${n} Class Features</h2>`+feats.filter((f,i)=>!HIDE_BELOW.includes(f.name)||(KEEP_FIRST.includes(f.name)&&feats.findIndex(x=>x.name===f.name)===i)).map((f,i)=>`<h4 id="f${i}">Level ${f.level}: ${esc(f.name)}</h4>${body(f.html)}`).join("");
+ // Subclasses: one section per entry in P.subclasses (each gets its own tracker link)
+ d+=(P.subclasses||[]).map((s,si)=>`<h2 id="sub-${slug(s.slug||s.name)}">${esc(s.name)} Subclass</h2>`
+  +(s.label?`<p class="sublabel">${esc(s.label)}</p>`:"")
+  +(s.intro||[]).map(p=>`<p>${p}</p>`).join("")
+  +norm(s.features).map((f,i)=>`<h4 id="s${si}f${i}">Level ${f.level}: ${esc(f.name)}</h4>${body(f.html)}`).join("")).join("");
 }
 if(P.source)d+=`<div class="src">${esc(P.source)}</div>`;
 
