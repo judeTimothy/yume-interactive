@@ -137,7 +137,7 @@ const card=(c,g)=>`<a class="lc" id="${c.slug}" style="--c:${c.color}" href="spe
  <span class="mono" aria-hidden="true">${esc(c.name[0])}</span>
  <img class="bg" src="${C20_IMG}${c.slug}.png" alt="" loading="lazy" onerror="this.remove()">
  <div class="lb">
-  <div class="lt"><span class="ic"><img src="images/icons/species/${c.slug}.jpg" alt="${esc(c.name)}" loading="lazy"></span><div><h3>${esc(c.name)}</h3><div class="src${g.id==="ossyran"?" o":""}">${esc(c.label || g.label)}</div></div></div>
+  <div class="lt"><div><h3>${esc(c.name)}</h3><div class="src${g.id==="ossyran"?" o":""}">${esc(c.label || g.label)}</div></div></div>
   ${c.blurb?`<p>${c.tag?`<em>${esc(c.tag)}</em>`:""}${esc(c.blurb)}</p>
   <h4 class="tr">${esc(c.name)} Traits</h4>
   <p class="trl">${(c.traits||[]).map(esc).join(", ")}</p>`
