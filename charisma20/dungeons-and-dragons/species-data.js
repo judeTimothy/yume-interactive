@@ -56,7 +56,7 @@ const C20_SPECIES = [
   { slug:"aelyasari", name:"Aelyasari", color:"#fff9e4", group:"ossyran",
     tag:"Descendants of the Sisters",
     blurb:"Aelyasari are direct descendants of the offspring of the Sisters, bearing their spark and their gifts.",
-    traits:["Divine Insight","Darkvision"]},
+    traits:["Darkvision", "Celestial Wings", "Divine Insight", "Aelyasari Heritage"]},
   
   { slug:"malverin", name:"Malverin", color:"#c50c7b", group:"ossyran",
     tag:"Legacy of the Sins",
