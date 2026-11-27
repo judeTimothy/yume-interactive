@@ -90,7 +90,6 @@ footer{border-top:1px solid var(--line);padding:26px 0;color:var(--mute);font-si
         <button class="btn ghost" id="bRoute">Travel Time</button>
         <button class="btn ghost hid" id="bCfg">Map Settings</button>
         <span class="grow"></span>
-        <div class="acct hid" id="acct" style="display: none"><button class="btn ghost sm" id="bUid" title="Copy your user ID (for DM_UIDS and Firestore rules)">My UID</button></div>
       </div>
       <div class="chips" id="chips"></div>
       <div class="mapbox">
@@ -125,7 +124,7 @@ function el(t,c,x){const e=document.createElement(t);if(c)e.className=c;if(x!=nu
 const NS="http://www.w3.org/2000/svg";
 const map=$("map"),w=$("w"),pinsEl=$("pins"),rs=$("rs");
 
-let W=2000,H=1300,miles=600,v={x:0,y:0,s:1},mode="view",route=[],gp=[],lp=[],sel=null,me=null,isDM=false,hidden=new Set(),fitted=false;
+let W=2000,H=1300,miles=600,v={x:0,y:0,s:1},mode="view",route=[],gp=[],lp=[],sel=null,me=null,isDM=false,hidden=new Set(),fitted=false,moving=null;
 $("yr").textContent=new Date().getFullYear();
 
 /* chips */
@@ -143,9 +142,18 @@ function setMap(src,mi){
   im.onerror=()=>{if(!im.src.startsWith("data:"))im.src=placeholder()};
   im.src=src||DEFAULT_MAP;
 }
-function fit(){const r=map.getBoundingClientRect();v.s=Math.min(r.width/W,r.height/H);v.x=(r.width-W*v.s)/2;v.y=(r.height-H*v.s)/2;apply()}
-function apply(){w.style.transform=`translate(${v.x}px,${v.y}px) scale(${v.s})`;w.style.setProperty("--i",Math.min(1.4,Math.max(.7,1/v.s*.8)))}
-function zoomAt(cx,cy,f){const n=Math.min(6,Math.max(.05,v.s*f));f=n/v.s;v.x=cx-(cx-v.x)*f;v.y=cy-(cy-v.y)*f;v.s=n;apply()}
+const MAXZ=4;
+function minS(){const r=map.getBoundingClientRect();return Math.max(r.width/W,r.height/H)}
+/* keep the map covering the whole viewport: no empty space, no getting lost */
+function clamp(){
+  const r=map.getBoundingClientRect();
+  v.s=Math.min(MAXZ,Math.max(minS(),v.s));
+  v.x=Math.min(0,Math.max(r.width-W*v.s,v.x));
+  v.y=Math.min(0,Math.max(r.height-H*v.s,v.y));
+}
+function fit(){const r=map.getBoundingClientRect();v.s=minS();v.x=(r.width-W*v.s)/2;v.y=(r.height-H*v.s)/2;apply()}
+function apply(){clamp();w.style.transform=`translate(${v.x}px,${v.y}px) scale(${v.s})`;w.style.setProperty("--i",Math.min(1.4,Math.max(.7,1/v.s*.8)))}
+function zoomAt(cx,cy,f){const n=Math.min(MAXZ,Math.max(minS(),v.s*f));f=n/v.s;v.x=cx-(cx-v.x)*f;v.y=cy-(cy-v.y)*f;v.s=n;apply()}
 $("zi").onclick=()=>{const r=map.getBoundingClientRect();zoomAt(r.width/2,r.height/2,1.3)};
 $("zo").onclick=()=>{const r=map.getBoundingClientRect();zoomAt(r.width/2,r.height/2,1/1.3)};
 
@@ -182,7 +190,9 @@ function showCard(ref,edit){
     if(p.desc)body.append(el("p","",p.desc));
     const r=el("div","row");
     const go=el("button","btn sm","Travel from here");go.onclick=()=>{route=[{nx:p.nx,ny:p.ny}];setMode("route",1);hideCard()};r.append(go);
-    if(can){const e=el("button","btn ghost sm","Edit");e.onclick=()=>showCard(ref,1);r.append(e)}
+    if(can){const e=el("button","btn ghost sm","Edit");e.onclick=()=>showCard(ref,1);r.append(e);
+      const mv=el("button","btn ghost sm","Move");mv.onclick=()=>{moving=ref;hideCard();setMode("move",1)};r.append(mv);
+      const dl=el("button","btn ghost sm","Delete");dl.onclick=()=>{if(confirm("Delete this pin?")){remove(ref);hideCard()}};r.append(dl)}
     const x=el("button","btn ghost sm","Close");x.onclick=hideCard;r.append(x);body.append(r);
   }else{
     const n=el("input");n.value=p.name||"";n.placeholder="Name";n.maxLength=60;
@@ -200,24 +210,25 @@ function showCard(ref,edit){
 function persist(ref){
   const {p,l}=ref;p.saved=1;
   if(l){if(!lp.includes(p))lp.push(p);saveLocal();drawPins()}
-  else setDoc(doc(db,PINS,p.id),{name:p.name||"",type:p.type||"other",desc:p.desc||"",nx:p.nx,ny:p.ny,by:me.uid,t:serverTimestamp()}).catch(e=>alert("Could not save pin: "+(e.message||e)));
+  else setDoc(doc(db,PINS,p.id),{name:p.name||"",type:p.type||"other",desc:p.desc||"",nx:p.nx,ny:p.ny,by:p.by||me.uid,t:serverTimestamp()},{merge:true}).catch(e=>alert("Could not save pin: "+(e.message||e)));
 }
-function remove(ref,quiet){
+function remove(ref){
   const {p,l}=ref;
-  if(l){lp=lp.filter(q=>q!==p);saveLocal();drawPins()}
-  else if(!quiet)deleteDoc(doc(db,PINS,p.id)).catch(()=>{});
-  else gp=gp.filter(q=>q!==p);
+  if(l){lp=lp.filter(q=>q!==p);saveLocal();drawPins();return}
+  gp=gp.filter(q=>q!==p);drawPins();
+  if(p.saved)deleteDoc(doc(db,PINS,p.id)).catch(e=>alert("Could not delete pin: "+(e.message||e)));
 }
 
 /* modes */
 function setMode(m,force){
   mode=(!force&&mode===m&&m!=="view")?"view":m;
-  map.classList.toggle("add",mode==="add");
+  map.classList.toggle("add",mode==="add"||mode==="move");
   $("bAdd").classList.toggle("ghost",mode!=="add");$("bAdd").classList.toggle("on",mode==="add");
   $("bRoute").classList.toggle("on",mode==="route");
   const h=$("hint");
   if(mode==="add"){h.textContent="Tap the map to place a pin";h.classList.remove("hid")}
   else if(mode==="route"){h.textContent="Tap pins or the map to add stops";h.classList.remove("hid")}
+  else if(mode==="move"){h.textContent="Tap the new spot for this pin";h.classList.remove("hid")}
   else h.classList.add("hid");
   if(mode==="route"){$("card").classList.add("hid");showRoute()}else $("rt").classList.add("hid");
   drawRoute();
@@ -280,6 +291,11 @@ addEventListener("pointerup",up);addEventListener("pointercancel",up);
 map.addEventListener("wheel",e=>{e.preventDefault();const r=map.getBoundingClientRect();zoomAt(e.clientX-r.left,e.clientY-r.top,e.deltaY<0?1.15:1/1.15)},{passive:false});
 addEventListener("resize",apply);
 function tap(e){
+  if(mode==="move"&&moving){
+    const at=pos(e),r=moving;moving=null;
+    r.p.nx=Math.min(1,Math.max(0,at.nx));r.p.ny=Math.min(1,Math.max(0,at.ny));
+    persist(r);setMode("view",1);showCard(r);return;
+  }
   const pe=startTarget&&startTarget.closest&&startTarget.closest(".pin"),at=pos(e);
   if(pe&&pe._ref){
     const ref=pe._ref;
@@ -305,16 +321,14 @@ $("bCfg").onclick=()=>{
 };
 
 /* auth + data (login itself lives in the shared header) */
-$("bUid").onclick=async()=>{try{await navigator.clipboard.writeText(me.uid);$("bUid").textContent="Copied"}catch(e){prompt("Your UID:",me.uid)}setTimeout(()=>$("bUid").textContent="My UID",1500)};
 /* world data is public: no login needed to view the map or use travel time */
 const bad=()=>{$("hint").textContent="Could not load map data";$("hint").classList.remove("hid")};
 onSnapshot(collection(db,PINS),s=>{gp=s.docs.map(d=>Object.assign({id:d.id,saved:1},d.data()));drawPins()},bad);
 onSnapshot(CFG,s=>{const c=s.exists()?s.data():{};setMap(c.img||null,c.miles)},()=>{});
 A.onAuthStateChanged(A.auth,u=>{
   me=A.isReal(u)?u:null;
-  if(!me){isDM=false;lp=[];$("acct").classList.add("hid");$("bCfg").classList.add("hid");$("bAdd").textContent="Add My Pin";hideCard();drawPins();return}
+  if(!me){isDM=false;lp=[];$("bCfg").classList.add("hid");$("bAdd").textContent="Add My Pin";hideCard();drawPins();return}
   isDM=DM_UIDS.includes(me.uid);loadLocal();
-  $("acct").classList.remove("hid");
   $("bAdd").textContent=isDM?"Add World Pin":"Add My Pin";
   $("bCfg").classList.toggle("hid",!isDM);
   drawPins();
