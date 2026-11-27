@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>World Map | Charisma20</title>
+<meta name="description" content="The interactive world map of Ossyra. Explore points of interest, drop your own pins and plan your journey.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;800&family=Roboto+Condensed:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#12100f;--panel:#1d1a19;--panel2:#262221;--line:#3a3331;--ink:#ece6df;--mute:#9b918a;--red:#c53131;--gold:#d8a94a;--green:#5fa86a;--blue:#3b7fb5;--purple:#8a4bb0;color-scheme:dark}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--ink);font:400 16px/1.5 'Roboto Condensed',system-ui,sans-serif;padding:env(safe-area-inset-top,0) 0 env(safe-area-inset-bottom,0)}
+h1,h2,h3,h4,h5{font-family:'Cinzel',Georgia,serif;margin:0;letter-spacing:.04em;font-weight:800}
+a{color:inherit;text-decoration:none}
+.wrap{max-width:1180px;margin:0 auto;padding:0 20px}
+.eyebrow{font:700 .75rem 'Roboto Condensed',sans-serif;letter-spacing:.18em;text-transform:uppercase;color:var(--gold)}
+.btn{display:inline-block;font:700 .8rem 'Roboto Condensed',sans-serif;text-transform:uppercase;letter-spacing:.1em;padding:10px 18px;border-radius:4px;background:var(--red);border:1px solid var(--red);color:#fff;cursor:pointer}
+.btn:hover{filter:brightness(1.1)}
+.btn.ghost{background:transparent;border-color:var(--gold);color:var(--gold)}
+.btn.ghost.on{background:var(--gold);color:#12100f}
+.btn.sm{padding:6px 12px;font-size:.72rem}
+.ornate{position:relative;display:inline-block;padding:16px 42px;color:#fff;font:700 .9rem 'Roboto Condensed',sans-serif;letter-spacing:.12em;text-transform:uppercase;z-index:0;border:0;cursor:pointer;background:none;clip-path:polygon(16px 0,calc(100% - 16px) 0,100% 50%,calc(100% - 16px) 100%,16px 100%,0 50%)}
+.ornate::before{content:"";position:absolute;inset:0;z-index:-2;background:linear-gradient(90deg,#e7d29a,#f6e7bd 20%,#d9b86b 50%,#f6e7bd 80%,#e7d29a)}
+.ornate::after{content:"";position:absolute;inset:2px;z-index:-1;background:linear-gradient(180deg,rgba(255,255,255,.14),rgba(0,0,0,.22)),#e10600;clip-path:polygon(14px 0,calc(100% - 14px) 0,100% 50%,calc(100% - 14px) 100%,14px 100%,0 50%)}
+.ornate:hover{filter:brightness(1.08)}
+.hero{text-align:center;padding:54px 0 30px;background:radial-gradient(900px 360px at 50% -80px,#4a1c18,transparent),linear-gradient(#12100f,#171312)}
+.hero h1{font-size:clamp(2rem,6vw,3.6rem);line-height:1.05;margin:12px 0 14px}
+.hero h1 span{color:var(--red)}
+.hero p{max-width:620px;margin:0 auto;color:#cfc7bf;font-size:1.08rem}
+.rule{height:14px;max-width:520px;margin:0 auto 20px;background:linear-gradient(90deg,transparent,var(--gold),transparent);clip-path:polygon(0 50%,45% 45%,50% 0,55% 45%,100% 50%,55% 55%,50% 100%,45% 55%);opacity:.8}
+section{padding:26px 0 60px}
+.frame{background:#131110;border:1px solid var(--line);border-radius:18px;padding:22px;box-shadow:inset 0 0 0 4px #171413,inset 0 0 0 5px #3a3331}
+.bar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:12px}
+.bar .grow{flex:1}
+.acct{display:flex;gap:8px;align-items:center;font-size:.85rem;color:var(--mute)}
+.acct img{width:26px;height:26px;border-radius:50%;border:1px solid var(--gold)}
+input.q,.sheet input,.sheet select,.sheet textarea{background:#0f0d0d;border:1px solid var(--line);border-radius:6px;padding:8px 10px;color:var(--ink);font:inherit;width:100%}
+input.q{width:190px}
+.sheet input:focus,.sheet select:focus,.sheet textarea:focus,input.q:focus{outline:1px solid var(--gold)}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px}
+.chip{font:700 .7rem 'Roboto Condensed',sans-serif;letter-spacing:.08em;text-transform:uppercase;padding:4px 11px;border-radius:99px;border:1px solid var(--c);background:var(--panel2);color:var(--ink);cursor:pointer}
+.chip.off{opacity:.38;background:transparent}
+.mapbox{position:relative;height:clamp(460px,72vh,780px);border:1px solid var(--line);border-radius:12px;overflow:hidden;background:#0c0a09;box-shadow:inset 0 0 40px rgba(0,0,0,.7)}
+#map{position:absolute;inset:0;touch-action:none;cursor:grab}
+#map.add{cursor:crosshair}
+#w{position:absolute;left:0;top:0;transform-origin:0 0;will-change:transform}
+#w img{display:block;user-select:none;-webkit-user-drag:none;pointer-events:none}
+#rs{position:absolute;left:0;top:0;pointer-events:none;overflow:visible}
+.pin{position:absolute;transform:translate(-50%,-50%) scale(var(--i,1));cursor:pointer;text-align:center}
+.pin .dm{width:28px;height:28px;margin:0 auto;transform:rotate(45deg);background:var(--c);border:2px solid var(--gold);box-shadow:0 2px 6px rgba(0,0,0,.7);display:grid;place-items:center}
+.pin .dm b{transform:rotate(-45deg);font:700 14px/1 system-ui,sans-serif;color:#fff}
+.pin.l .dm{border-color:#9fd0ff;border-radius:50%;transform:none}
+.pin.l .dm b{transform:none}
+.pin.sel .dm{box-shadow:0 0 0 3px rgba(216,169,74,.5),0 2px 8px #000}
+.pin small{display:block;margin-top:8px;font:700 11px/1.1 'Roboto Condensed',sans-serif;letter-spacing:.08em;text-transform:uppercase;color:var(--ink);background:rgba(18,16,15,.85);border:1px solid var(--line);padding:2px 6px;border-radius:3px;white-space:nowrap}
+.wp{position:absolute;width:12px;height:12px;background:var(--gold);border:2px solid #12100f;transform:translate(-50%,-50%) rotate(45deg) scale(var(--i,1))}
+.sheet{background:var(--panel);border:1px solid var(--line);border-radius:10px;overflow:hidden}
+.sheet h5{margin:0;padding:9px 14px;background:var(--panel2);border-bottom:1px solid var(--line);font:800 .8rem 'Cinzel',serif;letter-spacing:.08em;color:var(--gold);text-transform:uppercase}
+.sheet .in{padding:14px;display:grid;gap:8px}
+.sheet .in p{margin:0;white-space:pre-wrap;color:#cfc7bf}
+.sheet .t{color:var(--mute);font-size:.85rem}
+.pop{position:absolute;left:12px;bottom:12px;width:min(380px,calc(100% - 24px));max-height:62%;overflow:auto;box-shadow:0 8px 28px rgba(0,0,0,.6)}
+.row{display:flex;gap:8px;flex-wrap:wrap}
+table{border-collapse:collapse;width:100%}td{padding:4px 0;border-bottom:1px solid var(--line)}td:last-child{text-align:right;font:800 1rem 'Cinzel',serif;color:var(--gold)}
+.hid{display:none!important}
+.hint{position:absolute;left:50%;top:12px;transform:translateX(-50%);background:var(--red);color:#fff;padding:5px 16px;font:700 .72rem 'Roboto Condensed',sans-serif;letter-spacing:.12em;text-transform:uppercase;clip-path:polygon(10px 0,calc(100% - 10px) 0,100% 50%,calc(100% - 10px) 100%,10px 100%,0 50%);pointer-events:none;white-space:nowrap}
+.gate{position:absolute;inset:0;display:grid;place-items:center;background:rgba(12,10,9,.82);text-align:center;padding:20px;z-index:5}
+.gate p{color:var(--mute);margin:0 0 18px}
+.zoom{position:absolute;right:12px;top:12px;display:grid;gap:6px}
+.zoom button{width:36px;height:36px;border-radius:6px;border:1px solid var(--gold);background:rgba(18,16,15,.9);color:var(--gold);font:800 1.1rem 'Cinzel',serif;cursor:pointer}
+.zoom button:hover{background:var(--gold);color:#12100f}
+footer{border-top:1px solid var(--line);padding:26px 0;color:var(--mute);font-size:.85rem;text-align:center}
+</style>
+</head>
+<body>
+<!-- Same shared header as the other Charisma20 pages. Adjust the path to wherever charisma20-header.js lives relative to this file. -->
+<script src="../../charisma20-header.js" data-title="Charisma20"></script>
+
+
+
+<section style="padding-top:34px">
+  <div class="wrap">
+    <div class="frame">
+      <div class="bar">
+        <input class="q" id="q" placeholder="Search places…" aria-label="Search places">
+        <button class="btn" id="bAdd">Add My Pin</button>
+        <button class="btn ghost" id="bRoute">Travel Time</button>
+        <button class="btn ghost hid" id="bCfg">Map Settings</button>
+        <span class="grow"></span>
+        <div class="acct hid" id="acct"><button class="btn ghost sm" id="bUid" title="Copy your user ID (for DM_UIDS and Firestore rules)">My UID</button></div>
+      </div>
+      <div class="chips" id="chips"></div>
+      <div class="mapbox">
+        <div id="map"><div id="w"><img id="img" alt="Map of Ossyra"><svg id="rs"></svg><div id="pins"></div></div></div>
+        <div class="zoom"><button id="zi" aria-label="Zoom in">+</button><button id="zo" aria-label="Zoom out">−</button></div>
+        <div class="hint hid" id="hint"></div>
+        <div class="sheet pop hid" id="card"></div>
+        <div class="sheet pop hid" id="rt"></div>
+      </div>
+    </div>
+  </div>
+</section>
+<footer><div class="wrap">© <span id="yr"></span> Charisma20. A tabletop RPG group.</div></footer>
+
+<script type="module">
+import {getFirestore,collection,doc,setDoc,deleteDoc,onSnapshot,serverTimestamp} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+/* ===== SETUP ===== */
+const AUTH_URL="../../c20-auth.js"; // same file the header loads; path relative to this page
+const DM_UIDS=["PASTE_YOUR_UID_HERE"];
+/* ================== */
+
+const A=await import(AUTH_URL);               // shared login: auth, onAuthStateChanged, isReal, login, logout
+const db=A.db||getFirestore(A.auth.app);      // reuse the site's existing Firebase app, no second config
+const PINS="worldmap_pins",CFG=doc(db,"worldmap_config","main");
+
+const TYPES={city:["City","#d8a94a","♜"],town:["Town","#5fa86a","⌂"],dungeon:["Dungeon","#c53131","☠"],shop:["Shop","#3b7fb5","⚖"],inn:["Inn","#b8743a","♨"],camp:["Camp","#6f7f4a","⚑"],quest:["Quest","#8a4bb0","!"],other:["Other","#7d746c","◆"]};
+const DEFAULT_MAP="The World of Ossyra.jpg"; // path to the map image, relative to this page
+const SPEEDS=[["Walking",24],["Horse",48],["Cart",18]];
+const $=id=>document.getElementById(id);
+function el(t,c,x){const e=document.createElement(t);if(c)e.className=c;if(x!=null)e.textContent=x;return e}
+const NS="http://www.w3.org/2000/svg";
+const map=$("map"),w=$("w"),pinsEl=$("pins"),rs=$("rs");
+
+let W=2000,H=1300,miles=600,v={x:0,y:0,s:1},mode="view",route=[],gp=[],lp=[],sel=null,me=null,isDM=false,hidden=new Set(),fitted=false;
+$("yr").textContent=new Date().getFullYear();
+
+/* chips */
+for(const k in TYPES){const c=el("button","chip",TYPES[k][0]);c.style.setProperty("--c",TYPES[k][1]);c.onclick=()=>{hidden.has(k)?hidden.delete(k):hidden.add(k);c.classList.toggle("off");drawPins()};$("chips").append(c)}
+
+/* placeholder map */
+function placeholder(){
+  const s='<svg xmlns="http://www.w3.org/2000/svg" width="2000" height="1300"><rect width="2000" height="1300" fill="#1b2a30"/><path d="M200 300Q500 80 900 200T1300 350 1000 650 1250 950 800 1150 350 1000 150 650Z" fill="#3b352a" stroke="#d8a94a" stroke-width="5"/><path d="M1350 250Q1700 180 1850 450T1750 900 1450 750 1400 500Z" fill="#342f26" stroke="#d8a94a" stroke-width="5"/><g fill="#5a5142"><path d="M450 450l60-110 60 110zM560 480l50-90 50 90zM650 440l55-100 55 100z"/></g><g fill="#2f4a33"><circle cx="900" cy="800" r="55"/><circle cx="970" cy="840" r="45"/><circle cx="840" cy="860" r="40"/><circle cx="1600" cy="600" r="50"/></g><text x="1000" y="1230" font-family="Georgia" font-size="38" text-anchor="middle" fill="#ece6df" opacity=".7">Map image not found. Check DEFAULT_MAP or Map Settings</text></svg>';
+  return "data:image/svg+xml,"+encodeURIComponent(s);
+}
+function setMap(src,mi){
+  if(mi>0)miles=mi;
+  const im=$("img");
+  im.onload=()=>{W=im.naturalWidth||2000;H=im.naturalHeight||1300;im.style.width=W+"px";im.style.height=H+"px";rs.setAttribute("width",W);rs.setAttribute("height",H);if(!fitted){fit();fitted=true}else apply();drawPins();drawRoute()};
+  im.onerror=()=>{if(!im.src.startsWith("data:"))im.src=placeholder()};
+  im.src=src||DEFAULT_MAP;
+}
+function fit(){const r=map.getBoundingClientRect();v.s=Math.min(r.width/W,r.height/H);v.x=(r.width-W*v.s)/2;v.y=(r.height-H*v.s)/2;apply()}
+function apply(){w.style.transform=`translate(${v.x}px,${v.y}px) scale(${v.s})`;w.style.setProperty("--i",Math.min(1.4,Math.max(.7,1/v.s*.8)))}
+function zoomAt(cx,cy,f){const n=Math.min(6,Math.max(.05,v.s*f));f=n/v.s;v.x=cx-(cx-v.x)*f;v.y=cy-(cy-v.y)*f;v.s=n;apply()}
+$("zi").onclick=()=>{const r=map.getBoundingClientRect();zoomAt(r.width/2,r.height/2,1.3)};
+$("zo").onclick=()=>{const r=map.getBoundingClientRect();zoomAt(r.width/2,r.height/2,1/1.3)};
+
+/* local pins (per Google account, per browser) */
+const lkey=()=>"c20_map_local_"+(me?me.uid:"anon");
+function loadLocal(){try{lp=JSON.parse(localStorage.getItem(lkey())||"[]")}catch(e){lp=[]}}
+function saveLocal(){try{localStorage.setItem(lkey(),JSON.stringify(lp))}catch(e){}}
+
+/* pins */
+const all=()=>gp.map(p=>({p,l:0})).concat(lp.map(p=>({p,l:1})));
+function drawPins(){
+  pinsEl.textContent="";const q=$("q").value.trim().toLowerCase();
+  for(const {p,l} of all()){
+    if(hidden.has(p.type))continue;
+    if(q&&!(p.name||"").toLowerCase().includes(q))continue;
+    const T=TYPES[p.type]||TYPES.other;
+    const d=el("div","pin"+(l?" l":"")+(sel&&sel.p.id===p.id?" sel":""));
+    d.style.left=p.nx*W+"px";d.style.top=p.ny*H+"px";d.style.setProperty("--c",T[1]);
+    const dm=el("div","dm"),b=el("b","",T[2]);dm.append(b);d.append(dm,el("small","",p.name||"Unnamed"));
+    d._ref={p,l};pinsEl.append(d);
+  }
+}
+const pos=e=>{const r=map.getBoundingClientRect();return{nx:(e.clientX-r.left-v.x)/v.s/W,ny:(e.clientY-r.top-v.y)/v.s/H}};
+
+/* card */
+function hideCard(){sel=null;$("card").classList.add("hid");drawPins()}
+function showCard(ref,edit){
+  sel=ref;const {p,l}=ref,c=$("card");c.textContent="";c.classList.remove("hid");$("rt").classList.add("hid");
+  const T=TYPES[p.type]||TYPES.other,can=l||isDM;
+  const hd=el("h5","",edit?(p.name?"Edit Pin":"New Pin"):(p.name||"Unnamed"));c.append(hd);
+  const body=el("div","in");c.append(body);
+  if(!edit){
+    body.append(el("div","t",T[0]+" · "+(l?"Only visible to you":"World pin")));
+    if(p.desc)body.append(el("p","",p.desc));
+    const r=el("div","row");
+    const go=el("button","btn sm","Travel from here");go.onclick=()=>{route=[{nx:p.nx,ny:p.ny}];setMode("route",1);hideCard()};r.append(go);
+    if(can){const e=el("button","btn ghost sm","Edit");e.onclick=()=>showCard(ref,1);r.append(e)}
+    const x=el("button","btn ghost sm","Close");x.onclick=hideCard;r.append(x);body.append(r);
+  }else{
+    const n=el("input");n.value=p.name||"";n.placeholder="Name";n.maxLength=60;
+    const t=el("select");for(const k in TYPES){const o=el("option","",TYPES[k][0]);o.value=k;t.append(o)}t.value=p.type||"other";
+    const d=el("textarea");d.rows=4;d.value=p.desc||"";d.placeholder="Description / notes";d.maxLength=1000;
+    body.append(n,t,d);
+    const r=el("div","row");
+    const s=el("button","btn sm","Save");s.onclick=()=>{p.name=n.value.trim();p.type=t.value;p.desc=d.value;persist(ref);showCard(ref)};
+    const del=el("button","btn ghost sm","Delete");del.onclick=()=>{if(confirm("Delete this pin?")){remove(ref);hideCard()}};
+    const x=el("button","btn ghost sm","Cancel");x.onclick=()=>{if(!p.name&&!p.saved){remove(ref,1)}hideCard()};
+    r.append(s,del,x);body.append(r);n.focus();
+  }
+  drawPins();
+}
+function persist(ref){
+  const {p,l}=ref;p.saved=1;
+  if(l){if(!lp.includes(p))lp.push(p);saveLocal();drawPins()}
+  else setDoc(doc(db,PINS,p.id),{name:p.name||"",type:p.type||"other",desc:p.desc||"",nx:p.nx,ny:p.ny,by:me.uid,t:serverTimestamp()}).catch(e=>alert("Could not save pin: "+(e.message||e)));
+}
+function remove(ref,quiet){
+  const {p,l}=ref;
+  if(l){lp=lp.filter(q=>q!==p);saveLocal();drawPins()}
+  else if(!quiet)deleteDoc(doc(db,PINS,p.id)).catch(()=>{});
+  else gp=gp.filter(q=>q!==p);
+}
+
+/* modes */
+function setMode(m,force){
+  mode=(!force&&mode===m&&m!=="view")?"view":m;
+  map.classList.toggle("add",mode==="add");
+  $("bAdd").classList.toggle("ghost",mode!=="add");$("bAdd").classList.toggle("on",mode==="add");
+  $("bRoute").classList.toggle("on",mode==="route");
+  const h=$("hint");
+  if(mode==="add"){h.textContent="Tap the map to place a pin";h.classList.remove("hid")}
+  else if(mode==="route"){h.textContent="Tap pins or the map to add stops";h.classList.remove("hid")}
+  else h.classList.add("hid");
+  if(mode==="route"){$("card").classList.add("hid");showRoute()}else $("rt").classList.add("hid");
+  drawRoute();
+}
+$("bAdd").onclick=async()=>{if(!me){try{await A.login()}catch(e){return}if(!me)return}setMode("add")};
+$("bRoute").onclick=()=>setMode("route");
+$("q").oninput=drawPins;
+$("q").onkeydown=e=>{if(e.key==="Enter"){const q=e.target.value.trim().toLowerCase();const m=all().find(a=>(a.p.name||"").toLowerCase().includes(q));if(m){const r=map.getBoundingClientRect();v.s=Math.max(v.s,.8);v.x=r.width/2-m.p.nx*W*v.s;v.y=r.height/2-m.p.ny*H*v.s;apply();showCard(m)}}};
+
+/* route + travel time */
+function dist(){let d=0;for(let i=1;i<route.length;i++)d+=Math.hypot((route[i].nx-route[i-1].nx)*miles,(route[i].ny-route[i-1].ny)*miles*H/W);return d}
+const fmt=days=>days<1?Math.max(1,Math.round(days*8))+" hours":days.toFixed(1)+" days";
+function drawRoute(){
+  rs.textContent="";document.querySelectorAll(".wp").forEach(e=>e.remove());
+  if(!route.length)return;
+  if(route.length>1){const pl=document.createElementNS(NS,"polyline");pl.setAttribute("points",route.map(r=>r.nx*W+","+r.ny*H).join(" "));pl.setAttribute("fill","none");pl.setAttribute("stroke","#d8a94a");pl.setAttribute("stroke-width","3");pl.setAttribute("stroke-dasharray","10 7");pl.setAttribute("vector-effect","non-scaling-stroke");rs.append(pl)}
+  for(const r of route){const d=el("div","wp");d.style.left=r.nx*W+"px";d.style.top=r.ny*H+"px";w.append(d)}
+}
+function showRoute(){
+  const c=$("rt");c.textContent="";c.classList.remove("hid");
+  c.append(el("h5","","Travel Time"));const b=el("div","in");c.append(b);
+  if(route.length<2)b.append(el("div","t","Add at least two stops. Tap a pin or any spot on the map."));
+  else{
+    const d=dist();b.append(el("div","t",route.length+" stops · about "+Math.round(d)+" miles · 8-hour travel days"));
+    const t=el("table");for(const [n,m] of SPEEDS){const tr=el("tr");tr.append(el("td","",n+" ("+m+" mi/day)"),el("td","",fmt(d/m)));t.append(tr)}b.append(t);
+  }
+  const r=el("div","row");
+  const u=el("button","btn ghost sm","Undo");u.onclick=()=>{route.pop();drawRoute();showRoute()};
+  const x=el("button","btn ghost sm","Clear");x.onclick=()=>{route=[];drawRoute();showRoute()};
+  const dn=el("button","btn sm","Done");dn.onclick=()=>setMode("view");
+  r.append(u,x,dn);b.append(r);
+}
+function addStop(nx,ny){route.push({nx,ny});drawRoute();showRoute()}
+
+/* gestures */
+const ptrs=new Map();let moved=false,startTarget=null,lastD=0,startXY=null;
+map.addEventListener("pointerdown",e=>{
+  ptrs.set(e.pointerId,{x:e.clientX,y:e.clientY});
+  if(ptrs.size===1){moved=false;startTarget=e.target;startXY={x:e.clientX,y:e.clientY}}
+  if(ptrs.size===2){moved=true;const [a,b]=[...ptrs.values()];lastD=Math.hypot(a.x-b.x,a.y-b.y)}
+});
+addEventListener("pointermove",e=>{
+  const p=ptrs.get(e.pointerId);if(!p)return;
+  if(ptrs.size===1){
+    if(!moved&&Math.hypot(e.clientX-startXY.x,e.clientY-startXY.y)>6)moved=true;
+    if(moved){v.x+=e.clientX-p.x;v.y+=e.clientY-p.y;apply()}
+    p.x=e.clientX;p.y=e.clientY;
+  }else if(ptrs.size===2){
+    p.x=e.clientX;p.y=e.clientY;
+    const [a,b]=[...ptrs.values()],d=Math.hypot(a.x-b.x,a.y-b.y),r=map.getBoundingClientRect();
+    if(lastD)zoomAt((a.x+b.x)/2-r.left,(a.y+b.y)/2-r.top,d/lastD);lastD=d;
+  }
+});
+function up(e){
+  if(!ptrs.has(e.pointerId))return;
+  const single=ptrs.size===1;ptrs.delete(e.pointerId);
+  if(e.type==="pointerup"&&single&&!moved)tap(e);
+}
+addEventListener("pointerup",up);addEventListener("pointercancel",up);
+map.addEventListener("wheel",e=>{e.preventDefault();const r=map.getBoundingClientRect();zoomAt(e.clientX-r.left,e.clientY-r.top,e.deltaY<0?1.15:1/1.15)},{passive:false});
+addEventListener("resize",apply);
+function tap(e){
+  const pe=startTarget&&startTarget.closest&&startTarget.closest(".pin"),at=pos(e);
+  if(pe&&pe._ref){
+    const ref=pe._ref;
+    if(mode==="route")addStop(ref.p.nx,ref.p.ny);else if(mode==="view")showCard(ref);
+    return;
+  }
+  if(mode==="add"){
+    const p={id:"p"+Date.now().toString(36)+Math.random().toString(36).slice(2,6),name:"",type:"other",desc:"",nx:at.nx,ny:at.ny};
+    const l=isDM?0:1;
+    if(l)lp.push(p);else gp.push(p);
+    setMode("view");showCard({p,l},1);
+  }else if(mode==="route")addStop(at.nx,at.ny);
+  else hideCard();
+}
+
+/* DM map settings */
+$("bCfg").onclick=()=>{
+  const m=prompt("How many miles wide is the whole map?",String(miles));
+  if(m===null)return;
+  const img=prompt("Map image URL or path (leave empty to keep the current one):","");
+  const data={miles:+m>0?+m:miles};if(img)data.img=img.trim();
+  setDoc(CFG,data,{merge:true}).catch(e=>alert("Could not save: "+(e.message||e)));
+};
+
+/* auth + data (login itself lives in the shared header) */
+$("bUid").onclick=async()=>{try{await navigator.clipboard.writeText(me.uid);$("bUid").textContent="Copied"}catch(e){prompt("Your UID:",me.uid)}setTimeout(()=>$("bUid").textContent="My UID",1500)};
+/* world data is public: no login needed to view the map or use travel time */
+const bad=()=>{$("hint").textContent="Could not load map data";$("hint").classList.remove("hid")};
+onSnapshot(collection(db,PINS),s=>{gp=s.docs.map(d=>Object.assign({id:d.id,saved:1},d.data()));drawPins()},bad);
+onSnapshot(CFG,s=>{const c=s.exists()?s.data():{};setMap(c.img||null,c.miles)},()=>{});
+A.onAuthStateChanged(A.auth,u=>{
+  me=A.isReal(u)?u:null;
+  if(!me){isDM=false;lp=[];$("acct").classList.add("hid");$("bCfg").classList.add("hid");$("bAdd").textContent="Add My Pin";hideCard();drawPins();return}
+  isDM=DM_UIDS.includes(me.uid);loadLocal();
+  $("acct").classList.remove("hid");
+  $("bAdd").textContent=isDM?"Add World Pin":"Add My Pin";
+  $("bCfg").classList.toggle("hid",!isDM);
+  drawPins();
+});
+setMap(null,600);
+</script>
+</body>
+</html>
