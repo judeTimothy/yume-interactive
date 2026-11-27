@@ -117,7 +117,7 @@ const A=await import(AUTH_URL);               // shared login: auth, onAuthState
 const db=A.db||getFirestore(A.auth.app);      // reuse the site's existing Firebase app, no second config
 const PINS="worldmap_pins",CFG=doc(db,"worldmap_config","main");
 
-const TYPES={city:["City","#d8a94a","♜"],town:["Town","#5fa86a","⌂"],dungeon:["Dungeon","#c53131","☠"],shop:["Shop","#3b7fb5","⚖"],inn:["Inn","#b8743a","♨"],camp:["Camp","#6f7f4a","⚑"],quest:["Quest","#8a4bb0","!"],other:["Other","#7d746c","◆"]};
+const TYPES={city:["Major Nation","#d8a94a","♜"],town:["Minor Nation","#5fa86a","⌂"],dungeon:["Dungeon","#c53131","☠"],shop:["Shop","#3b7fb5","⚖"],inn:["Inn","#b8743a","♨"],camp:["Camp","#6f7f4a","⚑"],quest:["Quest","#8a4bb0","!"],other:["Other","#7d746c","◆"]};
 const DEFAULT_MAP="The World of Ossyra.jpg"; // path to the map image, relative to this page
 const SPEEDS=[["Walking",24],["Horse",48],["Cart",18]];
 const $=id=>document.getElementById(id);
