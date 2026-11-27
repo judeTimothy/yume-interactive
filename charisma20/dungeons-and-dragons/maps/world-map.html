@@ -46,10 +46,11 @@ input.q{width:190px}
 .mapbox{position:relative;height:clamp(460px,72vh,780px);border:1px solid var(--line);border-radius:12px;overflow:hidden;background:#0c0a09;box-shadow:inset 0 0 40px rgba(0,0,0,.7)}
 #map{position:absolute;inset:0;touch-action:none;cursor:grab}
 #map.add{cursor:crosshair}
-#w{position:absolute;left:0;top:0;transform-origin:0 0;will-change:transform}
+#w{position:absolute;left:0;top:0;transform-origin:0 0}
+#pins{position:absolute;inset:0;pointer-events:none;overflow:hidden}
 #w img{display:block;user-select:none;-webkit-user-drag:none;pointer-events:none}
 #rs{position:absolute;left:0;top:0;pointer-events:none;overflow:visible}
-.pin{position:absolute;transform:translate(-50%,-50%) scale(var(--i,1));cursor:pointer;text-align:center}
+.pin{position:absolute;left:0;top:0;pointer-events:auto;cursor:pointer;text-align:center}
 .pin .dm{width:28px;height:28px;margin:0 auto;transform:rotate(45deg);background:var(--c);border:2px solid var(--gold);box-shadow:0 2px 6px rgba(0,0,0,.7);display:grid;place-items:center}
 .pin .dm b{transform:rotate(-45deg);font:700 14px/1 system-ui,sans-serif;color:#fff}
 .pin.l .dm{border-color:#9fd0ff;border-radius:50%;transform:none}
@@ -93,7 +94,7 @@ footer{border-top:1px solid var(--line);padding:26px 0;color:var(--mute);font-si
       </div>
       <div class="chips" id="chips"></div>
       <div class="mapbox">
-        <div id="map"><div id="w"><img id="img" alt="Map of Ossyra"><svg id="rs"></svg><div id="pins"></div></div></div>
+        <div id="map"><div id="w"><img id="img" alt="Map of Ossyra"><svg id="rs"></svg></div><div id="pins"></div></div>
         <div class="zoom"><button id="zi" aria-label="Zoom in">+</button><button id="zo" aria-label="Zoom out">−</button></div>
         <div class="hint hid" id="hint"></div>
         <div class="sheet pop hid" id="card"></div>
@@ -152,7 +153,8 @@ function clamp(){
   v.y=Math.min(0,Math.max(r.height-H*v.s,v.y));
 }
 function fit(){const r=map.getBoundingClientRect();v.s=minS();v.x=(r.width-W*v.s)/2;v.y=(r.height-H*v.s)/2;apply()}
-function apply(){clamp();w.style.transform=`translate(${v.x}px,${v.y}px) scale(${v.s})`;w.style.setProperty("--i",Math.min(1.4,Math.max(.7,1/v.s*.8)))}
+function placeEl(d){const p=d._ref.p;d.style.transform=`translate(${Math.round(p.nx*W*v.s+v.x)}px,${Math.round(p.ny*H*v.s+v.y)}px) translate(-50%,-50%)`}
+function apply(){clamp();for(const d of pinsEl.children)placeEl(d);w.style.transform=`translate(${v.x}px,${v.y}px) scale(${v.s})`;w.style.setProperty("--i",Math.min(1.4,Math.max(.7,1/v.s*.8)))}
 function zoomAt(cx,cy,f){const n=Math.min(MAXZ,Math.max(minS(),v.s*f));f=n/v.s;v.x=cx-(cx-v.x)*f;v.y=cy-(cy-v.y)*f;v.s=n;apply()}
 $("zi").onclick=()=>{const r=map.getBoundingClientRect();zoomAt(r.width/2,r.height/2,1.3)};
 $("zo").onclick=()=>{const r=map.getBoundingClientRect();zoomAt(r.width/2,r.height/2,1/1.3)};
@@ -171,9 +173,9 @@ function drawPins(){
     if(q&&!(p.name||"").toLowerCase().includes(q))continue;
     const T=TYPES[p.type]||TYPES.other;
     const d=el("div","pin"+(l?" l":"")+(sel&&sel.p.id===p.id?" sel":""));
-    d.style.left=p.nx*W+"px";d.style.top=p.ny*H+"px";d.style.setProperty("--c",T[1]);
+    d.style.setProperty("--c",T[1]);
     const dm=el("div","dm"),b=el("b","",T[2]);dm.append(b);d.append(dm,el("small","",p.name||"Unnamed"));
-    d._ref={p,l};pinsEl.append(d);
+    d._ref={p,l};placeEl(d);pinsEl.append(d);
   }
 }
 const pos=e=>{const r=map.getBoundingClientRect();return{nx:(e.clientX-r.left-v.x)/v.s/W,ny:(e.clientY-r.top-v.y)/v.s/H}};
