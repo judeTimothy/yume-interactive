@@ -23,8 +23,8 @@ if(!C){
  for(let L=1;L<=20;L++){const f=feats.filter(x=>x.level===L).map(x=>esc(x.name)).join(", ")||"&mdash;";rows+=`<tr><td>${L}</td><td>+${2+Math.floor((L-1)/4)}</td><td>${f}</td></tr>`}
  d+=`<h2 id="table">${n} Features Table</h2><div class="tw"><table><thead><tr><th>Level</th><th>Proficiency Bonus</th><th>Class Features</th></tr></thead><tbody>${rows}</tbody></table></div>`;
  d+=`<h2 id="features">${n} Class Features</h2>`+feats.filter((f,i)=>!HIDE_BELOW.includes(f.name)||(KEEP_FIRST.includes(f.name)&&feats.findIndex(x=>x.name===f.name)===i)).map((f,i)=>`<h4 id="f${i}">Level ${f.level}: ${esc(f.name)}</h4>${body(f.html)}`).join("");
- // Subclasses: one section per entry in P.subclasses (each gets its own tracker link)
- d+=(P.subclasses||[]).map((s,si)=>`<h2 id="sub-${slug(s.slug||s.name)}">${esc(s.name)} Subclass</h2>`
+ // Subclasses: a main "<Class> Subclasses" heading, then one sub-heading per entry in P.subclasses
+ if((P.subclasses||[]).length)d+=`<h2 id="subclasses">${n} Subclasses</h2>`+P.subclasses.map((s,si)=>`<h3 id="sub-${slug(s.slug||s.name)}">${esc(s.name)}</h3>`
   +(s.label?`<p class="sublabel">${esc(s.label)}</p>`:"")
   +(s.intro||[]).map(p=>`<p>${p}</p>`).join("")
   +norm(s.features).map((f,i)=>`<h4 id="s${si}f${i}">Level ${f.level}: ${esc(f.name)}</h4>${body(f.html)}`).join("")).join("");
@@ -37,8 +37,8 @@ $("#app").innerHTML=`<main class="wrap" style="--c:${esc(P.color)}">
  <div class="layout"><nav class="toc" aria-label="Chapters"><h5>Chapters</h5></nav><article class="doc">${d}</article></div></main><footer>Charisma20</footer>`;
 
 // chapter tracker: built from headings, highlights the section being read
-const toc=$(".toc"),hs=[...document.querySelectorAll(".doc h2")];
-hs.forEach(h=>{const a=document.createElement("a");a.href="#"+h.id;a.dataset.t=h.id;a.textContent=h.textContent;if(h.tagName==="H4")a.className="sub";toc.appendChild(a)});
+const toc=$(".toc"),hs=[...document.querySelectorAll(".doc h2,.doc h3")];
+hs.forEach(h=>{const a=document.createElement("a");a.href="#"+h.id;a.dataset.t=h.id;a.textContent=h.textContent;if(h.tagName==="H3")a.className="sub";toc.appendChild(a)});
 const links=[...toc.querySelectorAll("a")];let cur;
 function spy(){
  let id=hs[0].id;for(const h of hs){if(h.getBoundingClientRect().top<=120)id=h.id;else break}
