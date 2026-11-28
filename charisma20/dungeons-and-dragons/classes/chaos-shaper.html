@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Chaos Shaper | Charisma20</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;800&family=Roboto+Condensed:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../detail.css">
+</head>
+<body>
+<script src="/charisma20/charisma20-header.js" data-title="Chaos Shaper"></script>
+<div id="app"></div>
+<script>
+window.C20_PAGE=
+{
+ "kind": "class",
+ "slug": "chaos-shaper",
+ "name": "Chaos Shaper",
+ "color": "#7a3fa0",
+ "source": "The World of Ossyra (2026)",
+ "intro": [
+  "Abyssal warriors who have crossed into the Material Plane, Chaos Shapers bend reality to inflict ruinous damage on a single target or spread corruption across a wide area. They grow stronger as a fight turns to madness."
+ ],
+ "core": [
+  [
+   "Primary Ability",
+   "Strength or Dexterity"
+  ],
+  [
+   "Hit Point Die",
+   "D8 per Chaos Shaper level"
+  ],
+  [
+   "Saving Throw Proficiencies",
+   "Strength and Dexterity"
+  ],
+  [
+   "Skill Proficiencies",
+   "Choose 2: Acrobatics, Athletics, History, Insight, Investigation, or Religion"
+  ],
+  [
+   "Weapon Proficiencies",
+   "Simple and Martial weapons"
+  ],
+  [
+   "Armor Training",
+   "Light armor"
+  ],
+  [
+   "Starting Equipment",
+   "Choose (a) 2 Shortswords or (b) a Longsword; and (a) a Dungeoneer’s Pack or (b) an Explorer’s Pack"
+  ]
+ ],
+ "columns": [
+  {
+   "name": "Rot Strike",
+   "before": true,
+   "from": {
+    "1": "1d4",
+    "11": "2d4",
+    "17": "3d4",
+    "20": "4d4"
+   }
+  }
+ ],
+ "hideBelow": [
+  "Chaos Shape feature"
+ ],
+ "features": [
+  [
+   1,
+   "Rot Resistance",
+   "<p>You have Advantage on saving throws against gaining Rot.</p>"
+  ],
+  [
+   1,
+   "The Rot Hungers",
+   "<p>You have a number of Rot Dice equal to your Proficiency Bonus. You regain all expended Rot Dice when you finish a Short or Long Rest. In addition, during combat, you regain one expended Rot Die whenever you roll a 1 or a 20 on the d20 of a D20 Test.</p>"
+  ],
+  [
+   1,
+   "Rot Strike",
+   "<p>When you hit a creature with a weapon attack, you can expend one Rot Die to deal extra Necrotic damage to it. The extra damage is shown in the Rot Strike column of the Chaos Shaper Features table. This damage can’t be reduced or prevented by Resistance or Immunity, including Resistance or Immunity to Necrotic damage.</p><p>The target must also succeed on a Constitution saving throw (DC 8 plus your Proficiency Bonus and Constitution modifier) or gain 1d4 Rot, as described under Rot.</p><p>You can expend only one Rot Die in this way on each of your turns.</p>"
+  ],
+  [
+   1,
+   "Abyssal Initiative",
+   "<p>When you roll Initiative, you can treat the d20 as a 20. Once you use this feature, you can’t use it again until you finish a Long Rest.</p>"
+  ],
+  [
+   1,
+   "Living Carapace",
+   "<p>You have Advantage on Strength saving throws, Dexterity saving throws, and Death Saving Throws.</p><p>As a Bonus Action, you can regain Hit Points equal to 1d10 plus your Chaos Shaper level. Once you use this Bonus Action, you can’t use it again until you finish a Short or Long Rest.</p>"
+  ],
+  [
+   2,
+   "Chaorruption",
+   "<p>Your weapon attacks carry the Abyss’s corruption. When you hit a creature with a weapon attack, roll a d6 and consult the table below. The target must succeed on a Constitution saving throw (DC 8 plus your Proficiency Bonus and Constitution modifier) or take 1d4 damage of the type shown.</p><div class=\"tw\"><table><thead><tr><th>d6</th><th>Damage Type</th></tr></thead><tbody><tr><td>1</td><td>Poison</td></tr><tr><td>2</td><td>Cold</td></tr><tr><td>3</td><td>Fire</td></tr><tr><td>4</td><td>Thunder</td></tr><tr><td>5</td><td>Lightning</td></tr><tr><td>6</td><td>Force</td></tr></tbody></table></div>"
+  ],
+  [
+   2,
+   "Abyssal Rites",
+   "<p>You can perform rites that draw on the Abyss. You can perform a rite only while you can speak and move your hands freely. You have 1 use of this feature, gain a second use at level 6, and gain a third use at level 18. You regain one expended use when you finish a Short Rest, and all expended uses when you finish a Long Rest. Each rite you perform expends one use.</p><p>You know the Feed the Hunger rite, and your Chaos Shape adds another rite at level 3.</p><p><b><i>Feed the Hunger.</i></b> As a Bonus Action, you feed the Chaos within you and regain a number of expended Rot Dice equal to half your Proficiency Bonus (rounded up).</p>"
+  ],
+  [
+   3,
+   "Chaos Shape",
+   "<p>You choose the form your Chaos powers take: the Ravener, Confessor, Warper, or Shapeless subclass, each detailed below. You gain a Chaos Shape feature at levels 3, 6, 10, and 14.</p><p>Each Shape adds a rite to your Abyssal Rites feature at level 3.</p>"
+  ],
+  [
+   4,
+   "Ability Score Improvement",
+   "<p>You gain the Ability Score Improvement feature at levels 4, 8, 12, 16, and 19. You can increase one ability score of your choice by 2, or two ability scores of your choice by 1 each. You can’t increase an ability score above 20 with this feature.</p>"
+  ],
+  [
+   5,
+   "It Takes Two",
+   "<p>You can attack twice, instead of once, whenever you take the Attack action on your turn. The extra attack doesn’t trigger Rot Strike or Chaorruption.</p>"
+  ],
+  [
+   6,
+   "Chaos Shape feature"
+  ],
+  [
+   8,
+   "Ability Score Improvement"
+  ],
+  [
+   9,
+   "Chaotic Touch",
+   "<p>When you miss with an attack roll, you can choose to hit instead. Once you use this feature, you can’t use it again until you finish a Long Rest. You can use it twice between Long Rests at level 13 and three times between Long Rests at level 17.</p>"
+  ],
+  [
+   10,
+   "Chaos Shape feature"
+  ],
+  [
+   11,
+   "Improved Living Carapace",
+   "<p>The Hit Points you regain from Living Carapace increase to 2d10 plus your Proficiency Bonus and Chaos Shaper level. You also have Immunity to the Telekinesis spell and similar effects.</p>"
+  ],
+  [
+   12,
+   "Ability Score Improvement"
+  ],
+  [
+   13,
+   "It Takes Chaos",
+   "<p>You can attack three times, instead of once, whenever you take the Attack action on your turn. Each of these attacks can trigger Rot Strike and Chaorruption, and the limit of one Rot Die per turn no longer applies.</p>"
+  ],
+  [
+   14,
+   "Chaos Shape feature"
+  ],
+  [
+   15,
+   "Abyssal Surge",
+   "<p>When you roll the d6 for Chaorruption, you can roll twice and use either result.</p>"
+  ],
+  [
+   16,
+   "Ability Score Improvement"
+  ],
+  [
+   17,
+   "Critters of the Void",
+   "<p>You can use your own life force to create Void Critters. As a Bonus Action, you can spawn a critter in an unoccupied space within 5 feet of you, taking 5 Necrotic damage that can’t be reduced in any way. You can have a number of critters equal to your Constitution modifier (minimum 1).</p><p>Each critter lasts until you dismiss it (no action required), it is more than 30 feet from you, or it drops to 0 Hit Points. It has 5 Hit Points and an AC equal to 5 plus your Proficiency Bonus and Constitution modifier.</p><p>On your turn, you can command each critter. Each critter has its own action and Bonus Action and can move up to 30 feet. A critter can use its action to interact with an object (open an unlocked door or container, stow or retrieve an item from an open container, or pour out a vial), or to make a Claw attack: a melee attack using your attack modifier for weapon attacks, dealing 2d4 Slashing damage on a hit. A critter can’t activate magic items or carry more than 5 pounds.</p><p>When a critter drops to 0 Hit Points, it explodes, and each creature within 5 feet of it takes 5 Necrotic damage. A critter that is dismissed or goes out of range doesn’t explode.</p>"
+  ],
+  [
+   18,
+   "Chaotic Sting",
+   "<p>When you use Chaotic Touch, the attack is a Critical Hit.</p>"
+  ],
+  [
+   19,
+   "Ability Score Improvement"
+  ],
+  [
+   20,
+   "The Final Shape",
+   "<p>You are an embodiment of Chaos. Chaorruption damage is doubled. Spawning a Void Critter now deals only 2 Slashing damage to you.</p><p>While one or more creatures within 20 feet of you are afflicted by Chaorruption, you gain a +1 bonus to attack rolls and damage rolls (melee, ranged, and spell) for each such creature.</p><p>Your attack rolls score a Critical Hit on a roll of 19 or 20. Whenever you score a Critical Hit, the target takes an extra 1d6 damage plus your Proficiency Bonus.</p>"
+  ]
+ ],
+ "subclassTitle": "Chaos Shapes",
+ "subclassIntro": "Chaos Shapers use Shapes to enhance and augment their formidable forms and powers.",
+ "subclasses": [
+  {
+   "name": "Ravener",
+   "intro": [
+    "A ravenous monster, unshackled and driven by the Chaos that hungers within it."
+   ],
+   "features": [
+    [
+     3,
+     "Unleashed",
+     "<p>Your Hit Point maximum increases by 1d4 when you choose this Shape. For each level you gain from 3rd level on, your Hit Point Die is a d10 instead of a d8. While you are wearing armor or using a Longsword, a Finesse weapon, or a Martial weapon, you don’t add your Proficiency Bonus to attack rolls.</p>"
+    ],
+    [
+     3,
+     "Rite of Rampage",
+     "<p>You add the Rite of Rampage to Abyssal Rites. As a Bonus Action, you expend one use. Until the end of your next turn, when you hit with a weapon attack, you roll one additional die of the weapon’s damage dice and add it to the damage (roll 1d4 if the attack has no damage die). During that time, you also have Advantage on Wisdom saving throws against being Charmed or Frightened.</p>"
+    ],
+    [
+     6,
+     "Resilient Carapace",
+     "<p>Living Carapace also gives you Advantage on Constitution saving throws. While you aren’t wearing armor, when a creature deals damage to you, it takes 1d4 Piercing damage for every 10 damage it dealt.</p>"
+    ],
+    [
+     10,
+     "Calm Storm",
+     "<p>You have Advantage on saving throws against effects that control your mind, effects that inflict madness, and Psychic damage, and you gain a +2 bonus to those saving throws.</p>"
+    ],
+    [
+     14,
+     "Double Edge",
+     "<p>When you hit a creature with a weapon attack, you can expend one Rot Die and spend your own life force. Roll a number of d4s of your choice, up to your Proficiency Bonus. You take Necrotic damage equal to the total, which can’t be reduced in any way, and the target takes extra damage of the attack’s type equal to 1d6 for each d4 you rolled. You can’t use this feature if the damage would reduce you to 0 Hit Points. You can use this feature only once on each of your turns.</p>"
+    ]
+   ]
+  },
+  {
+   "name": "Confessor",
+   "intro": [
+    "An unhinged yet powerful healer, constantly bargaining with [the Abyssal powers] for more strength."
+   ],
+   "features": [
+    [
+     3,
+     "Unleashed",
+     "<p>Your Hit Point maximum increases by 1d4 when you choose this Shape. For each level you gain from 3rd level on, your Hit Point Die is a d6 instead of a d8.</p>"
+    ],
+    [
+     3,
+     "Spellcasting",
+     "<p>As a conduit for Chaos, you can cast Cleric spells. Cleric spells work as normal for you, with the following additions.</p><p><b><i>Amplified Spells.</i></b> When you cast a spell that deals damage or restores Hit Points, you can increase the damage or healing by 1d4. You take Necrotic damage equal to the amount rolled. You can’t do this if you have fewer than 4 Hit Points.</p><p><b><i>Cantrips and Components.</i></b> You know Mystic cantrips in addition to your Cleric cantrips. You don’t need Material components or a Spellcasting Focus to cast your spells.</p><p>You prepare and learn a number of Cleric spells equal to your Wisdom modifier. Wisdom is your spellcasting ability. Your spell save DC is 8 plus your Proficiency Bonus and Wisdom modifier, and your spell attack modifier is your Proficiency Bonus plus your Wisdom modifier. You can cast a Cleric spell as a ritual if it has the Ritual tag and you have it prepared.</p><div class=\"tw\"><table><thead><tr><th>Chaos Shaper Level</th><th>Cantrips</th><th>1st</th><th>2nd</th><th>3rd</th><th>4th</th><th>5th</th></tr></thead><tbody><tr><td>3</td><td>3</td><td>3</td><td>&mdash;</td><td>&mdash;</td><td>&mdash;</td><td>&mdash;</td></tr><tr><td>6</td><td>4</td><td>4</td><td>2</td><td>&mdash;</td><td>&mdash;</td><td>&mdash;</td></tr><tr><td>10</td><td>5</td><td>4</td><td>3</td><td>2</td><td>&mdash;</td><td>&mdash;</td></tr><tr><td>14</td><td>5</td><td>4</td><td>3</td><td>3</td><td>1</td><td>&mdash;</td></tr><tr><td>17</td><td>5</td><td>4</td><td>3</td><td>3</td><td>3</td><td>1</td></tr></tbody></table></div>"
+    ],
+    [
+     3,
+     "Cull the Heretic",
+     "<p>You add the Cull the Heretic rite to Abyssal Rites. As a Magic action, you expend one use and speak a passage from [the Abyssal liturgy], and Chaos presses on every creature within 30 feet of you that can see or hear you and isn’t tainted by Chaos. Each of those creatures makes a Wisdom saving throw. On a failed save, a creature is destroyed if its Challenge Rating is lower than your Proficiency Bonus; otherwise, it takes Necrotic damage equal to 2d10 plus your Chaos Shaper level.</p>"
+    ],
+    [
+     6,
+     "Harbinger of Doom",
+     "<p>Necrotic damage dealt by your Cleric spells can’t be reduced or prevented by Resistance or Immunity to Necrotic damage.</p>"
+    ],
+    [
+     10,
+     "Realignment",
+     "<p>When you expend a Rot Die for Rot Strike, you deal an extra 1d8 Necrotic damage, increasing to 2d8 at level 14. This damage follows the same rules as Rot Strike.</p>"
+    ],
+    [
+     14,
+     "Desperate Plea",
+     "<p>When your need is great, you can plead with [the Abyssal powers] for aid. As a Magic action, describe the help you seek and roll percentile dice. If the result is equal to or lower than your Chaos Shaper level, the Abyss answers. The GM chooses the effect. Any Cleric spell or Cleric domain spell of 5th level or lower is appropriate, and so is any Mystic spell of 5th level or lower, which you cast at no cost.</p><p>If the Abyss answers, you can’t use this feature again for 7 days. If it doesn’t, you can try again after a Long Rest, provided you succeed on a Religion check (DC 23). At level 20, the Abyss always answers.</p>"
+    ]
+   ]
+  },
+  {
+   "name": "Warper",
+   "intro": [
+    "A battle-mage who warps reality itself, bending spells and the Abyss to wreak havoc."
+   ],
+   "features": [
+    [
+     3,
+     "Unleashed",
+     "<p>Your Hit Point maximum increases by 1d4 when you choose this Shape. For each level you gain from 3rd level on, your Hit Point Die is a d6 instead of a d8.</p>"
+    ],
+    [
+     3,
+     "Spellcasting",
+     "<p>You can cast Mystic spells, with the following addition.</p><p><b><i>Amplified Spells.</i></b> When you cast a spell that deals damage or restores Hit Points, you can increase the damage or healing by 1d4. You take Necrotic damage equal to the amount rolled. You can’t do this if you have fewer than 4 Hit Points.</p><p>You prepare and learn a number of Mystic spells equal to your Intelligence modifier. Intelligence is your spellcasting ability. Your spell save DC is 8 plus your Proficiency Bonus and Intelligence modifier, and your spell attack modifier is your Proficiency Bonus plus your Intelligence modifier. You can cast a Mystic spell as a ritual if it has the Ritual tag and you have it prepared.</p><div class=\"tw\"><table><thead><tr><th>Chaos Shaper Level</th><th>Cantrips</th><th>1st</th><th>2nd</th><th>3rd</th><th>4th</th><th>5th</th></tr></thead><tbody><tr><td>3</td><td>3</td><td>3</td><td>&mdash;</td><td>&mdash;</td><td>&mdash;</td><td>&mdash;</td></tr><tr><td>6</td><td>4</td><td>4</td><td>2</td><td>&mdash;</td><td>&mdash;</td><td>&mdash;</td></tr><tr><td>10</td><td>5</td><td>4</td><td>3</td><td>2</td><td>&mdash;</td><td>&mdash;</td></tr><tr><td>14</td><td>5</td><td>4</td><td>3</td><td>3</td><td>1</td><td>&mdash;</td></tr><tr><td>17</td><td>5</td><td>4</td><td>3</td><td>3</td><td>3</td><td>1</td></tr></tbody></table></div><p><b><i>Spellcasting Focus.</i></b> Before a Long Rest, you can create a Spellcasting Focus from any object, magical or mundane, that you can hold while casting.</p><p><b><i>Spellbook.</i></b> Each time you gain a Chaos Shaper level, you can add two Mystic spells of your choice to your spellbook. Each must be of a level for which you have spell slots. You can add spells you find on your adventures.</p>"
+    ],
+    [
+     3,
+     "Reclaimed Currents",
+     "<p>You add the Reclaimed Currents rite to Abyssal Rites. By performing it over 1 minute, you expend one use and reclaim spent magic from the chaos around you: choose expended spell slots to regain. Their combined level can’t exceed half your Chaos Shaper level (rounded up), and none of them can be 5th level or higher.</p>"
+    ],
+    [
+     6,
+     "Reality Warp",
+     "<p>You can cast a spell at a higher level without expending a spell slot, to a maximum of one level above the highest-level spell slot you have. You can do this a number of times equal to your Intelligence modifier, and you regain all expended uses when you finish a Long Rest. Casting a spell at its normal level expends a spell slot as normal.</p>"
+    ],
+    [
+     10,
+     "Favored Workings",
+     "<p>Choose two 3rd-level Mystic spells in your spellbook as your favored workings. You always have them prepared, and they don’t count against the number of spells you can prepare. You can cast each once at 3rd level without expending a spell slot, and you regain each use when you finish a Short or Long Rest. To cast either at a higher level, you must expend a spell slot.</p>"
+    ],
+    [
+     14,
+     "Second Nature",
+     "<p>Choose a 1st-level spell and a 2nd-level spell from your spellbook. While you have them prepared, you can cast each at its lowest level without expending a spell slot. Casting either at a higher level expends a spell slot as normal. After 8 hours of study, you can swap either spell for another spell of the same level.</p>"
+    ]
+   ]
+  },
+  {
+   "name": "Shapeless",
+   "intro": [
+    "A true follower of [the Covenant], who discards their Shape and becomes nothing. Nothing is everything. Everything is nothing."
+   ],
+   "features": [
+    [
+     3,
+     "Formless",
+     "<p>You gain no extra Hit Points. For each level you gain from 3rd level on, your Hit Point Die is a d4 instead of a d8, and you don’t add your Constitution modifier to the Hit Points you gain.</p><p>Your maximum number of Rot Dice is doubled. You have proficiency with all weapons and tools. Your Unarmed Strikes count as weapon attacks for your Chaos Shaper features.</p>"
+    ],
+    [
+     3,
+     "Rite of Emptying",
+     "<p>You add the Rite of Emptying to Abyssal Rites. As a Bonus Action, you expend one use and empty yourself. Until the end of your next turn, you choose whether you count as Healthy, Injured, or Reeling for Follower of [the Covenant], regardless of your current Hit Points.</p>"
+    ],
+    [
+     3,
+     "Follower of [the Covenant]",
+     "<p>You draw a power from [the Covenant] based on what you hold and how badly you are hurt. These benefits apply only while you aren’t wearing armor.</p><p><b><i>Condition.</i></b> You are Healthy while you have more than half your Hit Point maximum. You are Injured while you have half or less, but more than a quarter. You are Reeling while you have a quarter or less. Unless a line says otherwise, you have only the benefits listed for your current condition.</p><p><b><i>Disarm.</i></b> When Disarm applies to a creature, that creature must succeed on a Strength saving throw against your Chaorruption save DC or drop one object of your choice that it is holding. The object lands in its space.</p><p><b><i>Maim.</i></b> When Maim applies to a creature, that creature must succeed on a Strength saving throw against your Chaorruption save DC or have its Speed halved until the end of its next turn.</p><p><b><i>Parry.</i></b> When a creature hits you with a melee attack roll, you can take a Reaction and expend one Rot Die to reduce the damage by 1d8 plus your Strength or Dexterity modifier (your choice). If the attack would reduce you to 0 Hit Points, roll the d8 twice and use the higher result. If this leaves you with at least 1 Hit Point, you regain Hit Points equal to your Proficiency Bonus plus your Chaos Shaper level.</p><p><b>Unarmed</b></p><p style=\"margin-left:24px\"><b><i>Healthy.</i></b> You have Advantage on attack rolls and a +3 bonus to AC against melee attacks.</p><p style=\"margin-left:24px\"><b><i>Injured.</i></b> You have the benefits of Healthy, and ranged attack rolls against you have Disadvantage.</p><p style=\"margin-left:24px\"><b><i>Reeling.</i></b> Your attack rolls score a Critical Hit on a roll of 16 or higher. Attack rolls against you have Advantage, and the Dodge action also gives you a +3 bonus to AC until the start of your next turn. Once on each of your turns, you can use Rot Strike without expending a Rot Die.</p><p><b>Melee Weapon</b></p><p style=\"margin-left:24px\"><b><i>Healthy.</i></b> When you score a Critical Hit against a creature, you can apply Disarm to it.</p><p style=\"margin-left:24px\"><b><i>Injured.</i></b> When you hit a creature with an attack roll of 16 or higher, you can apply Disarm to it.</p><p style=\"margin-left:24px\"><b><i>Reeling.</i></b> You have the benefits of Injured. Piercing, Slashing, and Bludgeoning damage you deal has a +2 bonus. You can use Parry.</p><p><b>Ranged Weapon</b></p><p style=\"margin-left:24px\"><b><i>Healthy.</i></b> You don’t have Disadvantage on ranged attack rolls against targets within 5 feet of you.</p><p style=\"margin-left:24px\"><b><i>Injured.</i></b> You have the benefits of Healthy, and Maim applies to any creature you hit with a Critical Hit.</p><p style=\"margin-left:24px\"><b><i>Reeling.</i></b> You have the benefits of Healthy. Maim applies to any creature targeted by an attack roll of yours of 16 or higher, even if the roll is lower than the target’s AC. Once per target between Long Rests, when you make an attack roll against a creature within 5 feet of you, you can choose to hit instead.</p><p><b>Spellcaster</b></p><p>You can cast spells without expending spell slots, using Rot Dice instead. A cantrip costs no Rot Dice. A spell of 1st level or higher costs a number of Rot Dice equal to its level, and its level can’t exceed one quarter of your Chaos Shaper level, rounded up (maximum 5th). Constitution is your spellcasting ability for these spells. Your spell save DC is your Chaorruption save DC, and your spell attack modifier is your Proficiency Bonus plus your Constitution modifier. You don’t need Material components.</p><p>Your condition decides what you can cast. You can cast any spell in the table below from your current condition’s column or from a column to its left. These limits apply to your movement:</p><p style=\"margin-left:24px\"><b><i>Healthy.</i></b> Casting a spell sets your Speed to 0 until the end of the turn, and you can’t cast if you have moved this turn.</p><p style=\"margin-left:24px\"><b><i>Injured.</i></b> Casting a spell halves your Speed until the end of the turn, and you can’t cast if you have moved more than half your Speed this turn.</p><p style=\"margin-left:24px\"><b><i>Reeling.</i></b> Casting a spell halves your Speed until the end of the turn. If you moved more than half your Speed earlier in the turn, roll a d6 after casting: on a 3 or lower, you take half the spell’s damage, or the spell fails if it deals none.</p><div class=\"tw\"><table><thead><tr><th>Spell Level</th><th>Healthy</th><th>Injured</th><th>Reeling</th></tr></thead><tbody><tr><td>Cantrip</td><td>Eldritch Blast, Chill Touch, Poison Spray, Mage Hand</td><td>&mdash;</td><td>&mdash;</td></tr><tr><td>1st</td><td>&mdash;</td><td>Magic Missile, Shield</td><td>Cure Wounds, Hellish Rebuke</td></tr><tr><td>2nd</td><td>&mdash;</td><td>Misty Step, Scorching Ray</td><td>Hold Person, Spiritual Weapon</td></tr><tr><td>3rd</td><td>&mdash;</td><td>Counterspell, Fireball</td><td>Haste, Spirit Guardians</td></tr><tr><td>4th</td><td>&mdash;</td><td>Dimension Door, Greater Invisibility</td><td>Banishment, Death Ward</td></tr><tr><td>5th</td><td>&mdash;</td><td>Cone of Cold, Wall of Force</td><td>Flame Strike, Mass Cure Wounds</td></tr></tbody></table></div>"
+    ],
+    [
+     6,
+     "Virtuoso",
+     "<p>Living Carapace also gives you Advantage on Constitution saving throws. While you aren’t wearing armor, you can take the Dodge action as a Bonus Action.</p>"
+    ],
+    [
+     10,
+     "Nothing to Lose",
+     "<p>While you are Injured or Reeling, you regain one expended Rot Die when a hostile creature deals damage to you. You can regain a die this way only once per round.</p>"
+    ],
+    [
+     14,
+     "Nothing Remains",
+     "<p>When you are reduced to 0 Hit Points but not killed outright, you can drop to 1 Hit Point instead. You then regain a number of Rot Dice equal to your Proficiency Bonus. Once you use this feature, you can’t use it again until you finish a Long Rest.</p>"
+    ],
+    [
+     14,
+     "Cantrip Strike",
+     "<p>When you take the Attack action on your turn, you can replace one of your attacks with one cantrip from the Healthy column of the Follower of [the Covenant] table. You can do this only once on each of your turns. The cantrip doesn’t set or halve your Speed and isn’t limited by how far you have moved.</p>"
+    ]
+   ]
+  }
+ ]
+}
+;
+</script>
+<script src="../detail.js"></script>
+</body>
+</html>
