@@ -7,7 +7,7 @@ const img=P.image||`../images/${dir}/${P.slug}.png`;
 const norm=a=>(a||[]).filter(Boolean).map(f=>Array.isArray(f)?{level:f[0],name:f[1],html:f[2]}:f);
 const feats=norm(P.features);
 // Features with these names appear in the level table but not in the detailed list below it
-const HIDE_BELOW=["Ability Score Improvement","Subclass Feature"];
+const HIDE_BELOW=["Ability Score Improvement","Subclass Feature",...(P.hideBelow||[])];
 const KEEP_FIRST=["Ability Score Improvement"];
 // Plain-text descriptions are wrapped in <p> automatically; text starting with a tag is used as-is
 const body=h=>!h?'<p class="todo">Description coming soon.</p>':(/^\s*</.test(h)?h:`<p>${h}</p>`);
@@ -21,22 +21,22 @@ if(!C){
  d+=feats.map((f,i)=>`<h4 id="f${i}">${esc(f.name)}</h4>${body(f.html)}`).join("");
 }else{
  d+=`<h2 id="core">Core ${n} Traits</h2><div class="tw"><table><tbody>${(P.core||[]).map(([k,v])=>`<tr><th>${esc(k)}</th><td>${esc(v)}</td></tr>`).join("")}</tbody></table></div>`;
- // Extra table columns: P.columns = [ ["Name",[20 values]], {name,from:{level:value,...}}, ... ] (any number)
+ // Extra table columns: P.columns = [ ["Name",[20 values],"Group"?], {name,from:{level:value,...},group?,before?}, ... ]
  const cols=(P.columns||[]).filter(Boolean).map(c=>Array.isArray(c)?{name:c[0],values:c[1],group:c[2]}:c);
  const cell=(c,L)=>{let v;if(c.from){for(const k of Object.keys(c.from).map(Number).sort((x,y)=>x-y))if(k<=L)v=c.from[k]}else v=(c.values||[])[L-1];return v==null||v===""?"&mdash;":esc(v)};
- // Optional group header row: columns sharing the same `group` text get one centered header spanning them
+ const mk=c=>({name:c.name,group:c.group||"",f:L=>cell(c,L)});
+ const order=[{name:"Level",group:"",f:L=>L},{name:"Proficiency Bonus",group:"",f:L=>"+"+(2+Math.floor((L-1)/4))},...cols.filter(c=>c.before).map(mk),
+  {name:"Class Features",group:"",f:L=>feats.filter(x=>x.level===L).map(x=>esc(x.name)).join(", ")||"&mdash;"},...cols.filter(c=>!c.before).map(mk)];
  let grow="";
  if(cols.some(c=>c.group)){
-  const cells=[{g:"",n:3}];
-  for(const c of cols){const g=c.group||"",l=cells[cells.length-1];if(l.g===g)l.n++;else cells.push({g,n:1})}
+  const cells=[];for(const c of order){const l=cells[cells.length-1];if(l&&l.g===c.group)l.n++;else cells.push({g:c.group,n:1})}
   grow=`<tr>${cells.map(x=>x.g?`<th colspan="${x.n}" style="text-align:center">${esc(x.g)}</th>`:`<th colspan="${x.n}" style="border:0;background:none"></th>`).join("")}</tr>`;
  }
- let rows="";
- for(let L=1;L<=20;L++){const f=feats.filter(x=>x.level===L).map(x=>esc(x.name)).join(", ")||"&mdash;";rows+=`<tr><td>${L}</td><td>+${2+Math.floor((L-1)/4)}</td><td>${f}</td>${cols.map(c=>`<td>${cell(c,L)}</td>`).join("")}</tr>`}
- d+=`<h2 id="table">${n} Features Table</h2><div class="tw"><table><thead>${grow}<tr><th>Level</th><th>Proficiency Bonus</th><th>Class Features</th>${cols.map(c=>`<th>${esc(c.name)}</th>`).join("")}</tr></thead><tbody>${rows}</tbody></table></div>`;
+ let rows="";for(let L=1;L<=20;L++)rows+=`<tr>${order.map(c=>`<td>${c.f(L)}</td>`).join("")}</tr>`;
+ d+=`<h2 id="table">${n} Features Table</h2><div class="tw"><table><thead>${grow}<tr>${order.map(c=>`<th>${esc(c.name)}</th>`).join("")}</tr></thead><tbody>${rows}</tbody></table></div>`;
  d+=`<h2 id="features">${n} Class Features</h2>`+feats.filter((f,i)=>!HIDE_BELOW.includes(f.name)||(KEEP_FIRST.includes(f.name)&&feats.findIndex(x=>x.name===f.name)===i)).map((f,i)=>`<h4 id="f${i}">Level ${f.level}: ${esc(f.name)}</h4>${body(f.html)}`).join("");
  // Subclasses: a main "<Class> Subclasses" heading, then one sub-heading per entry in P.subclasses
- if((P.subclasses||[]).length)d+=`<h2 id="subclasses">${n} Subclasses</h2>`+P.subclasses.map((s,si)=>`<h3 id="sub-${slug(s.slug||s.name)}">${esc(s.name)}</h3>`
+ if((P.subclasses||[]).length)d+=`<h2 id="subclasses">${esc(P.subclassTitle||P.name+" Subclasses")}</h2>`+(P.subclassIntro?`<p>${P.subclassIntro}</p>`:"")+P.subclasses.map((s,si)=>`<h3 id="sub-${slug(s.slug||s.name)}">${esc(s.name)}</h3>`
   +(s.label?`<p class="sublabel">${esc(s.label)}</p>`:"")
   +(s.intro||[]).map(p=>`<p>${p}</p>`).join("")
   +norm(s.features).map((f,i)=>`<h4 id="s${si}f${i}">Level ${f.level}: ${esc(f.name)}</h4>${body(f.html)}`).join("")).join(SUB_SEP);
